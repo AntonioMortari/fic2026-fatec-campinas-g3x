@@ -1,0 +1,67 @@
+# Ambiente de desenvolvimento local: MySQL + API + front-end.
+#
+#   docker compose up --build
+#   docker compose exec backend npm run db:migrate
+#
+# Front: http://localhost:5173 · API: http://localhost:3333/api · Swagger: http://localhost:3333/api-docs
+# As credenciais abaixo são SÓ de desenvolvimento local. Em produção, tudo vem
+# de variáveis de ambiente da plataforma de deploy (RNF-SEG-05).
+
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: atelie_afro
+      MYSQL_USER: atelie
+      MYSQL_PASSWORD: atelie-dev
+      MYSQL_ROOT_PASSWORD: root-dev
+    ports:
+      - "3306:3306"
+    volumes:
+      - dados-mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uatelie", "-patelie-dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    environment:
+      NODE_ENV: development
+      PORTA: 3333
+      CORS_ORIGENS: http://localhost:5173
+      DB_HOST: db
+      DB_PORTA: 3306
+      DB_NOME: atelie_afro
+      DB_USUARIO: atelie
+      DB_SENHA: atelie-dev
+      JWT_SEGREDO: chave-de-desenvolvimento-local-nao-usar-em-producao
+      JWT_EXPIRA_EM: 1h
+    ports:
+      - "3333:3333"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    environment:
+      VITE_API_URL: http://localhost:3333/api
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  dados-mysql:
