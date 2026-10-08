@@ -1,0 +1,49 @@
+%% 03 — Seguranca em camadas: quem recusa, e em que ordem
+%% ---
+%% A pergunta: se a guarda do codigo falhar, o que segura? A resposta e'
+%% que a guarda do codigo NUNCA e' a tranca — ela decide o que DESENHAR.
+%% Quem decide o que PODE e' o banco, e ele recusa em dois pontos antes.
+%% ---
+%% DESENHO: uma escada reta. A versao anterior punha cada camada num
+%% `subgraph`, e o Mermaid empurrava cada caixa para o lado — o diagrama
+%% descia na diagonal e ocupava tres vezes a folha. O nome da camada
+%% mudou para DENTRO da caixa, e o caminho feliz virou uma coluna: o que
+%% passa desce, o que e' recusado sai para o lado, sempre o mesmo lado.
+%% ---
+%% AS PORTAS SAO RETANGULOS, e nao losangos, de proposito. O losango cresce
+%% muito com texto de duas linhas, e quatro losangos grandes empurravam a
+%% coluna para a esquerda a cada degrau. Quem diz que ali ha uma decisao
+%% sao os rotulos das arestas — `passa` e `recusa` —, nao a forma.
+flowchart TB
+  R["Requisição chega<br/><i>página, Server Action ou Route Handler</i>"]
+
+  G1["<b>CAMADA 1</b> · o código do site<br/><i>ehEquipe() · ehVoluntarioAtivo()</i>"]
+  G2["<b>CAMADA 2</b> · privilégio do papel<br/><i>tem GRANT nesta tabela?</i>"]
+  G3["<b>CAMADA 3</b> · política de linha (RLS)<br/><i>pode ver ESTA linha?</i>"]
+  G4["<b>CAMADA 4</b> · o esquema<br/><i>as constraints aceitam?</i>"]
+  OK["<b>grava / devolve</b>"]
+
+  N1["<b>404</b><br/><i>a EXISTÊNCIA do painel<br/>é o que se recusa a contar</i>"]
+  N2["<b>42501</b> permission denied<br/><i>antes mesmo da política</i>"]
+  N3["<b>zero linhas</b><br/><i>sem erro, sem vazamento</i>"]
+  N4["<b>exceção do banco</b><br/><i>RN02 e LGPD impostas pelo esquema</i>"]
+  T["<b>TRIGGER</b> proteger_papel_equipe<br/><i>eh_equipe nunca vem do cadastro</i>"]
+
+  R  ==> G1
+  G1 ==>|passa| G2
+  G2 ==>|passa| G3
+  G3 ==>|passa| G4
+  G4 ==>|passa| OK
+  OK -.->|"e ainda assim:"| T
+
+  G1 -->|recusa| N1
+  G2 -->|recusa| N2
+  G3 -->|recusa| N3
+  G4 -->|recusa| N4
+
+  classDef porta fill:#F4EFE6,stroke:#D69A10,stroke-width:2px,color:#2B2019
+  classDef nega  fill:#F3D8D8,stroke:#9A3232,color:#5A1C1C
+  classDef passa fill:#DCEBD8,stroke:#2F7A3F,stroke-width:2px,color:#1D4A26
+  class G1,G2,G3,G4 porta
+  class N1,N2,N3,N4 nega
+  class OK passa

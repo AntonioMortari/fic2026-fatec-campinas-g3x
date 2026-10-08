@@ -1,0 +1,47 @@
+PROTOTIPOS DA INTERFACE — por que HTML, e nao PDF
+=================================================
+
+Abra o arquivo index.html neste diretorio. Ele funciona SEM INTERNET.
+
+
+POR QUE NAO HA UM "Prototipos_Interface.pdf"
+--------------------------------------------
+
+O Anexo I §2.2.3 do Regulamento Tecnico exige que os prototipos sejam
+entregues "em um formato estatico que possa ser acessado completamente
+offline", e lista os formatos aceitos:
+
+    ".pdf, imagens (.png, .svg, .jpeg) ou arquivos .html estaticos
+     exportados diretamente da ferramenta."
+
+Escolhemos o ultimo. O exemplo de estrutura do §3.1 mostra um
+"Prototipos_Interface.pdf", e este aviso existe para que a ausencia dele
+nao seja lida como arquivo faltando: e' escolha, e o formato entregue
+esta' entre os que o proprio anexo aceita.
+
+O motivo e' pratico. Sao 82 capturas, cada tela em duas larguras. Num PDF
+elas virariam 82 paginas para folhear. No indice, ficam agrupadas por
+fluxo, lado a lado nas duas larguras, e cada uma amplia com um clique.
+
+
+O QUE ESTAS CAPTURAS SAO
+------------------------
+
+Nao sao maquetes desenhadas antes do sistema. Sao capturas do SISTEMA
+RODANDO, contra o banco de dados real da organizacao.
+
+A consequencia e' que o prototipo nao consegue mostrar uma tela que nao
+funcione — e as telas que nao foram capturadas aparecem no indice
+dizendo por que, em vez de sumir da lista.
+
+As duas larguras sao 450px (celular) e 1280px (desktop). A largura de
+celular vem primeiro em toda comparacao, porque a organizacao nao possui
+computador: toda a operacao acontece no celular pessoal da equipe.
+
+
+ONDE ESTAO OS ARQUIVOS
+----------------------
+
+    index.html      o indice navegavel — comece por aqui
+    telas/          as capturas, uma por tela e por largura
+    capturas.json   metadado da geracao; nao faz parte da entrega

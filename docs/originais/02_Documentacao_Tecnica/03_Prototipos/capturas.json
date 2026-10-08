@@ -1,0 +1,299 @@
+{
+  "feitas": [
+    {
+      "rota": "/",
+      "nome": "Página inicial",
+      "rf": "RF01",
+      "fluxo": "institucional",
+      "base": "institucional-"
+    },
+    {
+      "rota": "/quem-somos",
+      "nome": "Quem somos",
+      "rf": "RF02",
+      "fluxo": "institucional",
+      "base": "institucional-quem-somos"
+    },
+    {
+      "rota": "/projetos",
+      "nome": "Projetos e atividades",
+      "rf": "RF03",
+      "fluxo": "institucional",
+      "base": "institucional-projetos"
+    },
+    {
+      "rota": "/projetos/banzo",
+      "nome": "Um projeto",
+      "rf": "RF03",
+      "fluxo": "institucional",
+      "base": "institucional-projetos-banzo"
+    },
+    {
+      "rota": "/noticias",
+      "nome": "Notícias",
+      "rf": "RF04",
+      "fluxo": "institucional",
+      "base": "institucional-noticias"
+    },
+    {
+      "rota": "/galeria",
+      "nome": "Galeria",
+      "rf": "RF05",
+      "fluxo": "institucional",
+      "base": "institucional-galeria"
+    },
+    {
+      "rota": "/acervo",
+      "nome": "Acervo aberto",
+      "rf": "RF35",
+      "fluxo": "institucional",
+      "base": "institucional-acervo"
+    },
+    {
+      "rota": "/para-escolas",
+      "nome": "Para escolas",
+      "rf": "RF38",
+      "fluxo": "institucional",
+      "base": "institucional-para-escolas"
+    },
+    {
+      "rota": "/contato",
+      "nome": "Contato",
+      "rf": "RF06 · RF07",
+      "fluxo": "institucional",
+      "base": "institucional-contato"
+    },
+    {
+      "rota": "/privacidade",
+      "nome": "Política de privacidade",
+      "rf": "RNF09",
+      "fluxo": "institucional",
+      "base": "institucional-privacidade"
+    },
+    {
+      "rota": "/agenda",
+      "nome": "Agenda",
+      "rf": "RF14",
+      "fluxo": "participar",
+      "base": "participar-agenda"
+    },
+    {
+      "rota": "/agenda/{{EVENTO}}/inscricao",
+      "nome": "Inscrição sem conta",
+      "rf": "RF15",
+      "fluxo": "participar",
+      "base": "participar-agenda-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-inscricao"
+    },
+    {
+      "rota": "/voluntariado",
+      "nome": "Voluntariado",
+      "rf": "RF24",
+      "fluxo": "participar",
+      "base": "participar-voluntariado"
+    },
+    {
+      "rota": "/voluntariado/candidatura",
+      "nome": "Candidatura",
+      "rf": "RF25",
+      "fluxo": "participar",
+      "base": "participar-voluntariado-candidatura"
+    },
+    {
+      "rota": "/doar",
+      "nome": "Como apoiar",
+      "rf": "RF23",
+      "fluxo": "participar",
+      "base": "participar-doar"
+    },
+    {
+      "rota": "/doar/ofertar",
+      "nome": "Oferecer doação",
+      "rf": "RF19",
+      "fluxo": "participar",
+      "base": "participar-doar-ofertar"
+    },
+    {
+      "rota": "/entrar",
+      "nome": "Entrar e criar conta",
+      "rf": "RF08 · RF09 · RF10 · RF12",
+      "fluxo": "conta",
+      "base": "conta-entrar"
+    },
+    {
+      "rota": "/recuperar-acesso",
+      "nome": "Recuperar acesso",
+      "rf": "RF10",
+      "fluxo": "conta",
+      "base": "conta-recuperar-acesso"
+    },
+    {
+      "rota": "/nova-senha",
+      "nome": "Definir nova senha",
+      "rf": "RF10",
+      "fluxo": "conta",
+      "base": "conta-nova-senha"
+    },
+    {
+      "rota": "/minha-conta",
+      "nome": "Minha conta",
+      "rf": "RF11",
+      "sessao": true,
+      "fluxo": "conta",
+      "base": "conta-minha-conta"
+    },
+    {
+      "rota": "/minha-conta/candidaturas",
+      "nome": "Minhas candidaturas",
+      "rf": "RF11 · RF25",
+      "sessao": true,
+      "fluxo": "conta",
+      "base": "conta-minha-conta-candidaturas"
+    },
+    {
+      "rota": "/minha-conta/doacoes",
+      "nome": "Minhas doações",
+      "rf": "RF22",
+      "sessao": true,
+      "fluxo": "conta",
+      "base": "conta-minha-conta-doacoes"
+    },
+    {
+      "rota": "/avisos",
+      "nome": "Mural de avisos",
+      "rf": "RF27",
+      "sessao": true,
+      "fluxo": "conta",
+      "base": "conta-avisos"
+    },
+    {
+      "rota": "/admin",
+      "nome": "Início do painel",
+      "rf": "RF33 · RF30",
+      "fluxo": "painel",
+      "base": "painel-admin"
+    },
+    {
+      "rota": "/admin/atividades",
+      "nome": "Projetos",
+      "rf": "RF03",
+      "fluxo": "painel",
+      "base": "painel-admin-atividades"
+    },
+    {
+      "rota": "/admin/atividades/editar",
+      "nome": "Adicionar projeto",
+      "rf": "RF03",
+      "fluxo": "painel",
+      "base": "painel-admin-atividades-editar"
+    },
+    {
+      "rota": "/admin/publicacoes",
+      "nome": "Notícias",
+      "rf": "RF04",
+      "fluxo": "painel",
+      "base": "painel-admin-publicacoes"
+    },
+    {
+      "rota": "/admin/publicacoes/editar",
+      "nome": "Escrever notícia",
+      "rf": "RF04",
+      "fluxo": "painel",
+      "base": "painel-admin-publicacoes-editar"
+    },
+    {
+      "rota": "/admin/galeria",
+      "nome": "Galeria",
+      "rf": "RF05",
+      "fluxo": "painel",
+      "base": "painel-admin-galeria"
+    },
+    {
+      "rota": "/admin/acervo",
+      "nome": "Acervo",
+      "rf": "RF37",
+      "fluxo": "painel",
+      "base": "painel-admin-acervo"
+    },
+    {
+      "rota": "/admin/eventos",
+      "nome": "Agenda",
+      "rf": "RF13",
+      "fluxo": "painel",
+      "base": "painel-admin-eventos"
+    },
+    {
+      "rota": "/admin/eventos/editar",
+      "nome": "Cadastrar evento",
+      "rf": "RF13",
+      "fluxo": "painel",
+      "base": "painel-admin-eventos-editar"
+    },
+    {
+      "rota": "/admin/eventos/inscritos?id={{EVENTO}}",
+      "nome": "Inscritos",
+      "rf": "RF16",
+      "fluxo": "painel",
+      "base": "painel-admin-eventos-inscritos-id-b161303a-bc7f-4916-b2fa-5fab27cfcaa7"
+    },
+    {
+      "rota": "/admin/eventos/presenca?id={{EVENTO}}",
+      "nome": "Lista de presença",
+      "rf": "RF17",
+      "fluxo": "painel",
+      "base": "painel-admin-eventos-presenca-id-b161303a-bc7f-4916-b2fa-5fab27cfcaa7"
+    },
+    {
+      "rota": "/admin/contatos",
+      "nome": "Mensagens recebidas",
+      "rf": "RF29",
+      "fluxo": "painel",
+      "base": "painel-admin-contatos"
+    },
+    {
+      "rota": "/admin/voluntarios",
+      "nome": "Voluntários",
+      "rf": "RF26",
+      "fluxo": "painel",
+      "base": "painel-admin-voluntarios"
+    },
+    {
+      "rota": "/admin/doacoes",
+      "nome": "Doações",
+      "rf": "RF20 · RF21",
+      "fluxo": "painel",
+      "base": "painel-admin-doacoes"
+    },
+    {
+      "rota": "/admin/doacoes/registrar",
+      "nome": "Registrar doação",
+      "rf": "RF21",
+      "fluxo": "painel",
+      "base": "painel-admin-doacoes-registrar"
+    },
+    {
+      "rota": "/admin/avisos",
+      "nome": "Avisos",
+      "rf": "RF27 · RF28",
+      "fluxo": "painel",
+      "base": "painel-admin-avisos"
+    },
+    {
+      "rota": "/admin/avisos/editar",
+      "nome": "Escrever aviso",
+      "rf": "RF27",
+      "fluxo": "painel",
+      "base": "painel-admin-avisos-editar"
+    },
+    {
+      "rota": "/admin/relatorio",
+      "nome": "Relatório em PDF",
+      "rf": "RF32",
+      "fluxo": "painel",
+      "base": "painel-admin-relatorio"
+    }
+  ],
+  "puladas": [],
+  "mascarados": 50,
+  "evento": "b161303a-bc7f-4916-b2fa-5fab27cfcaa7",
+  "em": "2026-09-04T03:33:41.324Z"
+}
