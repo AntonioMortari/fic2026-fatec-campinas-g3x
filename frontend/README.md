@@ -45,12 +45,31 @@ npm run dev                 # http://localhost:5173
 ## Organização
 
 ```
+public/
+├── fontes/             Bitter servida localmente (sem Google Fonts)
+└── imagens/            logotipo da ONG e fotos autorizadas
 src/
-├── main.tsx            provedores (React Query, roteador) e montagem
-├── rotas.tsx           mapa de rotas
-├── estilos.css         Tailwind e tokens do design system
-├── componentes/        componentes reutilizáveis (Layout, ...)
+├── main.tsx            provedores (leitura, React Query, roteador) e montagem
+├── rotas.tsx           mapa de rotas; /componentes só em desenvolvimento
+├── estilos.css         Tailwind + tokens do design system (@theme), alto contraste
+├── componentes/
+│   ├── ui/             peças do design system: Botao, Campo, CampoSenha, Cartao,
+│   │                   CabecalhoDaPagina, ItemDeLista, SeloDeData, Abas,
+│   │                   FiltroEmChips, EstadoVazio, FaixaListrada
+│   └── estrutura/      moldura: Layout, LayoutFocado, Cabecalho, BarraInferior,
+│                       Menu (folha), Rodape, LinkDePular
+├── contextos/          preferências de leitura (A−/A/A+, alto contraste)
+├── compartilhado/      navegação, contatos da ONG, datas, validação de destino
 ├── paginas/            uma tela por arquivo
 ├── servicos/           cliente da API e configuração do React Query
 └── testes/             testes e preparação do ambiente de teste
+```
+
+## Design system
+
+Baseado na "Análise UX/UI" do Claude Design. As regras de uso (um aplique por tela, ocre só em
+ação e data, texto em rem…) estão no `CLAUDE.md` da raiz. Para ver cada componente:
+
+```bash
+npm run dev    # e abra http://localhost:5173/componentes
 ```

@@ -32,7 +32,7 @@ funcional no Documento de Requisitos (`docs/01_Requisitos/`).
 
 | Camada | Stack |
 |---|---|
-| Front-end | React + Vite + TypeScript, TailwindCSS, React Router, React Query, Axios |
+| Front-end | React + Vite + TypeScript, TailwindCSS (com os tokens do design system), React Router, React Query, Axios |
 | Back-end | Node.js + Express + TypeScript, JWT, bcrypt, Zod, Swagger |
 | Banco de dados | MySQL 8.4 com Sequelize (migrations com Umzug) |
 | Testes | Jest + Supertest (back-end), Vitest + Testing Library (front-end) |
@@ -72,11 +72,12 @@ Cada parte tem o seu README com dependências, variáveis de ambiente e comandos
 ├── backend/                   API REST Express (README próprio)
 └── docs/
     ├── originais/             cópia INALTERADA do .zip da Submissão Institucional
+    │   ├── LEIA-ME.md                    guia do pacote, como foi entregue
     │   ├── 01_Proposta/                  Proposta_Impacto.pdf
     │   ├── 02_Documentacao_Tecnica/
     │   │   ├── 01_Requisitos/            Documento_Requisitos.pdf
-    │   │   ├── 02_Arquitetura/           Diagrama_Arquitetura.md / .png
-    │   │   └── 03_Prototipos/            Prototipos_Interface.pdf
+    │   │   ├── 02_Arquitetura/           Diagrama_Arquitetura.md / .mmd / .png
+    │   │   └── 03_Prototipos/            index.html (abre offline) + telas/
     │   └── 03_Video_Defesa/              Link_Video.txt
     ├── 01_Requisitos/         Documento de Requisitos atualizado (v2)
     ├── 02_Arquitetura/        Diagrama de Arquitetura atualizado (v2, Mermaid + imagem)

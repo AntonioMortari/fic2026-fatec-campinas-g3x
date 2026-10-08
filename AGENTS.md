@@ -19,6 +19,7 @@ que ela fez, e quem da equipe revisou e respondeu pelo resultado.
 | Data | Ferramenta | Escopo | PR | Revisado por |
 |---|---|---|---|---|
 | 08/10/2026 | Claude Code (Anthropic) | Estrutura inicial do monorepo conforme o Anexo I/III do regulamento: esqueleto do back-end (Express, Sequelize, middlewares de validação, JWT e erro, Swagger, testes) e do front-end (Vite, React Router, React Query, Axios, Tailwind), Docker Compose e READMEs | estrutura base | _a preencher_ |
+| 08/10/2026 | Claude Code (Anthropic) | Cópia dos originais para `docs/originais/`; design system base no front-end (tokens no Tailwind, componentes, cabeçalho, barra inferior, menu em folha, rodapé) a partir da "Análise UX/UI" e do "Plano de Migração" do Claude Design; entradas do Changelog | estrutura base | _a preencher_ |
 
 **Como registrar uma nova entrada:** uma linha por PR em que a IA produziu código, documentação ou
 decisão de arquitetura. Uso pontual (tirar uma dúvida, explicar um erro) não precisa de linha.
