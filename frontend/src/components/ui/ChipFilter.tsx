@@ -1,0 +1,42 @@
+import { cn } from '../../lib/cn'
+
+export interface ChipOption {
+  value: string
+  label: string
+  count?: number
+}
+
+interface ChipFilterProps {
+  options: ChipOption[]
+  selected: string
+  onSelect: (value: string) => void
+  label: string
+}
+
+export function ChipFilter({ options, selected, onSelect, label }: ChipFilterProps) {
+  return (
+    <div role="group" aria-label={label} className="flex gap-2 overflow-x-auto pb-1 desktop:flex-wrap">
+      {options.map((option) => {
+        const active = option.value === selected
+        return (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={active}
+            onClick={() => onSelect(option.value)}
+            className={cn(
+              'inline-flex min-h-11 flex-none cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] border-brown px-3.5 text-small font-semibold',
+              active ? 'bg-brown text-cream' : 'bg-card text-brown',
+            )}
+          >
+            {option.label}
+            {option.count !== undefined && ' '}
+            {option.count !== undefined && (
+              <span className={cn('text-[0.8125rem]', active ? 'text-cream-dim' : 'text-brown-400')}>{option.count}</span>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}

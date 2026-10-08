@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Bitter";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/fonts/bitter-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Bitter";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/bitter-italic-latin.woff2") format("woff2");
+}
+
+@theme {
+  --color-*: initial;
+
+  --color-ochre: #d69a10;
+  --color-ochre-deep: #9a6a12;
+  --color-blue: #6fa6c8;
+  --color-blue-deep: #2f6d96;
+  --color-brown: #2b2019;
+  --color-brown-800: #3a2c21;
+  --color-brown-600: #4a3a2a;
+  --color-brown-400: #6e5b45;
+  --color-brown-300: #8a7862;
+  --color-cream: #f9f4ea;
+  --color-cream-dark: #efe6d6;
+  --color-cream-dim: #d8cbb8;
+  --color-card: #fffdf7;
+  --color-line: rgb(43 32 25 / 0.25);
+  --color-line-strong: rgb(43 32 25 / 0.4);
+  --color-scrim: rgb(43 32 25 / 0.55);
+
+  --font-sans: "Bitter", Georgia, "Times New Roman", serif;
+  --font-serif: "Bitter", Georgia, "Times New Roman", serif;
+
+  --text-overline: 0.75rem;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.45;
+  --text-body: 1rem;
+  --text-body--line-height: 1.55;
+  --text-item: 1.0625rem;
+  --text-item--line-height: 1.25;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.25;
+  --text-h2: 1.375rem;
+  --text-h2--line-height: 1.2;
+  --text-h1: 2rem;
+  --text-h1--line-height: 1.1;
+  --text-h2-desktop: 1.75rem;
+  --text-h2-desktop--line-height: 1.2;
+  --text-h1-desktop: 3rem;
+  --text-h1-desktop--line-height: 1.06;
+
+  --radius-control: 3px;
+
+  --shadow-applique: 5px 5px 0 var(--color-brown);
+  --shadow-applique-ochre: 5px 5px 0 var(--color-ochre);
+  --shadow-focus: 0 0 0 3px var(--color-blue);
+
+  --ease-out-soft: cubic-bezier(0.2, 0, 0, 1);
+  --animate-rise: rise 200ms var(--ease-out-soft) both;
+  --animate-sheet: sheet 280ms var(--ease-out-soft) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  @keyframes sheet {
+    from {
+      transform: translateY(100%);
+    }
+  }
+
+  --container-page: 75rem;
+  --breakpoint-desktop: 64rem;
+}
+
+@layer base {
+  html {
+    font-size: calc(100% * var(--font-scale, 1));
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html[data-font-scale="-1"] { --font-scale: 0.875; }
+  html[data-font-scale="1"] { --font-scale: 1.125; }
+  html[data-font-scale="2"] { --font-scale: 1.25; }
+  html[data-font-scale="3"] { --font-scale: 1.375; }
+
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-cream);
+    color: var(--color-brown);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  a {
+    color: var(--color-blue-deep);
+    text-underline-offset: 0.15em;
+  }
+
+  a:hover {
+    color: var(--color-brown);
+    text-decoration-thickness: 2px;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-ochre);
+    color: var(--color-brown);
+  }
+}
+
+html[data-contrast="high"] {
+  --color-cream: #ffffff;
+  --color-card: #ffffff;
+  --color-cream-dark: #ffffff;
+  --color-brown: #000000;
+  --color-brown-800: #000000;
+  --color-brown-600: #000000;
+  --color-brown-400: #000000;
+  --color-brown-300: #000000;
+  --color-ochre-deep: #000000;
+  --color-blue-deep: #00336b;
+  --color-cream-dim: #ffffff;
+  --color-line: #000000;
+  --color-line-strong: #000000;
+  --color-scrim: rgb(0 0 0 / 0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@utility striped-band {
+  background: repeating-linear-gradient(90deg, var(--color-brown) 0 3px, var(--color-blue) 3px 8px);
+}
+
+@utility safe-area-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
