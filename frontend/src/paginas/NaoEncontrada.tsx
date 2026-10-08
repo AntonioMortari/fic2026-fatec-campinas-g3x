@@ -1,12 +1,15 @@
-import { Link } from 'react-router-dom'
+import { Botao, CabecalhoDaPagina } from '../componentes/ui'
 
 export function NaoEncontrada() {
   return (
-    <section>
-      <h1>Página não encontrada</h1>
-      <p>
-        O endereço pode ter mudado. <Link to="/">Voltar para o início</Link>
-      </p>
-    </section>
+    <CabecalhoDaPagina
+      titulo="Página não encontrada"
+      lead="O endereço pode ter mudado, ou esta parte do site ainda está sendo construída."
+      acao={
+        <Botao para="/" variante="secundario">
+          Voltar para o início
+        </Botao>
+      }
+    />
   )
 }
