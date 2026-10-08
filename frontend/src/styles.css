@@ -61,16 +61,25 @@
 
   --shadow-applique: 5px 5px 0 var(--color-brown);
   --shadow-applique-ochre: 5px 5px 0 var(--color-ochre);
+  --shadow-applique-hero: 6px 6px 0 var(--color-brown);
+  --shadow-applique-hero-desktop: 8px 8px 0 var(--color-brown);
   --shadow-focus: 0 0 0 3px var(--color-blue);
 
   --ease-out-soft: cubic-bezier(0.2, 0, 0, 1);
   --animate-rise: rise 200ms var(--ease-out-soft) both;
   --animate-sheet: sheet 280ms var(--ease-out-soft) both;
+  --animate-page: page 150ms ease-out both;
 
   @keyframes rise {
     from {
       opacity: 0;
       transform: translateY(8px);
+    }
+  }
+
+  @keyframes page {
+    from {
+      opacity: 0;
     }
   }
 

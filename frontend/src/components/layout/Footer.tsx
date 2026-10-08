@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { CONTACTS } from '../../lib/contacts'
 import { StripedBand } from '../ui/StripedBand'
+import { Logo } from './Logo'
 
 const LINK = 'inline-flex min-h-11 items-center'
 
@@ -9,7 +10,10 @@ export function Footer() {
     <footer>
       <StripedBand />
       <div className="mx-auto flex max-w-page flex-col gap-1.5 px-4 pt-5.5 pb-7 text-small text-brown-400 desktop:flex-row desktop:items-center desktop:justify-between desktop:gap-8 desktop:px-8">
-        <p className="m-0">
+        <div className="hidden desktop:block">
+          <Logo className="h-7" />
+        </div>
+        <p className="m-0 desktop:flex-1">
           {CONTACTS.address}
           <span className="hidden desktop:inline"> · {CONTACTS.phoneDisplay}</span>
         </p>

@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react'
+import { NextActivity } from '../components/home/NextActivity'
 import {
   Button,
+  Container,
   Card,
   ChipFilter,
   DateBadge,
@@ -10,6 +12,7 @@ import {
   PasswordField,
   Tabs,
   TextField,
+  useToast,
 } from '../components/ui'
 import { CONTACTS } from '../lib/contacts'
 
@@ -36,9 +39,11 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export function ComponentCatalog() {
   const [tab, setTab] = useState('upcoming')
   const [filter, setFilter] = useState('all')
+  const [sending, setSending] = useState(false)
+  const showToast = useToast()
 
   return (
-    <>
+    <Container className="pb-12">
       <PageHeader
         overline="Só em desenvolvimento"
         title="Catálogo do design system"
@@ -75,7 +80,18 @@ export function ComponentCatalog() {
           <Button variant="secondary" size="compact" href={CONTACTS.instagram}>
             Instagram
           </Button>
-          <Button disabled>Enviando…</Button>
+          <Button
+            loading={sending}
+            onClick={() => {
+              setSending(true)
+              window.setTimeout(() => {
+                setSending(false)
+                showToast('Ana P. marcada como veio', { action: { label: 'Desfazer', onClick: () => undefined } })
+              }, 1200)
+            }}
+          >
+            Enviar
+          </Button>
         </div>
       </Section>
 
@@ -153,6 +169,20 @@ export function ComponentCatalog() {
         </Card>
       </Section>
 
+      <Section title="Próxima atividade (home)">
+        <div className="max-w-xl">
+          <NextActivity
+            event={{
+              id: 'exemplo',
+              title: 'Cafú e o Café',
+              category: 'Contação de história',
+              startsAt: '2026-10-17T17:00:00Z',
+              summary: '14h · Sede, Vila Romero · Livre',
+            }}
+          />
+        </div>
+      </Section>
+
       <Section title="Lista navegável">
         <ul className="m-0 max-w-xl list-none p-0">
           <ListItem number="01" tone="ochre" title="Conhecer" description="Nossa história e os três setores." to="/quem-somos" />
@@ -178,6 +208,6 @@ export function ComponentCatalog() {
           }
         />
       </Section>
-    </>
+    </Container>
   )
 }

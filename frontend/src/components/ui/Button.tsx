@@ -6,6 +6,7 @@ export type ButtonVariant = 'primary' | 'applique' | 'secondary' | 'support'
 
 interface CommonProps {
   variant?: ButtonVariant
+  loading?: boolean
   size?: 'default' | 'compact'
   fullWidth?: boolean
   children: ReactNode
@@ -39,7 +40,7 @@ const SIZES = {
 }
 
 export function Button(props: ButtonProps) {
-  const { variant = 'primary', size = 'default', fullWidth = false, className, children, ...rest } = props
+  const { variant = 'primary', size = 'default', fullWidth = false, loading = false, className, children, ...rest } = props
   const classes = cn(BASE, VARIANTS[variant], SIZES[size], fullWidth && 'w-full', className)
 
   if ('to' in rest && rest.to !== undefined) {
@@ -59,10 +60,10 @@ export function Button(props: ButtonProps) {
     )
   }
 
-  const { type = 'button', ...button } = rest as ButtonHTMLAttributes<HTMLButtonElement>
+  const { type = 'button', disabled, ...button } = rest as ButtonHTMLAttributes<HTMLButtonElement>
   return (
-    <button type={type} className={classes} {...button}>
-      {children}
+    <button type={type} className={classes} disabled={disabled || loading} aria-busy={loading || undefined} {...button}>
+      {loading ? 'Enviando…' : children}
     </button>
   )
 }

@@ -34,11 +34,25 @@ describe('bottom sheet menu', () => {
 
     const menu = screen.getByRole('dialog', { name: 'Menu' })
     expect(menu).toHaveAttribute('open')
-    expect(button).toHaveAttribute('aria-expanded', 'true')
     for (const group of MENU_GROUPS) {
       expect(within(menu).getByRole('heading', { name: group.title })).toBeInTheDocument()
     }
     expect(within(menu).getByRole('link', { name: 'WhatsApp' })).toHaveAttribute('href', 'https://wa.me/5511953968344')
+  })
+
+  it('keeps the bottom bar visible on top of the sheet, with Menu marked and closing it', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+    const menu = screen.getByRole('dialog', { name: 'Menu' })
+    const barInMenu = within(menu).getByRole('navigation', { name: 'Atalhos' })
+    const menuButton = within(barInMenu).getByRole('button', { name: 'Menu' })
+
+    expect(menuButton).toHaveAttribute('aria-expanded', 'true')
+    expect(within(barInMenu).getByRole('link', { name: 'Início' })).not.toHaveAttribute('aria-current')
+
+    await user.click(menuButton)
+    expect(menu).not.toHaveAttribute('open')
   })
 
   it('closes with the × button', async () => {
