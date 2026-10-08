@@ -1,6 +1,214 @@
 @import "tailwindcss";
 
 /*
- * Os tokens do design system (cores, tipografia, sombras) entram aqui, num
- * bloco @theme, no PR do design system. Até lá, só o Tailwind padrão.
+ * Design system "Ateliê Afro" — fundação visual.
+ *
+ * Fonte: Claude Design, "Análise UX/UI" (rodadas 1–5, seção "Fundamentos a
+ * ajustar no sistema") e "Plano de Migração", fase F1. Princípios:
+ *
+ *   - Creme é a superfície dominante; marrom é texto e ação principal.
+ *   - Ocre só em ação "Apoiar", estado ativo, contagem e data — nunca texto
+ *     sobre claro (para texto, ocre-escuro).
+ *   - Azul para link e rótulo de categoria.
+ *   - Elevação em 3 níveis: plano (linha leve), contorno (1,5px marrom) e
+ *     aplique (contorno + sombra dura). No máximo UM aplique por tela.
+ *   - Uma serifa só em tudo (Bitter), inclusive botão e rótulo.
+ *   - Faixa listrada: uma por página, acima do rodapé.
+ *
+ * Todo tamanho de texto em rem, para responder ao controle A−/A/A+ (que muda
+ * o font-size da raiz). Nunca `vw` em texto.
  */
+
+@font-face {
+  font-family: "Bitter";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/fontes/bitter-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Bitter";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fontes/bitter-italico-latin.woff2") format("woff2");
+}
+
+@theme {
+  /* Sem paleta padrão do Tailwind: só as cores do sistema existem. */
+  --color-*: initial;
+
+  /* Paleta da ONG (luz/sabedoria · céu/esperança · terra/raízes) */
+  --color-ocre: #d69a10;
+  --color-ocre-escuro: #9a6a12;
+  --color-azul: #6fa6c8;
+  --color-azul-escuro: #2f6d96;
+  --color-marrom: #2b2019;
+  --color-marrom-800: #3a2c21;
+  --color-marrom-600: #4a3a2a;
+  --color-marrom-400: #6e5b45;
+  --color-marrom-300: #8a7862;
+  --color-creme: #f9f4ea;
+  --color-creme-escuro: #efe6d6;
+  --color-creme-apagado: #d8cbb8;
+  --color-cartao: #fffdf7;
+  --color-linha: rgb(43 32 25 / 0.25);
+  --color-linha-campo: rgb(43 32 25 / 0.4);
+  --color-veu: rgb(43 32 25 / 0.55);
+
+  /* Uma família só */
+  --font-sans: "Bitter", Georgia, "Times New Roman", serif;
+  --font-serif: "Bitter", Georgia, "Times New Roman", serif;
+
+  /* Escala tipográfica do celular (razão ~1,2). Desktop amplia H1/H2 nos componentes. */
+  --text-sobretitulo: 0.75rem;
+  --text-sobretitulo--letter-spacing: 0.12em;
+  --text-secundario: 0.875rem;
+  --text-secundario--line-height: 1.45;
+  --text-corpo: 1rem;
+  --text-corpo--line-height: 1.55;
+  --text-item: 1.0625rem;
+  --text-item--line-height: 1.25;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.25;
+  --text-h2: 1.375rem;
+  --text-h2--line-height: 1.2;
+  --text-h1: 2rem;
+  --text-h1--line-height: 1.1;
+  --text-h2-desktop: 1.75rem;
+  --text-h2-desktop--line-height: 1.2;
+  --text-h1-desktop: 3rem;
+  --text-h1-desktop--line-height: 1.06;
+
+  /* Forma: zero raio nos blocos, 3px só em controles */
+  --radius-controle: 3px;
+
+  /* Elevação nível 3 — o aplique. Sombra dura, sem desfoque. */
+  --shadow-aplique: 5px 5px 0 var(--color-marrom);
+  --shadow-aplique-ocre: 5px 5px 0 var(--color-ocre);
+  --shadow-aplique-heroi: 6px 6px 0 var(--color-marrom);
+  --shadow-foco: 0 0 0 3px var(--color-azul);
+
+  /* Movimento */
+  --ease-saida: cubic-bezier(0.2, 0, 0, 1);
+  --animate-subir: subir 200ms var(--ease-saida) both;
+  --animate-folha: folha 280ms var(--ease-saida) both;
+
+  @keyframes subir {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  @keyframes folha {
+    from {
+      transform: translateY(100%);
+    }
+  }
+
+  /* Larguras da estrutura */
+  --container-pagina: 75rem;
+  --breakpoint-desktop: 64rem;
+}
+
+/* ---------- Base ---------- */
+
+@layer base {
+  html {
+    /* O controle A−/A/A+ muda só esta linha; tudo em rem acompanha. */
+    font-size: calc(100% * var(--escala-fonte, 1));
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html[data-fonte="-1"] { --escala-fonte: 0.875; }
+  html[data-fonte="1"] { --escala-fonte: 1.125; }
+  html[data-fonte="2"] { --escala-fonte: 1.25; }
+  html[data-fonte="3"] { --escala-fonte: 1.375; }
+
+  body {
+    margin: 0;
+    background: var(--color-creme);
+    color: var(--color-marrom);
+    font-family: var(--font-sans);
+    font-size: var(--text-corpo);
+    line-height: var(--text-corpo--line-height);
+  }
+
+  a {
+    color: var(--color-azul-escuro);
+    text-underline-offset: 0.15em;
+  }
+
+  a:hover {
+    color: var(--color-marrom);
+    text-decoration-thickness: 2px;
+  }
+
+  /* Foco visível em tudo que é interativo: anel azul, nunca removido. */
+  :focus-visible {
+    outline: 3px solid var(--color-azul);
+    outline-offset: 2px;
+  }
+
+  /* Com o menu em folha aberto, a página de trás não rola. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  ::selection {
+    background: var(--color-ocre);
+    color: var(--color-marrom);
+  }
+}
+
+/* ---------- Alto contraste ---------- */
+
+/*
+ * Por token, não por `filter`: o filtro também apagaria a cor das fotos e não
+ * aumentaria o contraste real do texto secundário.
+ */
+html[data-contraste="alto"] {
+  --color-creme: #ffffff;
+  --color-cartao: #ffffff;
+  --color-creme-escuro: #ffffff;
+  --color-marrom: #000000;
+  --color-marrom-800: #000000;
+  --color-marrom-600: #000000;
+  --color-marrom-400: #000000;
+  --color-marrom-300: #000000;
+  --color-ocre-escuro: #000000;
+  --color-azul-escuro: #00336b;
+  --color-creme-apagado: #ffffff;
+  --color-linha: #000000;
+  --color-linha-campo: #000000;
+  --color-veu: rgb(0 0 0 / 0.7);
+}
+
+/* ---------- Movimento reduzido ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Peças que não cabem em utilitário ---------- */
+
+@utility faixa-listrada {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-marrom) 0 3px,
+    var(--color-azul) 3px 8px
+  );
+}
+
+@utility area-segura-inferior {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}

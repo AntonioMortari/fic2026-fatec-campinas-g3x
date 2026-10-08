@@ -2,8 +2,23 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F9F4EA" />
+    <meta name="description" content="Espaço educativo de criação, reflexão e valorização da cultura e memória afro brasileira, na Casa Verde, zona norte de São Paulo." />
     <title>Ateliê Afro Cultural</title>
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/icone-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href="/fontes/bitter-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <script>
+      // Reaplica tamanho do texto e contraste ANTES da primeira pintura, para
+      // a página não piscar no padrão. Mesmas chaves de PreferenciasDeLeitura.tsx.
+      try {
+        var f = localStorage.getItem('af-fonte')
+        if (f && /^(-1|[1-3])$/.test(f)) document.documentElement.setAttribute('data-fonte', f)
+        if (localStorage.getItem('af-contraste') === 'alto') document.documentElement.setAttribute('data-contraste', 'alto')
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
