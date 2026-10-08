@@ -1,0 +1,45 @@
+%% 01 — As camadas, e a trava que atravessa todas elas
+%% ---
+%% A pergunta que este diagrama responde: por onde passa um dado, e onde
+%% ele NAO passa. O navegador nunca fala com o banco — e isso e' garantido
+%% por tres mecanismos independentes, nao por disciplina.
+%% ---
+%% DESENHO: uma PILHA, nao uma teia. Duas versoes anteriores falharam por
+%% motivos opostos, e as duas valem registrar:
+%% ---
+%%   1. um no' por modulo, com uma seta por chamada: virou uma teia de
+%%      arestas se cruzando, e escondia a informacao que importa, que e' a
+%%      ORDEM das camadas;
+%%   2. um `subgraph` por camada, com `direction LR` dentro: o Mermaid
+%%      IGNORA `direction` em qualquer subgraph que tenha aresta cruzando
+%%      a borda dele. Os nos empilharam na vertical e o diagrama ficou com
+%%      1774px de altura, cheio de buraco.
+%% ---
+%% Entao cada camada e' UM no', e o que morava em caixas irmas virou linha
+%% de texto dentro dele. Seis blocos, uma coluna, nenhuma aresta cruzada.
+flowchart TB
+  L1["<b>1 · NAVEGADOR</b><br/>só recebe HTML pronto<br/><i>páginas renderizadas no servidor<br/>formulários que funcionam sem JavaScript</i>"]
+
+  L2["<b>2 · BORDA</b> — middleware.ts<br/><i>renova a sessão · CSP com nonce<br/>redirects antigos · noindex</i>"]
+
+  L3["<b>3 · ENTRADA</b> — Next.js 16, App Router<br/><i>Server Components — app/**/page.tsx<br/>Server Actions — acoes/*.ts, a ESCRITA<br/>Route Handlers — CSV, /auth/confirm</i>"]
+
+  L4["<b>4 · NÚCLEO</b> — só no servidor, import 'server-only'<br/><i>servidor/dados/*.ts — a LEITURA, uma política de erro só<br/>servidor/sessao.ts — getUser(), nunca getSession()<br/>servidor/permissao.ts — ehEquipe(), falha FECHADA</i>"]
+
+  L5[("<b>5 · SUPABASE</b><br/><i>PostgreSQL — 17 tabelas, todas com RLS<br/>Auth · Storage — galeria privada, acervo público</i>")]
+
+  L6["<b>6 · E-MAIL</b> — fora do caminho da página<br/><i>Edge Function — único ponto com service_role<br/>Resend</i>"]
+
+  L1 ==>|"HTML e POST — o navegador NUNCA alcança o Supabase"| L2
+  L2 ==> L3
+  L3 ==> L4
+  L4 ==> L5
+  L3 -.->|"só o identificador do registro,<br/>nunca o texto do e-mail"| L6
+  L6 -.->|"busca o texto no banco"| L5
+
+  classDef navegador fill:#FBF6ED,stroke:#9A3232,stroke-width:1.5px,stroke-dasharray:6 4
+  classDef servidor  fill:#F4EFE6,stroke:#2B2019,stroke-width:1.5px
+  classDef banco     fill:#FBEFD0,stroke:#D69A10,stroke-width:2px
+  class L1 navegador
+  class L2,L3,L4,L6 servidor
+  class L5 banco

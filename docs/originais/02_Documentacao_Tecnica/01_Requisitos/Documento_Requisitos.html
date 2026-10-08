@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Documento de Requisitos — Ateliê Afro Cultural</title>
+<style>
+:root {
+  --ocre: #D69A10;
+  --azul: #6FA6C8;
+  --tinta: #2B2019;
+  --creme: #F4EFE6;
+  --linha: #C9BFB2;
+}
+
+@page { size: A4; margin: 2cm 1.8cm; }
+
+/*
+ * O HTML VAI NA ENTREGA JUNTO DO PDF, e aberto no navegador ele nao tem
+ * regra de pagina nenhuma — o texto encostava na borda da janela. Estas
+ * regras valem so na TELA; no papel quem manda e a regra de pagina acima.
+ *
+ * SEM CRASE NESTE COMENTARIO, de proposito: todo este CSS mora dentro de
+ * um template literal do JavaScript, e uma crase aqui FECHA a string. Foi
+ * exatamente o que quebrou a primeira versao deste bloco.
+ */
+@media screen {
+  body { max-width: 21cm; margin: 0 auto; padding: 2cm 1.8cm; }
+  .capa { height: auto; padding: 3cm 0; }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 10.5pt;
+  line-height: 1.5;
+  color: var(--tinta);
+  background: #fff;
+}
+
+h1, h2, h3 { line-height: 1.2; break-after: avoid; page-break-after: avoid; }
+h1 { font-size: 20pt; margin: 0 0 .3em; }
+h2 {
+  font-size: 14pt;
+  margin: 2em 0 .6em;
+  padding-bottom: .25em;
+  border-bottom: 2px solid var(--tinta);
+}
+h3 { font-size: 11.5pt; margin: 1.4em 0 .4em; }
+
+p { margin: 0 0 .8em; }
+ul { margin: 0 0 .8em; padding-left: 1.2em; }
+li { margin-bottom: .35em; }
+
+/* ---- capa ---- */
+.capa {
+  height: 24.5cm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  break-after: page;
+  page-break-after: always;
+}
+.capa__faixa { height: 10px; background: var(--ocre); margin-bottom: 1.4cm; }
+.capa__faixa--fim { margin: 1.4cm 0 0; background: var(--tinta); }
+.capa h1 { font-size: 30pt; margin-bottom: .15em; }
+.capa .sub { font-size: 14pt; margin-bottom: 1.6cm; }
+.capa dl { display: grid; grid-template-columns: 5.2cm 1fr; gap: .45em 0; margin: 0; font-size: 10.5pt; }
+.capa dt { font-weight: bold; }
+.capa dd { margin: 0; }
+
+/* ---- números ---- */
+.placar { display: flex; gap: .5cm; margin: 1.2em 0 1.6em; }
+.placar div {
+  flex: 1;
+  border: 1.5px solid var(--tinta);
+  padding: .55em .7em;
+  text-align: center;
+}
+.placar .n { display: block; font-size: 22pt; font-weight: bold; line-height: 1.1; }
+.placar .r { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .06em; }
+
+/* ---- tabelas ---- */
+table { width: 100%; border-collapse: collapse; margin: .6em 0 1.4em; font-size: 9pt; }
+thead { display: table-header-group; }
+th, td {
+  border: 1px solid var(--linha);
+  padding: .4em .5em;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--creme); font-size: 8.5pt; text-transform: uppercase; letter-spacing: .04em; }
+tr { break-inside: avoid; page-break-inside: avoid; }
+td.id { font-weight: bold; white-space: nowrap; width: 1.5cm; }
+td.origem { white-space: nowrap; width: 1.5cm; font-size: 8.5pt; }
+td.status { white-space: nowrap; width: 2.1cm; }
+td.evidencia { font-size: 8.5pt; }
+.onde { font-size: 8pt; font-family: ui-monospace, 'Courier New', monospace; opacity: .75; }
+
+.selo {
+  display: inline-block;
+  padding: .1em .45em;
+  font-size: 8pt;
+  font-weight: bold;
+  border: 1px solid var(--tinta);
+  white-space: nowrap;
+}
+.selo--pronto  { background: #DCEBD8; }
+.selo--parcial { background: #F6E4B8; }
+.selo--falta   { background: #F1D9D9; }
+
+/* ---- blocos ---- */
+.nota {
+  border-left: 5px solid var(--ocre);
+  background: var(--creme);
+  padding: .7em .9em;
+  margin: 1em 0;
+  break-inside: avoid;
+}
+.nota strong { display: block; margin-bottom: .25em; }
+
+.secao { break-before: page; page-break-before: always; }
+
+.rodape-doc {
+  margin-top: 2em;
+  padding-top: .6em;
+  border-top: 1px solid var(--tinta);
+  font-size: 8.5pt;
+}
+
+/* ================================================================
+ * BACKLOG: Epico, User Story e criterios de aceitacao
+ * ================================================================
+ *
+ * O Anexo I do regulamento pede o backlog em Epicos e User Stories.
+ * O bloco de cada requisito NAO PODE PARTIR entre duas paginas: uma
+ * User Story numa pagina e os criterios de aceitacao na seguinte
+ * obriga quem avalia a folhear para conferir uma coisa so.
+ *
+ * SEM CRASE NESTE COMENTARIO — ver o aviso la em cima.
+ */
+/*
+ * O involucro que mantem o cabecalho do epico junto da primeira User
+ * Story. MEDIDO: com o cabecalho solto, o "Epico 7" saiu sozinho no
+ * rodape de uma pagina e as historias dele na seguinte. O
+ * break-after: avoid dos titulos, la em cima, NAO resolve — o Firefox
+ * nao honra aquela propriedade na impressao. Esta ele honra.
+ *
+ * (E sim: a primeira versao deste comentario usava crase em volta do
+ * nome da propriedade, e FECHOU o template literal. E' a armadilha que o
+ * cabecalho deste arquivo ja' avisava.)
+ */
+.epico-inicio {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.epico {
+  border-bottom: 2px solid var(--ocre);
+  padding-bottom: .25em;
+  margin: 1.8em 0 .9em;
+}
+.epico-inicio > .epico:first-child { margin-top: 0; }
+.epico__id {
+  display: block;
+  font-size: 8.5pt;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  opacity: .7;
+  margin-top: .2em;
+}
+
+.rf {
+  border-left: 3px solid var(--linha);
+  padding: .1em 0 .1em .7em;
+  margin: 0 0 1em;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.rf h4 {
+  font-size: 11pt;
+  margin: 0 0 .15em;
+  line-height: 1.25;
+}
+.rf h4 .id {
+  font-family: ui-monospace, 'Courier New', monospace;
+  font-size: 9.5pt;
+  margin-right: .4em;
+}
+
+.us {
+  margin: .45em 0;
+  padding-left: .6em;
+  border-left: 2px solid var(--ocre);
+  font-style: italic;
+}
+.us strong { font-style: normal; }
+
+.aceitacao { margin: .45em 0 .2em; }
+.aceitacao__rotulo,
+.evidencia__rotulo {
+  display: block;
+  font-size: 7.5pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  opacity: .65;
+  margin-bottom: .15em;
+}
+.aceitacao ul { margin: 0; padding-left: 1.1em; }
+.aceitacao li { font-size: 9pt; margin-bottom: .12em; }
+
+p.evidencia {
+  margin: .45em 0 0;
+  font-size: 8.5pt;
+  background: var(--creme);
+  padding: .35em .5em;
+}
+.evidencia__rotulo { margin-bottom: .1em; }
+
+/* Perfis de usuario: a coluna de "onde isso vive" e' a que sustenta a
+ * afirmacao de que os perfis nao foram inventados para o documento. */
+td.perfil-nome { font-weight: bold; white-space: nowrap; }
+td.perfil-onde { font-size: 8pt; background: var(--creme); }
+
+/*
+ * A tabela dos 30 RNF do Anexo III tem cinco colunas, e duas delas sao
+ * texto longo. Sem largura declarada, o navegador espremia as duas e a
+ * linha ficava com dez centimetros de altura — TRES requisitos por
+ * pagina, e dez paginas so' para esta tabela.
+ *
+ * table-layout: fixed faz as larguras abaixo valerem de fato. A soma e'
+ * 100%.
+ */
+table.anexo3 { table-layout: fixed; font-size: 8.5pt; }
+table.anexo3 th:nth-child(1), table.anexo3 td:nth-child(1) { width: 12%; }
+table.anexo3 th:nth-child(2), table.anexo3 td:nth-child(2) { width: 25%; }
+table.anexo3 th:nth-child(3), table.anexo3 td:nth-child(3) { width: 9%; }
+table.anexo3 th:nth-child(4), table.anexo3 td:nth-child(4) { width: 15%; }
+table.anexo3 th:nth-child(5), table.anexo3 td:nth-child(5) { width: 39%; }
+table.anexo3 td { vertical-align: top; }
+
+/*
+ * DUAS CORRECOES QUE table-layout: fixed EXIGIU, e as duas apareceram na
+ * pagina impressa, nao no HTML:
+ *
+ * 1. td.id declara white-space: nowrap la em cima. Com largura fixa, o
+ *    "RNF-SEG-01" TRANSBORDAVA por cima do texto da coluna vizinha, em
+ *    vez de esticar a coluna. Aqui ele pode quebrar.
+ *
+ * 2. o selo tambem e' nowrap, e "Atendido por equivalencia" invadia a
+ *    coluna seguinte pelo mesmo motivo. Nesta tabela ele quebra em duas
+ *    linhas.
+ *
+ * Nenhuma das duas aparece no navegador com a janela larga — foi preciso
+ * olhar o PDF.
+ */
+table.anexo3 td.id { white-space: normal; width: auto; word-break: break-word; }
+table.anexo3 .selo {
+  white-space: normal;
+  font-size: 7pt;
+  padding: .1em .3em;
+  display: inline-block;
+}</style>
+</head>
+<body>
+
+<section class="capa">
+  <div class="capa__faixa"></div>
+  <h1>Documento de Requisitos</h1>
+  <p class="sub">Ateliê Afro Cultural — Site institucional e sistema de gestão</p>
+  <dl>
+    <dt>Contexto</dt><dd>Fatec Innovation Challenge · Venturus</dd>
+    <dt>Entrega</dt><dd>4 de setembro de 2026</dd>
+    <dt>Endereço em produção</dt><dd>https://www.atelieafrocultural.site</dd>
+    <dt>Repositório</dt><dd>github.com/oliveira-yuri/venturus-atelie · branch <code>migracao-nextjs</code></dd>
+    <dt>Conteúdo</dt><dd>39 requisitos funcionais em 9 épicos ·
+      30 requisitos não funcionais do Anexo III ·
+      12 do projeto · 8 regras de negócio</dd>
+  </dl>
+  <div class="capa__faixa capa__faixa--fim"></div>
+</section>
+
+<h2>1. Introdução</h2>
+
+<h3>Propósito</h3>
+
+<p>Este documento define <strong>o que o sistema do Ateliê Afro Cultural deve fazer</strong> e
+as regras que ele precisa respeitar. É a referência do escopo acordado com a organização e a
+base do desenvolvimento.</p>
+
+<h3>Escopo</h3>
+
+<p>Um site institucional público e um sistema de gestão para a equipe da ONG, cobrindo
+divulgação, contas e acesso, eventos e inscrições, doações, voluntariado, acervo aberto,
+comunicação interna e relatórios — <strong>39 requisitos funcionais</strong>
+organizados em <strong>9 épicos</strong>, mais 12
+requisitos não funcionais do projeto e 8 regras de negócio.</p>
+
+<p><strong>Fora do escopo, por decisão registrada:</strong> meio de pagamento e emissão de
+recibo. O sistema <em>registra</em> doações, não as cobra — a organização confirma o
+recebimento por fora, e o total dos indicadores soma fato, não promessa.</p>
+
+<p>Duas restrições da organização moldaram quase todas as decisões, e reaparecem ao longo do
+documento:</p>
+
+<ul>
+  <li><strong>A ONG não possui computador.</strong> Toda a operação acontece no celular pessoal
+  da equipe, muitas vezes de pé, no meio de um evento.</li>
+  <li><strong>O público começa aos 10 anos.</strong> Cada dado pessoal que o sistema guarda
+  pode ser de uma criança — o que torna a proteção de dados uma restrição de arquitetura, e
+  não um item de checklist.</li>
+</ul>
+
+<h3>Como ler as tabelas</h3>
+
+<p>Cada requisito tem uma linha <strong>"Como se sabe"</strong>. Ela existe porque
+<em>"pronto"</em> sem dizer como se verificou é promessa, não relatório. Ali está o que foi
+feito para saber: teste automatizado, medição contra o banco de dados de produção, ou
+navegador — e, onde ninguém percorreu o caminho até o fim, está escrito que ninguém
+percorreu.</p>
+
+<div class="placar">
+  <div><span class="n">36</span><span class="r">RF prontos</span></div>
+  <div><span class="n">3</span><span class="r">RF parciais</span></div>
+  <div><span class="n">0</span><span class="r">RF não iniciados</span></div>
+  <div><span class="n">1268</span><span class="r">testes verdes</span></div>
+</div>
+
+<p>Os três selos:</p>
+<ul>
+  <li><span class="selo selo--pronto">Pronto</span> — existe, funciona e foi verificado rodando.</li>
+  <li><span class="selo selo--parcial">Parcial</span> — o caminho principal existe; algo declarado ficou de fora, e a linha diz o quê.</li>
+  <li><span class="selo selo--falta">Não iniciado</span> — não foi construído.</li>
+</ul>
+
+<h2 class="secao">2. Perfis de Usuário</h2>
+
+<p>Os seis perfis abaixo <strong>não foram inventados para este documento</strong>: são as
+identidades que a política de acesso do banco de dados <em>distingue</em>. Cada um corresponde
+a uma condição real de autorização, e a última coluna diz onde ela vive.</p>
+
+<p>O critério é esse, e é verificável: um perfil que não muda o que o sistema
+<strong>permite</strong> não é perfil de usuário — é adjetivo.</p>
+
+<table>
+  <thead><tr>
+    <th>ID</th><th>Perfil</th><th>Conta</th><th>Quem é</th>
+    <th>O que faz no sistema</th><th>Onde a distinção vive</th>
+  </tr></thead>
+  <tbody><tr>
+    <td class="id">P1</td>
+    <td class="perfil-nome">Visitante</td>
+    <td class="origem">Não</td>
+    <td>Qualquer pessoa que chega ao site — moradora da Casa Verde, estudante, pesquisadora, jornalista, ou alguém que viu a ONG na imprensa.</td>
+    <td class="evidencia">Lê a história do Ateliê, os projetos, as notícias, a agenda e a galeria. Baixa material do acervo educativo. Escreve para a ONG pelo formulário de contato, sem criar conta.</td>
+    <td class="perfil-onde">É o papel anônimo do banco. Ele tem permissão de leitura apenas no que está publicado, e permissão de escrita apenas para inserir — nunca para ler de volta o que inseriu.</td>
+  </tr><tr>
+    <td class="id">P2</td>
+    <td class="perfil-nome">Participante de evento</td>
+    <td class="origem">Não</td>
+    <td>Quem vai a uma oficina, roda ou espetáculo. Pode ser criança a partir de 10 anos — e nesse caso quem preenche é a pessoa responsável, que fica identificada no registro.</td>
+    <td class="evidencia">Inscreve-se numa atividade da agenda SEM criar conta. É decisão de produto, não limitação: exigir cadastro para participar de uma oficina gratuita afasta exatamente quem a ONG quer alcançar.</td>
+    <td class="perfil-onde">A inscrição é gravada por uma função do banco que confere a vaga com a linha do evento travada — conferir no servidor não resolveria a corrida de duas pessoas no último lugar.</td>
+  </tr><tr>
+    <td class="id">P3</td>
+    <td class="perfil-nome">Pessoa com conta</td>
+    <td class="origem">Sim</td>
+    <td>Quem se cadastrou: voluntária, doadora, ou as duas coisas. Os papéis se acumulam, e nenhum deles é exclusivo.</td>
+    <td class="evidencia">Vê e corrige os próprios dados, acompanha as próprias candidaturas e as próprias doações. Não alcança o dado de mais ninguém.</td>
+    <td class="perfil-onde">Quem filtra é a política do banco, comparando a identidade da sessão com a dona da linha — não uma condição escrita à mão em cada consulta da tela. Uma consulta que esquecesse o filtro devolveria vazio, não o dado de outra pessoa.</td>
+  </tr><tr>
+    <td class="id">P4</td>
+    <td class="perfil-nome">Voluntário ativo</td>
+    <td class="origem">Sim</td>
+    <td>Quem se candidatou E teve a candidatura aprovada pela equipe. Ter se candidatado ontem não basta.</td>
+    <td class="evidencia">Tudo o que a pessoa com conta faz, mais ler o mural de avisos interno da organização.</td>
+    <td class="perfil-onde">A distinção entre "tem conta" e "é voluntário" importa porque a candidatura é pública: se bastasse ter conta, qualquer pessoa preencheria um formulário e passaria a ler a comunicação interna da ONG. A condição é a situação da candidatura, e ela mora numa função do banco.</td>
+  </tr><tr>
+    <td class="id">P5</td>
+    <td class="perfil-nome">Pessoa da equipe da ONG</td>
+    <td class="origem">Sim</td>
+    <td>As pessoas que tocam o Ateliê — entre 1 e 5, entre voluntários e colaboradores. Operam do celular pessoal, muitas vezes de pé, no meio de um evento: a organização não possui computador.</td>
+    <td class="evidencia">Publica projetos, notícias, fotos e avisos; lê as mensagens recebidas e marca o andamento de cada uma; confere a lista de presença; registra doações; tira relatório para prestação de contas.</td>
+    <td class="perfil-onde">O papel de equipe NUNCA vem do cadastro: só é concedido no painel do banco, e um gatilho levanta exceção se alguém tentar concedê-lo a si mesmo. Já houve uma escalada de privilégio real neste projeto, e foi assim que ela foi fechada.</td>
+  </tr><tr>
+    <td class="id">P6</td>
+    <td class="perfil-nome">Professor ou escola parceira</td>
+    <td class="origem">Não</td>
+    <td>Quem leva uma turma ao Ateliê, ou traz o Ateliê à escola. É um público que a ONG nomeia explicitamente no material dela.</td>
+    <td class="evidencia">Lê a página feita para escolas — o que a organização oferece, onde já esteve — e entra em contato para combinar uma visita ou uma atividade.</td>
+    <td class="perfil-onde">É o perfil por trás do limite de envio por visitante: uma turma inteira saindo por um endereço de rede só não pode fechar o formulário de contato para todo mundo. O endereço nunca é gravado — só o resumo criptográfico dele.</td>
+  </tr></tbody>
+</table>
+
+<h2 class="secao">3. Backlog do Produto</h2>
+
+<p>As 39 funcionalidades estão descritas do ponto de vista de quem usa, em
+dois níveis: <strong>Épico</strong>, que agrupa um tema do produto, e <strong>User
+Story</strong>, no formato <em>"Como [perfil], quero [ação] para [benefício]"</em>, cada uma
+com critérios de aceitação objetivos.</p>
+
+<p>O perfil de cada User Story é um dos seis da seção anterior, escrito por extenso — nunca
+"usuário", que não diz de quem é a necessidade. As tarefas técnicas de cada história não fazem
+parte deste documento: são criadas pela equipe durante o desenvolvimento.</p>
+
+<div class="epico-inicio"><h3 class="epico">Épico 1 — Site institucional e divulgação
+      <span class="epico__id">M1 · 9 User Stories</span></h3><article class="rf">
+    <h4><span class="id">RF01</span>Página inicial institucional <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/</p>
+    <p class="us">Como <strong>visitante</strong>, quero entender em poucos segundos o que é o Ateliê Afro Cultural e o que posso fazer ali
+       para decidir se vou participar, apoiar, levar minha turma ou apenas conhecer.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Os quatro caminhos — conhecer, participar, apoiar e escolas — aparecem na primeira tela a 390px de largura.</li><li>Os três setores da organização aparecem nomeados, cada um com uma frase e uma imagem.</li><li>Nenhum texto é inventado: cada frase vem do material da própria ONG.</li><li>A página não usa estética de pena, linguagem de caridade nem contador de "vidas salvas".</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Herói com foto, os quatro caminhos numerados, os três setores e "Na mídia". Conferido no navegador a 390px e 1280px.</p>
+  </article></div>
+    <article class="rf">
+    <h4><span class="id">RF02</span>Página "Quem somos" <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/quem-somos</p>
+    <p class="us">Como <strong>visitante</strong>, quero ler a história do Ateliê e saber quem o mantém e onde ele fica
+       para confiar na organização antes de me envolver com ela.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A página traz a história, os idealizadores e os três setores de atuação.</li><li>A localização vem acompanhada de mapa, porque quem lê pode querer ir.</li><li>O texto é o da organização, palavra por palavra, sem reescrita.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>História, idealizadores e os três setores. Mapa do Google abaixo da localização (pedido V1).</p>
+  </article><article class="rf">
+    <h4><span class="id">RF03</span>Projetos e atividades <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/projetos · /admin/atividades</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero publicar e corrigir os projetos do Ateliê pelo celular, inclusive a foto de capa
+       para manter o site certo sem depender de quem construiu o sistema.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A lista pública mostra os projetos com capa, resumo e página própria para cada um.</li><li>A página de cada projeto traz sinopse e ficha técnica quando a organização as forneceu.</li><li>A equipe cria um projeto novo e envia a capa pelo celular, sem computador.</li><li>Um projeto pode ser tirado do ar e devolvido ao ar por um botão separado do de salvar.</li><li>Apagar não é oferecido, e a tela diz por quê: é o único gesto sem desfazer.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>As 11 atividades reais da ONG, do banco. Lista em blocos com página própria por projeto; a equipe cria, edita e sobe capa. Apagar fica de fora, com argumento escrito.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF04</span>Notícias e campanhas <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/noticias · /admin/publicacoes</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero escrever uma notícia, revisá-la e só então publicá-la
+       para não pôr no ar por acidente um texto que ainda está pela metade.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Escrever e publicar são dois gestos separados: salvar um rascunho nunca o torna público.</li><li>A notícia aceita uma imagem com texto alternativo.</li><li>Tirar do ar preserva a data da primeira publicação, porque ela é um fato.</li><li>Enquanto não houver notícia publicada, a página mostra um texto de estado vazio, e não uma lista em branco.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Lista em blocos + página própria + imagem na notícia. Escrever, publicar e tirar do ar são gestos separados. Tabela ainda vazia: a ONG não publicou nada.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF05</span>Galeria de fotos <span class="selo selo--parcial">Parcial</span></h4>
+    <p class="onde">/galeria · /admin/galeria</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero publicar fotos das atividades marcando quais têm autorização de uso de imagem
+       para divulgar o trabalho do Ateliê sem expor criança alguma sem permissão.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Nenhuma foto aparece na galeria pública sem a autorização registrada na própria linha.</li><li>O arquivo em si também é protegido: quem tem o endereço de uma foto não publicada não consegue baixá-la.</li><li>O endereço de cada foto publicada vence em uma hora.</li><li>A foto abre em tela cheia com navegação entre as imagens do álbum, e sem JavaScript cada miniatura ainda abre a imagem.</li><li>Apagar existe, com tela de confirmação — é o único caminho que age no mesmo instante quando uma autorização é retirada.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Tela cheia com setas, e o álbum vira link para o projeto quando o nome bate com uma atividade. RN07 em quatro camadas, e a quarta é o ARQUIVO: a migration 008 foi APLICADA e medida — o bucket da galeria responde NoSuchBucket a quem não tem sessão, e o endereço de cada foto é uma URL assinada de uma hora. Fica PARCIAL por uma coisa só: VÍDEO não entra, porque não cabe no limite de corpo de uma Server Action.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF06</span>Contato institucional <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/contato</p>
+    <p class="us">Como <strong>visitante</strong>, quero encontrar os canais diretos de contato da ONG e onde ela fica
+       para falar com uma pessoa hoje, e não esperar alguém abrir um painel.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Os canais que a organização usa de fato aparecem nomeados, com ícone e link que abre o aplicativo certo.</li><li>Os canais diretos vêm ANTES do formulário na página.</li><li>O endereço vem acompanhado de mapa.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Os cinco canais nomeados pela ONG, com ícones, mais o mapa.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF07</span>Formulário de contato geral <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/contato</p>
+    <p class="us">Como <strong>visitante</strong>, quero escrever para a ONG sem precisar criar conta
+       para tirar uma dúvida ou propor uma parceria sem passar por um cadastro.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>O envio funciona sem sessão e sem JavaScript.</li><li>A validação roda no servidor, campo a campo, e devolve o formulário preenchido quando recusa.</li><li>Depois do envio a pessoa vê uma confirmação, e não a mesma tela em branco.</li><li>As colunas de trabalho da organização — origem e situação — são escritas pelo servidor, nunca pelo formulário.</li><li>Há limite de envios por visitante, e o endereço de rede nunca é gravado: apenas o resumo criptográfico dele.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>MEDIDO ponta a ponta contra o Supabase de produção, sem JavaScript: preencher, enviar, redirect e a linha gravada. Foi o primeiro caminho de sucesso do projeto.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF38</span>Área "Para Escolas" <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/para-escolas</p>
+    <p class="us">Como <strong>professor ou escola parceira</strong>, quero ver numa página só o que o Ateliê oferece para escolas e onde já esteve
+       para levar a proposta à coordenação da minha escola com argumento pronto.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A página descreve as atividades disponíveis para turmas, com a linguagem da própria ONG.</li><li>Traz o histórico de onde a organização já esteve.</li><li>Leva ao contato sem exigir cadastro.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Atividades, faixas etárias, formatos, duração e o que a escola providencia.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF39</span>Prova social <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/ · /para-escolas</p>
+    <p class="us">Como <strong>visitante</strong>, quero ver que veículos de imprensa já falaram sobre o Ateliê
+       para saber que a organização é reconhecida fora do próprio site.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Os registros de imprensa aparecem com veículo, título e data.</li><li>Cada item leva à matéria original.</li><li>Nenhum registro é inventado: todos vêm do material fornecido pela organização.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Os 14 registros reais de clipping, do banco.</p>
+  </article><div class="epico-inicio"><h3 class="epico">Épico 2 — Cadastro de usuários e acesso
+      <span class="epico__id">M2 · 5 User Stories</span></h3><article class="rf">
+    <h4><span class="id">RF08</span>Cadastro de voluntário <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/entrar</p>
+    <p class="us">Como <strong>visitante</strong>, quero criar uma conta indicando que tenho interesse em ser voluntário
+       para poder me candidatar às frentes de trabalho do Ateliê.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>O cadastro funciona sem JavaScript.</li><li>A caixa de interesse em voluntariado é lida pelo conteúdo, não pela mera presença do campo.</li><li>Nenhum campo do formulário consegue conceder papel de equipe, mesmo se for acrescentado à mão no envio.</li><li>Erro de validação devolve o formulário preenchido, dizendo o que houve e o que fazer.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>MEDIDO contra o Auth de produção: criar conta devolve sessão na hora (autoconfirm ligado).</p>
+  </article></div>
+    <article class="rf">
+    <h4><span class="id">RF09</span>Cadastro de doador <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/entrar</p>
+    <p class="us">Como <strong>visitante</strong>, quero criar uma conta indicando que quero doar ou apoiar
+       para acompanhar minhas doações e receber resposta da organização.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>É o mesmo formulário do cadastro de voluntário: os papéis se acumulam, e marcar um não desmarca o outro.</li><li>A marcação de doador é gravada no perfil da pessoa.</li><li>Nenhum papel administrativo é concedido pelo cadastro.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Mesmo formulário, com tipo de pessoa (PF/PJ) e a caixa "quero doar ou apoiar".</p>
+  </article><article class="rf">
+    <h4><span class="id">RF10</span>Autenticação e papéis acumuláveis <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/entrar · /recuperar-acesso · /nova-senha</p>
+    <p class="us">Como <strong>pessoa com conta</strong>, quero entrar, sair e recuperar meu acesso quando esquecer a senha
+       para usar minha conta sem depender de alguém para me destravar.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Entrar, criar conta, pedir recuperação e definir senha nova funcionam sem JavaScript.</li><li>A sessão é verificada no servidor de autenticação a cada requisição, não lida do cookie.</li><li>O cabeçalho mostra o nome de quem entrou e um "Sair" que funciona sem JavaScript.</li><li>Credencial errada devolve uma frase que diz o que houve, em português, e não um código de erro.</li><li>A sessão se renova sozinha, com prazo total de espera, para que o serviço de autenticação fora do ar não trave a página.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>As quatro telas enviam COM e SEM JavaScript, medido no Firefox. Sessão lida com getUser(), nunca getSession().</p>
+  </article><article class="rf">
+    <h4><span class="id">RF11</span>Área do usuário <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/minha-conta</p>
+    <p class="us">Como <strong>pessoa com conta</strong>, quero ver e corrigir meus dados, minhas candidaturas e minhas doações
+       para manter meu cadastro certo sem escrever para a organização.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A ficha aparece antes do formulário: o que a pessoa vê ao abrir é o que ela veio ver.</li><li>Corrigir o nome muda o nome exibido no cabeçalho no mesmo gesto.</li><li>Um envio com campos acrescentados à mão — papel de equipe, identificador de outra pessoa, e-mail — não altera nenhum deles.</li><li>Toda consulta é filtrada pela identidade da sessão: quem é da equipe não vê o dado de terceiros nesta tela.</li><li>Quem chega sem sessão é levado à tela de entrar, e não a um erro de página inexistente.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>MEDIDO ponta a ponta contra produção, com e sem JavaScript. Primeiro caminho AUTENTICADO do projeto. Trava de escalada provada pelos dois caminhos (PATCH direto e formulário hostil).</p>
+  </article><article class="rf">
+    <h4><span class="id">RF12</span>Confirmação de maioridade <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/entrar</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero que o sistema recuse a criação de conta por menor de 18 anos
+       para que a organização não guarde dado de criança sem responsável identificado.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A confirmação de maioridade é obrigatória na tela.</li><li>A recusa acontece no servidor, e não apenas no navegador: o cadastro não é criado sem ela.</li><li>A caixa é lida pelo conteúdo enviado, não pela presença do campo.</li><li>A recusa foi medida também com o JavaScript desligado.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>RN01 recusada no servidor, e a recusa medida sem JavaScript. A caixa é lida pelo conteúdo, não pela presença do campo.</p>
+  </article><div class="epico-inicio"><h3 class="epico">Épico 3 — Gerenciamento de eventos
+      <span class="epico__id">M3 · 6 User Stories</span></h3><article class="rf">
+    <h4><span class="id">RF13</span>Cadastro e edição de eventos <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/eventos</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero cadastrar uma atividade na agenda e corrigi-la depois
+       para divulgar oficinas e espetáculos sem pedir ajuda a ninguém.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Salvar nunca publica: publicar é um botão separado.</li><li>A tela não apaga eventos, porque apagar um evento levaria junto a lista de inscritos.</li><li>O evento aceita limite de vagas e a exigência de documento, e os dois são opcionais.</li><li>Data e hora são interpretadas no fuso da organização.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Publicar é gesto separado. A tela não apaga: apagar um evento levaria a lista de inscritos junto (cascade).</p>
+  </article></div>
+    <article class="rf">
+    <h4><span class="id">RF14</span>Agenda pública <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/agenda</p>
+    <p class="us">Como <strong>visitante</strong>, quero ver o que vai acontecer no Ateliê e o que já aconteceu
+       para planejar minha participação nas próximas atividades.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>O que ainda vem aparece separado do que já passou.</li><li>Só o que ainda vem oferece o botão de inscrição.</li><li>Sem evento publicado, a página traz um texto de estado vazio — e ele desaparece assim que houver evento.</li><li>As datas são exibidas no fuso da organização.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Duas seções, com os passados acessíveis. Data no fuso da ONG, conferido com evento real.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF15</span>Inscrição em evento sem conta <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/agenda/&lt;id&gt;/inscricao</p>
+    <p class="us">Como <strong>participante de evento</strong>, quero me inscrever numa atividade sem criar conta
+       para garantir minha vaga sem precisar de um cadastro que não vou usar de novo.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A inscrição funciona sem sessão e sem JavaScript.</li><li>Quando a pessoa inscrita é menor de idade, o nome e o telefone de quem responde por ela são obrigatórios.</li><li>O grupo de campos do responsável chega aberto quando não há JavaScript, para ninguém receber erro apontando para um campo que nunca viu.</li><li>A vaga é conferida no banco de dados, com a linha do evento travada: duas pessoas enviando ao mesmo tempo não ocupam o mesmo último lugar.</li><li>A autorização de uso de imagem é perguntada, e a tela diz por escrito que dá para participar sem concedê-la.</li><li>Documento com onze dígitos iguais é recusado, mesmo passando na conta de verificação.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Migration 010 APLICADA e medida em produção. Vaga conferida no banco com a linha do evento travada — conferir no servidor não resolveria a corrida de duas pessoas no último lugar. 40 testes + 14 contra Postgres real. Existe uma inscrição de teste gravada em produção, e ela é lida de ponta a ponta: aparece em /admin/eventos/inscritos e foi ela que a função de e-mail buscou para mandar a confirmação (RF18).</p>
+  </article><article class="rf">
+    <h4><span class="id">RF16</span>Consulta e exportação de inscritos <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/eventos/inscritos</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero ver quem se inscreveu numa atividade e levar a lista para fora do sistema
+       para organizar a produção do evento e prestar contas depois.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A lista traz contato, documento quando houver, e o responsável quando a pessoa é menor.</li><li>A marca de autorização de uso de imagem aparece em toda linha, ANTES do contato — numa planilha larga, o que fica à direita é o que ninguém rola para ver.</li><li>A tela apenas lê: não corrige e não apaga.</li><li>A exportação abre em planilha, com neutralização de fórmula nos campos de texto.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Contato, CPF quando há, responsável (RN02) e a marca de autorização de imagem em toda linha. Exportação em CSV. Só lê.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF17</span>Lista de presença pelo celular <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/eventos/presenca</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero marcar presença pelo celular, de pé, na porta do evento
+       para saber quem veio sem papel e sem depender de internet boa.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Cada marcação é um envio ao servidor e funciona sem JavaScript.</li><li>A tela não tem paginação: numa lista de presença, "página 2" é onde as pessoas somem.</li><li>Documento e e-mail não aparecem: um celular virado para uma fila não mostra isso.</li><li>Há três estados, não dois — veio, não veio e ninguém conferiu —, para que uma lista não conferida nunca vire lista de faltas.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Três estados (veio / não veio / ninguém conferiu). Sem paginação, sem e-mail e sem CPF na tela. Cada botão é um &lt;form&gt; com Server Action — funciona sem JavaScript.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF18</span>E-mail de confirmação <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">Edge Function enviar-email</p>
+    <p class="us">Como <strong>participante de evento</strong>, quero receber um e-mail confirmando minha inscrição
+       para ter certeza de que ela foi registrada e saber quando e onde comparecer.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A mensagem é montada a partir do registro no banco: o texto não viaja no pedido de envio.</li><li>Chamar o envio duas vezes não manda dois e-mails para a mesma pessoa.</li><li>Cada envio deixa registro, com o desfecho.</li><li>O rastreamento de cliques fica desligado, porque reescrever os links contradiz a política de privacidade publicada.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>ENVIO REAL DISPARADO E MEDIDO em produção (03/09): a função leu a inscrição no banco, gravou a reserva em public.envios e o provedor aceitou; a segunda chamada respondeu ja_enviado, sem mandar de novo. Ela ficou muda por um dia por falta de GRANT ao service_role (migration 013), não por código — e passou a dizer qual papel a chave dela carrega, porque o Postgres responde "permission denied" sem falar de credencial.</p>
+  </article><div class="epico-inicio"><h3 class="epico">Épico 4 — Gestão de doações
+      <span class="epico__id">M4 · 5 User Stories</span></h3><article class="rf">
+    <h4><span class="id">RF19</span>Oferta de doação <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/doar/ofertar</p>
+    <p class="us">Como <strong>pessoa com conta</strong>, quero oferecer uma doação e descrever o que estou oferecendo
+       para combinar a entrega com a organização antes de aparecer com as coisas.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>O tipo de doação escolhido abre o campo correspondente: descrição para item, quantia para dinheiro.</li><li>A quantia informada não vira o valor confirmado da doação — ela é uma intenção, e o total dos indicadores soma fato.</li><li>O formulário nomeia o que a organização de fato aceita, e o texto deixa claro que não se trata de assistência social.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Tipo (item ou dinheiro) e o campo que corresponde: descrição livre para item, quantia em reais para dinheiro, com máscara que conta os centavos da direita. A quantia NÃO vira a coluna `valor` — ela entra na descrição, porque `valor` é o que a ONG confirmou ter recebido (RN08). Assim o total dos indicadores continua somando fato, não promessa.</p>
+  </article></div>
+    <article class="rf">
+    <h4><span class="id">RF20</span>Análise e resposta ao doador <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/doacoes/responder</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero responder a cada oferta de doação e registrar a resposta
+       para que ninguém que se ofereceu para ajudar fique sem retorno.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A resposta fica gravada e é lida pela pessoa que ofereceu, na área de conta dela.</li><li>A resposta também é enviada por e-mail.</li><li>A tela mostra as ofertas ainda sem resposta antes das já respondidas.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Aceite ou recusa com mensagem editável, e agora também POR E-MAIL. A equipe pode responder sem mudar a situação.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF21</span>Registro de doação recebida <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/doacoes/registrar</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero registrar uma doação que chegou por fora do site
+       para que os números da prestação de contas reflitam tudo que a organização recebeu.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>O registro aceita nome e e-mail de quem doou mesmo sem conta no sistema.</li><li>O valor é escrito pela equipe, depois do fato — nunca pelo formulário público.</li><li>O sistema não cobra e não emite recibo: ele registra.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Inclui doação vinda de fora do site (nome e e-mail sem conta ligada).</p>
+  </article><article class="rf">
+    <h4><span class="id">RF22</span>Histórico por doador <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/minha-conta · /admin/doacoes</p>
+    <p class="us">Como <strong>pessoa com conta</strong>, quero ver o histórico das doações que eu fiz
+       para acompanhar minha contribuição sem precisar perguntar à organização.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A pessoa vê apenas as próprias doações, e o filtro é da política do banco.</li><li>A equipe vê todas, numa tela separada.</li><li>Sem doação registrada, a área traz um texto de estado vazio que diz o que fazer.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>MEDIDO contra Postgres real: quem doou lê a resposta e NÃO consegue mudar a própria situação.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF23</span>Meios de doação <span class="selo selo--parcial">Parcial</span></h4>
+    <p class="onde">/doar</p>
+    <p class="us">Como <strong>visitante</strong>, quero saber de que formas posso apoiar o Ateliê
+       para escolher a que cabe em mim, seja dinheiro, item ou tempo.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A página nomeia as formas de apoio que a organização de fato aceita.</li><li>Enquanto a chave de pagamento real não existir, a chave de exemplo é identificada como tal em três marcas independentes, uma delas dentro da própria imagem — para sobreviver a uma captura de tela circulando por aplicativo de mensagem.</li><li>Há verificação automatizada que impede a chave de exemplo de ir ao ar sem o aviso, e o aviso de ficar sem a chave real.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Página pronta. A chave Pix é de TESTE (chaveteste-123) com três marcas dizendo isso — a chave real da ONG é a decisão D7, ainda pendente.</p>
+  </article><div class="epico-inicio"><h3 class="epico">Épico 5 — Área de voluntariado
+      <span class="epico__id">M5 · 3 User Stories</span></h3><article class="rf">
+    <h4><span class="id">RF24</span>Página de voluntariado <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/voluntariado</p>
+    <p class="us">Como <strong>visitante</strong>, quero ver em que frentes o Ateliê precisa de voluntários
+       para descobrir se tenho algo a oferecer antes de me candidatar.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>As frentes de trabalho vêm do banco de dados, com o texto da própria organização.</li><li>A página leva ao formulário de candidatura.</li><li>O texto principal da página é idêntico, palavra por palavra, ao que a organização escreveu.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>As cinco áreas reais, do banco.</p>
+  </article></div>
+    <article class="rf">
+    <h4><span class="id">RF25</span>Candidatura <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/voluntariado/candidatura</p>
+    <p class="us">Como <strong>pessoa com conta</strong>, quero me candidatar ao voluntariado escolhendo as frentes que me interessam
+       para que a organização saiba em que posso ajudar, e não apenas que quero ajudar.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A candidatura exige conta, e a página explica por quê a quem chega sem entrar — em vez de redirecionar.</li><li>Uma candidatura em andamento impede a criação de outra, e a recusa acontece também no servidor.</li><li>Quem já encerrou um voluntariado pode se candidatar de novo.</li><li>Se as frentes escolhidas não forem gravadas, a pessoa é avisada do que faltou e por onde completar — não recebe um "pronto" liso.</li><li>A candidatura aparece na área de conta com situação, data e frentes escolhidas.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>MEDIDO contra produção, sem JavaScript: entrar, marcar duas áreas, enviar, e a candidatura desenhada. Exige conta, e o porquê é do esquema.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF26</span>Gestão de voluntários <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/voluntarios</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero ler as candidaturas recebidas e mover cada uma entre as situações
+       para conduzir a entrada de voluntários sem abrir o painel do banco de dados.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A lista traz nome, contato, frentes escolhidas e a mensagem que a pessoa escreveu.</li><li>Há filtro por nome ou e-mail, frente, situação e tipo de pessoa, e os campos se somam.</li><li>A busca ignora acento e caixa, porque quem procura digita como lembra.</li><li>Encerrar um voluntariado devolve à pessoa o direito de se candidatar de novo.</li><li>A tela lê e tria: não cria e não apaga candidatura.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Lê as candidaturas com as áreas e move a situação entre as quatro. Filtro por nome ou e-mail, área, situação e tipo de pessoa — tudo por GET, o que faz o botão voltar desfazer e o endereço filtrado virar um link. Ele filtra em MEMÓRIA de propósito: como função pura, tem 11 testes sem banco nenhum, e a contagem da paginação continua honesta.</p>
+  </article><div class="epico-inicio"><h3 class="epico">Épico 6 — Acervo aberto
+      <span class="epico__id">M9 · 3 User Stories</span></h3><article class="rf">
+    <h4><span class="id">RF35</span>Catálogo do acervo com busca <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/acervo</p>
+    <p class="us">Como <strong>professor ou escola parceira</strong>, quero procurar material educativo no acervo do Ateliê por palavra
+       para encontrar o que serve para minha turma sem percorrer a lista inteira.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A busca acontece pelo endereço da página, e por isso funciona sem JavaScript.</li><li>Busca sem resultado explica que não houve resultado, em vez de mostrar uma lista vazia.</li><li>Sem material publicado, a página traz um texto de estado vazio.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Busca por texto. Tabela ainda vazia: a ONG não publicou material.</p>
+  </article></div>
+    <article class="rf">
+    <h4><span class="id">RF36</span>Visualização e download <span class="selo selo--parcial">Parcial</span></h4>
+    <p class="onde">/acervo</p>
+    <p class="us">Como <strong>professor ou escola parceira</strong>, quero abrir um material do acervo ou baixá-lo para usar depois
+       para levar o conteúdo para a sala de aula, inclusive sem internet.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Há dois caminhos por material: abrir e baixar.</li><li>O arquivo baixado chega com o nome do material, e não com o identificador interno.</li><li>O download funciona de fato, e não apenas parece funcionar.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Abrir e baixar, sem cadastro. ACHADO: o atributo download é ignorado entre origens — corrigido com ?download=. O CONTADOR de downloads não existe: exigiria função security definer.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF37</span>Publicação de material <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/acervo</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero publicar um material no acervo pelo celular
+       para compartilhar o que a organização produz sem intermediário.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Só documentos em PDF são aceitos, conferidos pelo conteúdo do arquivo e não pela extensão do nome.</li><li>Há limite de tamanho, e a pessoa recebe uma frase com o tamanho e o que fazer antes do envio falhar.</li><li>A tela permite apagar, com confirmação — porque neste acervo o arquivo é público por requisito.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Só PDF, reconhecido por assinatura de bytes (%PDF-), até 4 MB.</p>
+  </article><div class="epico-inicio"><h3 class="epico">Épico 7 — Comunicação interna
+      <span class="epico__id">M6 · 3 User Stories</span></h3><article class="rf">
+    <h4><span class="id">RF27</span>Mural de avisos <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/avisos · /admin/avisos</p>
+    <p class="us">Como <strong>voluntário ativo</strong>, quero ler os avisos internos da organização
+       para ficar sabendo das combinações sem depender de um grupo de mensagens.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Só quem tem candidatura ativa alcança o mural: ter conta não basta.</li><li>O item de menu para o mural só aparece para quem é voluntário ativo.</li><li>Encerrada a candidatura, o item some do menu.</li><li>Os avisos vivem em tabela própria, e nenhuma política de acesso deles depende de uma condição escrita à mão em cada consulta.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Tabela NOVA, não uma coluna em publicacoes — reaproveitar aquela política publicaria comunicação interna na internet aberta. "Voluntário" = situação ATIVA. 9 testes contra Postgres real. Migration 012 APLICADA. PERCORRIDO DE PONTA A PONTA em 03/09, com sessão real: publicar o aviso, promover a candidatura a ativa, ver o mural com conteúdo. Desde 03/09 ele é ABA DO MENU, e só para quem é voluntário ativo — medido: anônimo 11 itens sem o mural, voluntária ativa 14 com ele, e encerrando a candidatura pela tela o item some.</p>
+  </article></div>
+    <article class="rf">
+    <h4><span class="id">RF28</span>Mensagem para grupo <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/avisos</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero enviar um aviso por e-mail a um grupo definido de pessoas
+       para alcançar quem precisa saber sem montar lista de endereços à mão.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Os grupos vêm de uma lista fechada, e nenhum deles alcança "todo mundo".</li><li>Escrever, publicar e enviar são três gestos separados, e enviar só existe em aviso publicado.</li><li>Cada pessoa recebe uma mensagem própria: nenhum endereço aparece para outro destinatário.</li><li>Apertar o botão duas vezes não manda duas vezes — quem já recebeu é pulado.</li><li>O texto do aviso não viaja no pedido de envio: vai o identificador, e a mensagem é buscada no banco.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Grupo por lista fechada; nenhum alcança "todo mundo". Um e-mail por pessoa (/emails/batch), nunca uma lista no mesmo campo. ENVIO REAL DISPARADO E MEDIDO em produção (03/09): respondeu enviados 1; apertar de novo respondeu enviados 0 / ja_enviado, porque o índice único de public.envios pula quem já recebeu; e um grupo inventado foi recusado pela lista fechada DENTRO da função, que a confere de novo porque quem chama pode não ser o site.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF29</span>Registro central de contatos <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/contatos</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero ler as mensagens recebidas e marcar o andamento de cada atendimento
+       para que nenhuma mensagem fique sem resposta por ninguém saber que ela chegou.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A fila começa por quem ainda espera resposta, e o que foi concluído desce sem sumir.</li><li>A situação muda em qualquer sentido, porque um atendimento pode ser reaberto.</li><li>A tela lê e tria: não apaga e não edita a mensagem — o texto que a pessoa escreveu é registro.</li><li>A tela diz por escrito como pedir a exclusão de um dado, já que ela mesma não apaga.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Fila de atendimento com novo / em contato / concluída. Lê e tria: não apaga e não edita a mensagem — o texto recebido é registro.</p>
+  </article><div class="epico-inicio"><h3 class="epico">Épico 8 — Relatórios
+      <span class="epico__id">M7 · 3 User Stories</span></h3><article class="rf">
+    <h4><span class="id">RF30</span>Painel de indicadores <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero ver os números do Ateliê logo ao abrir o painel
+       para saber onde está o trabalho do dia sem abrir seis telas.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Os indicadores ficam abaixo dos atalhos de trabalho: no topo, empurrariam o trabalho para fora da primeira tela a 375px.</li><li>Nenhuma linha de dado atravessa a rede para desenhar um número: as contagens são feitas no banco.</li><li>Zero é exibido como zero; contagem que falhou é exibida como traço, nunca como zero inventado.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Seis números com count + head, sem trazer linha nenhuma pela rede. Zero é número; contagem que falhou é traço, nunca um zero inventado.</p>
+  </article></div>
+    <article class="rf">
+    <h4><span class="id">RF31</span>Exportação em CSV <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/exportar/&lt;conjunto&gt;</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero exportar as listas em planilha
+       para trabalhar os dados fora do sistema e enviá-los a um financiador.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>A planilha abre em qualquer editor de planilhas.</li><li>Campos de texto que comecem com sinal de fórmula são neutralizados: aspas não protegem disso.</li><li>A exportação respeita o filtro aplicado na tela.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>Contatos, voluntários e inscritos. Neutraliza injeção de fórmula (= + - @) — as aspas NÃO protegem disso. Separador ; e BOM, para o Excel em português.</p>
+  </article><article class="rf">
+    <h4><span class="id">RF32</span>Relatório em PDF <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin/relatorio</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero gerar um relatório imprimível com os números e a agenda
+       para entregar prestação de contas a um financiador em papel ou PDF.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>O documento é produzido pelo próprio navegador, sem biblioteca de geração de PDF.</li><li>Sem JavaScript, o menu de impressão do navegador produz o MESMO documento — o botão é conveniência.</li><li>A folha traz os indicadores e a agenda com inscritos, presentes e não conferidos por evento.</li><li>Imprimir qualquer outra tela do painel também produz um documento legível.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>window.print() com impressao.css, sem biblioteca de PDF (decisão da spec §9). Sem JavaScript o menu do navegador produz o MESMO documento — quem o gera é o CSS.</p>
+  </article><div class="epico-inicio"><h3 class="epico">Épico 9 — Administração
+      <span class="epico__id">M8 · 2 User Stories</span></h3><article class="rf">
+    <h4><span class="id">RF33</span>Painel administrativo mobile-first <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">/admin</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero operar todo o sistema pelo celular, com uma mão, no meio de um evento
+       para administrar o Ateliê sem ter um computador, que a organização não possui.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Toda tela do painel funciona a 375px de largura, sem rolagem horizontal.</li><li>Os alvos de toque têm ao menos 44 pixels.</li><li>Quem não é equipe recebe página inexistente em todas as telas do painel — a existência do painel é o que se recusa a contar.</li><li>Toda ação destrutiva pede confirmação, e as duas mais graves pedem uma palavra digitada.</li><li>Cada tela começa com instruções curtas, destacando o que não pode ser pulado.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>21 telas. Guarda na PÁGINA e no generateMetadata — MEDIDO: só no layout, o Next respondia 404 E mandava a página inteira no payload de hidratação.</p>
+  </article></div>
+    <article class="rf">
+    <h4><span class="id">RF34</span>Perfis e permissões <span class="selo selo--pronto">Pronto</span></h4>
+    <p class="onde">banco</p>
+    <p class="us">Como <strong>pessoa da equipe da ONG</strong>, quero que o papel de administrador não possa ser obtido por quem se cadastra
+       para que ninguém alcance os dados das crianças atendidas preenchendo um formulário.</p>
+    <div class="aceitacao">
+         <span class="aceitacao__rotulo">Critérios de aceitação</span>
+         <ul><li>Todas as tabelas têm política de acesso, criada na mesma migração da tabela.</li><li>Sem autenticação, as tabelas com dado pessoal respondem vazio ou negam o acesso.</li><li>O papel de equipe só é concedido fora do site, e uma tentativa de concedê-lo pela aplicação levanta exceção no banco.</li><li>As guardas são verificadas contra um banco de dados real, incluindo tentativas de escalada de privilégio.</li></ul>
+       </div>
+    <p class="evidencia"><span class="evidencia__rotulo">Como se sabe</span>118 testes contra um Postgres real com as migrations reais. Trigger contra escalada de privilégio, provado.</p>
+  </article>
+
+<h2 class="secao">4. Requisitos Não Funcionais obrigatórios (Anexo III)</h2>
+
+<p>Os 30 requisitos abaixo são os do <strong>Anexo III do Regulamento
+Técnico</strong>, comuns a todas as equipes — 27 obrigatórios e
+3 recomendados. O texto da coluna <strong>Requisito</strong> é
+<em>literal</em>: o regulamento exige que estejam "presentes e inalterados", e reescrever com
+outras palavras é alterar.</p>
+
+<p>A coluna <strong>Como este projeto atende</strong> é nossa, e usa quatro situações:</p>
+
+<ul>
+  <li><strong>Atendido</strong> — cumprido literalmente. São 15.</li>
+  <li><strong>Atendido por equivalência</strong> — cumprido por outro mecanismo, com o porquê
+  escrito. São 6.</li>
+  <li><strong>Divergente</strong> — não cumprido, e a razão é uma decisão de projeto declarada.
+  São 5, e a seção 5 explica cada uma.</li>
+  <li><strong>Devido na Etapa 6</strong> — requisito da Entrega da Versão Final, ainda não
+  exigível. São 4.</li>
+</ul>
+
+<div class="nota">
+  <strong>As divergências estão declaradas, não escondidas</strong>
+  Este projeto foi construído com renderização no servidor sobre PostgreSQL, e não com Express
+  sobre MySQL. Poderíamos ter omitido isso e deixado a banca descobrir abrindo a lista de
+  dependências. Preferimos declarar: uma decisão de arquitetura que se sustenta em argumento é
+  o que a competição diz querer avaliar, e uma que se esconde não é decisão — é descuido
+  esperando para ser encontrado. A seção 5 é o argumento.
+</div>
+
+<table class="anexo3">
+  <thead><tr>
+    <th>ID</th><th>Requisito (texto literal do Anexo III)</th>
+    <th>Obrig.</th><th>Situação</th><th>Como este projeto atende</th>
+  </tr></thead>
+  <tbody><tr>
+    <td class="id">RNF-SEG-01</td>
+    <td>Autenticação via JWT, com rotas protegidas</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">A autenticação emite JWT, e quem está autenticado se pergunta ao servidor de autenticação, não ao cookie — o token é verificado a cada requisição, e não apenas lido. As 21 telas do painel respondem 404 a quem não é equipe, e a guarda fica na PÁGINA, não só no layout: medido, com a guarda apenas no layout o 404 ainda entregava a página inteira do painel no conteúdo enviado ao navegador.</td>
+  </tr><tr>
+    <td class="id">RNF-SEG-02</td>
+    <td>Senhas armazenadas com hash (por exemplo, bcrypt)</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido por equivalência</span></td>
+    <td class="evidencia">A senha nunca chega ao código deste projeto: quem a armazena é o serviço de autenticação, com bcrypt, num schema separado. Não existe tabela de senha no schema da aplicação. É mais forte que implementar o hash, porque não há caminho pelo qual o código do projeto veja uma senha em texto claro.</td>
+  </tr><tr>
+    <td class="id">RNF-SEG-03</td>
+    <td>Validação dos dados de entrada nas rotas</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">Toda validação roda no servidor, e o formulário é lido campo a campo POR NOME — nunca espalhado num objeto, que é exatamente como uma escalada de privilégio real entrou neste projeto uma vez. Há teste que exercita a validação com um envio HOSTIL (papel de equipe, identificador de outra pessoa, campos inventados) e exige que nada disso atravesse até a gravação.</td>
+  </tr><tr>
+    <td class="id">RNF-SEG-04</td>
+    <td>CORS configurado de acordo com o front-end</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido por equivalência</span></td>
+    <td class="evidencia">Não há chamada entre origens a proteger: a interface e o servidor são a mesma origem, e o navegador nunca fala com o banco de dados. O que ocupa este lugar é a Política de Segurança de Conteúdo com nonce, medida caminho a caminho — cinco hosts, todos com uso demonstrado, e a diretiva de conexão sem o banco. A única chamada entre origens do sistema, a função de envio de e-mail, exige chave compartilhada e responde 401 sem ela.</td>
+  </tr><tr>
+    <td class="id">RNF-SEG-05</td>
+    <td>Segredos (chave de assinatura do JWT, credenciais do banco) mantidos em variáveis de ambiente, fora do código versionado</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">Variáveis sem o prefixo público não são embutidas no pacote que vai ao navegador, e todo módulo de dados começa com uma marca que o torna impossível de importar do lado do cliente — é erro de BUILD, não convenção que alguém possa esquecer. A chave de serviço, a única capaz de ignorar as políticas de acesso, existe somente como segredo da função de e-mail, e nunca esteve no repositório.</td>
+  </tr><tr>
+    <td class="id">RNF-QUA-01</td>
+    <td>Documentação da API com Swagger, exposta em rota dedicada (por exemplo, /api-docs)</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--falta">Divergente — justificado</span></td>
+    <td class="evidencia">NÃO ATENDIDO, e a razão é estrutural: não existe uma API REST a documentar. A escrita acontece em ações de servidor, que não são endereços nomeados por nós, e a leitura em módulos que só existem no servidor. Um Swagger aqui documentaria uma superfície que o sistema não tem. O que ocupa o lugar é o Diagrama de Arquitetura deste pacote, que descreve as camadas e o fluxo de dados entre elas.</td>
+  </tr><tr>
+    <td class="id">RNF-QUA-02</td>
+    <td>Testes automatizados (por exemplo, Jest) das funcionalidades principais do back-end</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido por equivalência</span></td>
+    <td class="evidencia">1268 testes no executor nativo do Node, sem dependência nova — a mesma disciplina do resto do projeto. Zero falhas. Mais 1269 contra o banco de produção, que é o que impede o site de servir conteúdo versionado achando que está lendo o banco, e 118 contra um PostgreSQL real com as migrations aplicadas, onde cada política de acesso é exercitada — inclusive as tentativas de escalada de privilégio.</td>
+  </tr><tr>
+    <td class="id">RNF-QUA-03</td>
+    <td>Testes automatizados no front-end</td>
+    <td class="origem">Recomendado</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">Firefox em modo automatizado, com e SEM JavaScript, a 375px e 1280px. A medição sem JavaScript é a que mais paga: foi ela que provou que a lista de presença funciona com internet de galpão, que é a condição real de uso da equipe da ONG.</td>
+  </tr><tr>
+    <td class="id">RNF-QUA-04</td>
+    <td>README na raiz do repositório: nome do projeto, equipe, descrição do problema e da solução, tecnologias, setup local e inicialização, URL do deploy, e mapa das pastas do repositório com o caminho de cada artefato, inclusive docs/originais/</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--parcial">Devido na Etapa 6</span></td>
+    <td class="evidencia">Devido na Entrega da Versão Final (Etapa 6). O conteúdo já existe, distribuído: o mapa de status e a arquitetura no guia do repositório, a operação no manual da equipe, e o escopo neste documento. Falta consolidar num README, junto com a pasta de originais que aquela etapa exige.</td>
+  </tr><tr>
+    <td class="id">RNF-QUA-05</td>
+    <td>Arquivo AGENTS.md ou CLAUDE.md na raiz documentando o uso de IA e as instruções para agentes, em linha com a seção 11.2</td>
+    <td class="origem">Recomendado</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">CLAUDE.md na raiz traz as instruções para agentes e o mapa do projeto. O escopo e o modo do uso de inteligência artificial estão declarados em docs/uso-de-ia.md, conforme o §11.2 exige.</td>
+  </tr><tr>
+    <td class="id">RNF-QUA-06</td>
+    <td>README próprio em frontend/ e em backend/, com dependências, variáveis de ambiente e execução daquela parte do projeto</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--falta">Divergente — justificado</span></td>
+    <td class="evidencia">NÃO APLICÁVEL na forma escrita: não há separação entre frontend e backend a documentar (ver a seção sobre a divergência de stack). O conteúdo que o requisito pede — dependências, variáveis de ambiente e execução — vira um README único na raiz, na Etapa 6.</td>
+  </tr><tr>
+    <td class="id">RNF-BE-01</td>
+    <td>API no padrão REST, com separação de responsabilidades (por exemplo, controllers, services e models)</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido por equivalência</span></td>
+    <td class="evidencia">A separação existe e é mais rígida que a convencional, só que com outros nomes: a escrita mora em um diretório, a leitura em outro, e as regras puras num terceiro. E ela não depende de disciplina: há varreduras de código que FALHAM se a fronteira for cruzada — uma exige que a ação pública de inscrição NÃO ganhe guarda de equipe, e a irmã exige que a do painel NUNCA perca a dela.</td>
+  </tr><tr>
+    <td class="id">RNF-BE-02</td>
+    <td>Acesso a dados via ORM (Sequelize), com modelagem adequada</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--falta">Divergente — justificado</span></td>
+    <td class="evidencia">PostgreSQL com políticas de acesso no próprio banco, não Sequelize sobre MySQL. A razão é a regra de proteção de imagem e o público a partir de 10 anos: a autorização precisa viver na MESMA transação do dado. Um ORM põe a autorização no código da aplicação, onde um esquecimento vira vazamento silencioso. Modelagem: 17 tabelas, todas com política na mesma migration, provadas contra PostgreSQL real. Ver a seção sobre a divergência.</td>
+  </tr><tr>
+    <td class="id">RNF-BE-03</td>
+    <td>Uso correto de código assíncrono (async/await), com tratamento de erros</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">Uma política de erro só, num módulo único: nenhum módulo de dados lança para cima. Banco fora do ar degrada para o conteúdo versionado ou para lista vazia, sempre com aviso no log — porque a tela não distingue "não há registro" de "não deu para perguntar". Há suíte dedicada que prova que falha de consulta não derruba a página, e que as rotas sem conteúdo de reserva respondem com o layout inteiro em vez de erro.</td>
+  </tr><tr>
+    <td class="id">RNF-BE-04</td>
+    <td>TypeScript no back-end</td>
+    <td class="origem">Recomendado</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">TypeScript em todo o servidor, com a compilação barrando erro de tipo antes da publicação.</td>
+  </tr><tr>
+    <td class="id">RNF-FE-01</td>
+    <td>TypeScript com tipagem adequada</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">TypeScript em todo o projeto, interface inclusive. A compilação faz parte da publicação: erro de tipo impede o site de subir.</td>
+  </tr><tr>
+    <td class="id">RNF-FE-02</td>
+    <td>Componentes funcionais reutilizáveis, com uso correto de props e estado</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">React 19, componentes funcionais. Uma decisão vale registro: o layout passa ao cabeçalho o MÍNIMO — um nome, nada de identificador, e-mail ou objeto de usuário, que iriam parar no HTML de toda página de quem está autenticado.</td>
+  </tr><tr>
+    <td class="id">RNF-FE-03</td>
+    <td>Gerência de estado e consumo da API (hooks, Context API, React Query e Axios)</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--falta">Divergente — justificado</span></td>
+    <td class="evidencia">NÃO ATENDIDO, e é o desenho: o navegador não consome API nenhuma. As páginas são montadas no servidor e o HTML chega pronto — que é o motivo de o site funcionar SEM JavaScript, requisito da ONG, cuja equipe opera de celular em rede de galpão. React Query e Axios pressupõem um cliente que busca dados; aqui esse cliente não existe, e a ausência dele é o que sustenta a acessibilidade.</td>
+  </tr><tr>
+    <td class="id">RNF-FE-04</td>
+    <td>Navegação entre telas por roteamento (react-router-dom)</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido por equivalência</span></td>
+    <td class="evidencia">Roteamento baseado em arquivos, 45 rotas. Um roteador de cliente seria uma SEGUNDA tabela de rotas para manter em sincronia com a do servidor. O que o roteador de cliente daria de graça e aqui foi trabalho — mover o foco e anunciar a mudança de página para leitores de tela — foi implementado à mão, e está medido.</td>
+  </tr><tr>
+    <td class="id">RNF-FE-05</td>
+    <td>Estilização consistente e responsiva (por exemplo, TailwindCSS)</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido por equivalência</span></td>
+    <td class="evidencia">Design system próprio, em CSS com tokens, quatro arquivos. Sem framework de estilo por restrição declarada do projeto — e porque a paleta tem significado atribuído pela própria ONG (luz e sabedoria, céu e esperança, terra e raízes), que uma escala genérica apagaria. Responsividade medida a 375px, 390px e 1280px, sem rolagem horizontal em nenhuma das 16 rotas conferidas.</td>
+  </tr><tr>
+    <td class="id">RNF-REP-01</td>
+    <td>Código-fonte versionado em Git, hospedado no GitHub, em repositório privado. O endereço é informado à organização no início das mentorias (seção 8.2)</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">Git no GitHub, repositório privado. O endereço será informado ao mentor e à organização no primeiro encontro, como o §8.2 determina.</td>
+  </tr><tr>
+    <td class="id">RNF-REP-02</td>
+    <td>Versão final na branch principal (main), correspondente à aplicação publicada no deploy avaliado</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--parcial">Devido na Etapa 6</span></td>
+    <td class="evidencia">Devido na Etapa 6. Hoje a versão publicada vive numa branch de trabalho; a fusão em main acontece no congelamento da entrega final.</td>
+  </tr><tr>
+    <td class="id">RNF-REP-03</td>
+    <td>Acesso de leitura concedido às contas do GitHub indicadas pela organização, com os convites aceitos antes do prazo de entrega</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--parcial">Devido na Etapa 6</span></td>
+    <td class="evidencia">Devido na Etapa 6, quando a organização divulgar a lista de contas. Convite pendente não é acesso, e acompanhar até o aceite é responsabilidade da equipe.</td>
+  </tr><tr>
+    <td class="id">RNF-REP-04</td>
+    <td>Histórico de commits que evidencie a evolução do trabalho da equipe</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">180 commits, com mensagens que dizem o que mudou e por quê, não apenas o que foi tocado. A partir das mentorias, cada integrante passa a commitar o próprio trabalho sob a própria identidade.</td>
+  </tr><tr>
+    <td class="id">RNF-REP-05</td>
+    <td>Entrega final congelada por tag ou release, com endereço do repositório, nome da tag e SHA do commit informados no formulário de entrega final</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--parcial">Devido na Etapa 6</span></td>
+    <td class="evidencia">Devido na Etapa 6.</td>
+  </tr><tr>
+    <td class="id">RNF-REP-06</td>
+    <td>Repositório nomeado no padrão fic2026-[nome-da-fatec]-[nome-da-equipe], com estrutura de monorepo conforme a seção 3.2 do Anexo I (frontend/, backend/ e docs/) e a cópia inalterada da Submissão Institucional em docs/originais/</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--falta">Divergente — justificado</span></td>
+    <td class="evidencia">O NOME segue o padrão. A estrutura frontend/backend NÃO se aplica: a aplicação é uma só, montada no servidor, e separá-la em duas pastas criaria uma fronteira que o código não tem — a divisão real é entre escrita, leitura e regras puras, e ela é vigiada por teste. A pasta docs/originais/ com a cópia inalterada desta submissão será criada na Etapa 6, como o regulamento exige.</td>
+  </tr><tr>
+    <td class="id">RNF-DES-01</td>
+    <td>Interface responsiva (desktop e dispositivos móveis)</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">Mobile-first por necessidade, não por moda: a ONG não possui computador, e toda a operação acontece no celular pessoal da equipe, muitas vezes de pé, no meio de um evento. Medido a 375px, 390px e 1280px, sem rolagem horizontal nas 16 rotas conferidas. As capturas da pasta de protótipos são a prova, nas duas larguras.</td>
+  </tr><tr>
+    <td class="id">RNF-DES-02</td>
+    <td>Fluxos principais funcionam de ponta a ponta, sem travamentos ou erros evidentes</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">Medidos contra o banco de produção, no Firefox, com e sem JavaScript: criar conta, entrar, corrigir os próprios dados, candidatar-se ao voluntariado, escrever para a ONG, e o painel autenticado inteiro. O que NÃO foi percorrido está escrito linha a linha nas tabelas deste documento, em vez de omitido.</td>
+  </tr><tr>
+    <td class="id">RNF-DEP-01</td>
+    <td>Aplicação publicada em ambiente de nuvem, acessível por URL pública</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">Publicada em www.atelieafrocultural.site, com domínio próprio da ONG. Há um espelho em venturus-atelie.vercel.app, que é o endereço a usar em redes do governo do estado de São Paulo — o firewall delas devolve 403 para o domínio novo, e isso é bloqueio de rede, não do site.</td>
+  </tr><tr>
+    <td class="id">RNF-DEP-02</td>
+    <td>URL de deploy funcional na avaliação dos entregáveis (Etapa 6) e na apresentação de palco com demonstração ao vivo (Etapa 7)</td>
+    <td class="origem">Obrigatório</td>
+    <td class="status"><span class="selo selo--pronto">Atendido</span></td>
+    <td class="evidencia">Já funcional, com o banco de dados ligado e conteúdo real da ONG — três etapas antes do exigido.</td>
+  </tr></tbody>
+</table>
+
+<h2 class="secao">5. Onde este projeto diverge da stack obrigatória, e por quê</h2>
+
+<p>O Anexo III define uma stack comum a todas as equipes: <strong>Node.js com Express</strong>,
+<strong>React criado via Vite</strong>, <strong>MySQL com Sequelize</strong>, e monorepo
+separando <em>frontend</em> de <em>backend</em>.</p>
+
+<p>Este projeto atende os dois pilares nomeados na ficha de avaliação — <strong>o ambiente de
+execução é Node.js e a interface é React</strong> — e diverge nos demais em
+5 pontos:</p>
+
+<table>
+  <thead><tr><th>ID</th><th>O que o Anexo III pede</th></tr></thead>
+  <tbody><tr>
+    <td class="id">RNF-QUA-01</td>
+    <td>Documentação da API com Swagger, exposta em rota dedicada (por exemplo, /api-docs)</td>
+  </tr><tr>
+    <td class="id">RNF-QUA-06</td>
+    <td>README próprio em frontend/ e em backend/, com dependências, variáveis de ambiente e execução daquela parte do projeto</td>
+  </tr><tr>
+    <td class="id">RNF-BE-02</td>
+    <td>Acesso a dados via ORM (Sequelize), com modelagem adequada</td>
+  </tr><tr>
+    <td class="id">RNF-FE-03</td>
+    <td>Gerência de estado e consumo da API (hooks, Context API, React Query e Axios)</td>
+  </tr><tr>
+    <td class="id">RNF-REP-06</td>
+    <td>Repositório nomeado no padrão fic2026-[nome-da-fatec]-[nome-da-equipe], com estrutura de monorepo conforme a seção 3.2 do Anexo I (frontend/, backend/ e docs/) e a cópia inalterada da Submissão Institucional em docs/originais/</td>
+  </tr></tbody>
+</table>
+
+<p><strong>A divergência tem uma causa só, e ela está na primeira página do escopo:</strong> o
+público do Ateliê começa aos <strong>10 anos de idade</strong>. Isso transforma a proteção de
+dados de item de checklist em restrição de arquitetura.</p>
+
+<h3>A decisão: a autorização mora no banco, não no código</h3>
+
+<p>Numa aplicação com Express e um ORM, quem decide se uma pessoa pode ler uma linha é o
+<em>código da aplicação</em> — uma condição escrita à mão, em cada consulta. Isso funciona
+enquanto ninguém esquece. Um endereço novo sem a condição, uma junção que atravessa a
+fronteira, uma consulta de relatório escrita às pressas: qualquer um desses vaza, e vaza
+<strong>em silêncio</strong>, porque uma consulta que devolve demais não dá erro.</p>
+
+<p>Com políticas de segurança no nível da linha, no PostgreSQL, a autorização vive na
+<strong>mesma transação do dado</strong>. Uma consulta sem a condição não devolve demais:
+devolve <strong>vazio</strong>. O esquecimento vira ausência de resultado, que é visível, em
+vez de vazamento, que não é.</p>
+
+<p>Neste sistema isso não é retórica — é medido. As 17 tabelas nascem com política na mesma
+migração, e 118 testes as exercitam contra um PostgreSQL real, incluindo tentativas de
+escalada de privilégio. Uma delas é histórica: <strong>o papel de administrador já foi elevado
+indevidamente neste projeto</strong>, durante o desenvolvimento. A correção não foi uma
+condição no código — foi um gatilho no banco, que hoje levanta exceção mesmo se toda a camada
+de aplicação for burlada. Medido contra o sistema em produção: uma requisição direta ao banco
+pedindo o papel de equipe responde <em>somente a equipe altera o papel de equipe</em>.</p>
+
+<h3>A segunda decisão: o site funciona sem JavaScript</h3>
+
+<p>A organização <strong>não possui computador</strong>. Toda a operação acontece no celular
+pessoal da equipe, muitas vezes de pé, no meio de um evento, em rede de galpão. A lista de
+presença é o caso extremo: cada botão é um envio que o servidor processa, e a tela funciona
+com o JavaScript desligado.</p>
+
+<p>Isso é incompatível com <strong>React Query e Axios</strong> (RNF-FE-03), que pressupõem um
+cliente que busca dados, e torna um <strong>roteador de cliente</strong> (RNF-FE-04) uma
+segunda tabela de rotas para manter em sincronia com a do servidor. A renderização no servidor
+não é preferência técnica: é o que faz o requisito de acessibilidade da ONG ser cumprível.</p>
+
+<h3>O que isso custou, honestamente</h3>
+
+<p>Duas coisas que a stack obrigatória daria de graça e aqui foram trabalho. <strong>Mover o
+foco e anunciar a troca de página</strong> para quem usa leitor de tela — o carregamento de
+página inteira faz isso sozinho, o roteador não, e foi preciso implementar à mão. E
+<strong>não há Swagger</strong> (RNF-QUA-01), porque não existe uma API REST nomeada a
+documentar; o que ocupa o lugar é este documento e o Diagrama de Arquitetura ao lado.</p>
+
+<h3>O que se ganhou</h3>
+
+<ul>
+  <li><strong>25 dos 30 requisitos do
+  Anexo III atendidos</strong>, 6 deles por mecanismo equivalente e
+  declarado.</li>
+  <li><strong>Sistema em produção</strong>, com domínio próprio da organização e conteúdo real,
+  três etapas antes do exigido.</li>
+  <li><strong>1268 testes automatizados</strong>, mais 118 contra um banco de dados real.</li>
+  <li><strong>Custo de operação zero</strong> além do domínio, cerca de R$ 40 por ano — e a ONG
+  declara dificuldade de sustentabilidade financeira.</li>
+</ul>
+
+<h2 class="secao">6. Requisitos não funcionais do projeto</h2>
+
+<p>Os 12 abaixo são os que a <strong>organização</strong> pediu, e não se
+confundem com os do Anexo III da seção 4: aqueles vêm da competição, estes vêm do levantamento
+feito com a ONG.</p>
+
+<table>
+  <thead><tr><th>ID</th><th>Requisito</th><th>Status</th><th>Como se sabe</th></tr></thead>
+  <tbody><tr>
+    <td class="id">RNF01</td>
+    <td><strong>Responsividade</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Medido a 375px, 390px e 1280px, sem rolagem horizontal em nenhuma das 16 rotas conferidas.</td>
+  </tr><tr>
+    <td class="id">RNF02</td>
+    <td><strong>Acessibilidade</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">A-/A/A+ e alto contraste com preferência persistida; foco visível em todo elemento alcançado por Tab; alvos de 44px; VLibras sob a política de conteúdo. Auditado com axe-core.</td>
+  </tr><tr>
+    <td class="id">RNF03</td>
+    <td><strong>Facilidade de uso</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Instruções em bullets no topo de cada tela do painel, com destaque no que não pode ser pulado.</td>
+  </tr><tr>
+    <td class="id">RNF04</td>
+    <td><strong>Idioma português</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Interface, código, tabelas e colunas em português — é o que sustenta a RNF07.</td>
+  </tr><tr>
+    <td class="id">RNF05</td>
+    <td><strong>Tom de comunicação</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Há teste que recusa estética de pena e linguagem de caridade. Toda mensagem de erro diz o que houve e o que fazer.</td>
+  </tr><tr>
+    <td class="id">RNF06</td>
+    <td><strong>Identidade visual</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Design system "Ateliê Afro" v1, com a paleta e os significados declarados pela ONG. O LOGOTIPO estava anexado ao próprio formulário de levantamento, na última página, e ninguém tinha ido buscar: extraído do PDF, reduzido e limpo das franjas do JPEG (286 KB para 12 KB), está no rodapé de toda página. MEDIDO nos dois modos de contraste — o rodapé fica PRETO no alto contraste, não branco, e a primeira versão da regra fazia a marca sumir ali.</td>
+  </tr><tr>
+    <td class="id">RNF07</td>
+    <td><strong>Autonomia de manutenção</strong></td>
+    <td class="status"><span class="selo selo--parcial">Parcial</span></td>
+    <td class="evidencia">Manual escrito (docs/manual-da-equipe.md) e guia de uma página para imprimir. O TREINAMENTO presencial que o requisito também pede não aconteceu.</td>
+  </tr><tr>
+    <td class="id">RNF08</td>
+    <td><strong>Operação sem equipamento próprio</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Todo o painel é mobile-first. A lista de presença é a tela mais extrema: sem paginação, alvos grandes, e cada botão funciona sem JavaScript.</td>
+  </tr><tr>
+    <td class="id">RNF09</td>
+    <td><strong>Proteção de dados pessoais</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">RLS em todas as 17 tabelas, provada contra Postgres real. IP nunca gravado — só o hash. Política de privacidade publicada.</td>
+  </tr><tr>
+    <td class="id">RNF10</td>
+    <td><strong>Custo de operação</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Camada gratuita de Vercel + Supabase + Resend. Domínio ~R$ 40/ano. Nenhuma dependência paga.</td>
+  </tr><tr>
+    <td class="id">RNF11</td>
+    <td><strong>Desempenho em rede móvel</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Acervo tratado de 233 MB para 27 MB. Fontes servidas localmente. Nenhuma biblioteca de UI, nenhum framework de CSS.</td>
+  </tr><tr>
+    <td class="id">RNF12</td>
+    <td><strong>Execução em navegador</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Web, sem aplicativo. E funciona SEM JavaScript nas rotas medidas — o servidor entrega o HTML pronto.</td>
+  </tr></tbody>
+</table>
+
+<h2>7. Regras de negócio</h2>
+
+<table>
+  <thead><tr><th>ID</th><th>Regra</th><th>Status</th><th>Como se sabe</th></tr></thead>
+  <tbody><tr>
+    <td class="id">RN01</td>
+    <td><strong>Só maiores de 18 criam conta</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Caixa obrigatória na tela, recusa no servidor, e a recusa medida sem JavaScript.</td>
+  </tr><tr>
+    <td class="id">RN02</td>
+    <td><strong>Menor participa por responsável identificado</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Constraint no banco (responsavel_obrigatorio_para_menor) + validação na Action. Provado contra Postgres real, nos dois sentidos.</td>
+  </tr><tr>
+    <td class="id">RN03</td>
+    <td><strong>Ofertas compatíveis com a natureza da ONG</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">O formulário nomeia livros, instrumentos, materiais artísticos e acervo — e o texto deixa claro que não é assistência social.</td>
+  </tr><tr>
+    <td class="id">RN04</td>
+    <td><strong>Toda oferta recebe resposta registrada</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">A resposta é gravada e lida em /minha-conta, e desde 02/09 vai também por e-mail.</td>
+  </tr><tr>
+    <td class="id">RN05</td>
+    <td><strong>Dado pessoal só para a equipe</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">MEDIDO contra produção: select anônimo em contatos, inscricoes, voluntarios, doacoes e avisos responde 42501 permission denied — antes mesmo da RLS.</td>
+  </tr><tr>
+    <td class="id">RN06</td>
+    <td><strong>CPF condicional por evento</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">O campo só aparece quando o evento declara exige_cpf, e a Action valida a partir do BANCO, nunca do formulário. Os onze dígitos iguais são recusados à parte — eles passam na conta do módulo 11.</td>
+  </tr><tr>
+    <td class="id">RN07</td>
+    <td><strong>Foto só com autorização registrada</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">Quatro camadas independentes: RLS da tabela, guarda dentro da Action, tela, e o ARQUIVO. MEDIDO contra produção sem mandar chave: `galeria` responde NoSuchBucket (privado) enquanto `acervo` e `identidade` respondem NoSuchKey (públicos, e é o certo — download livre é o RF36).</td>
+  </tr><tr>
+    <td class="id">RN08</td>
+    <td><strong>Registra doações, não processa pagamento</strong></td>
+    <td class="status"><span class="selo selo--pronto">Pronto</span></td>
+    <td class="evidencia">lerOferta não lê campo de valor; valor só é escrito pela equipe, depois do fato.</td>
+  </tr></tbody>
+</table>
+
+<h2 class="secao">8. O que ficou parcial, e por quê</h2>
+
+<p>Nenhum dos 39 requisitos funcionais está por começar. 4
+itens estão parciais, e cada um tem um motivo declarado. Três dependem de uma decisão ou de uma
+ação humana que este repositório não pode tomar — a chave de pagamento real da ONG, um contador
+que exige função no banco, e o treinamento presencial da equipe.</p>
+
+<table>
+  <thead><tr><th>ID</th><th>Item</th><th>O que falta</th></tr></thead>
+  <tbody><tr>
+    <td class="id">RF05</td>
+    <td><strong>Galeria de fotos</strong></td>
+    <td class="evidencia">Tela cheia com setas, e o álbum vira link para o projeto quando o nome bate com uma atividade. RN07 em quatro camadas, e a quarta é o ARQUIVO: a migration 008 foi APLICADA e medida — o bucket da galeria responde NoSuchBucket a quem não tem sessão, e o endereço de cada foto é uma URL assinada de uma hora. Fica PARCIAL por uma coisa só: VÍDEO não entra, porque não cabe no limite de corpo de uma Server Action.</td>
+  </tr><tr>
+    <td class="id">RF23</td>
+    <td><strong>Meios de doação</strong></td>
+    <td class="evidencia">Página pronta. A chave Pix é de TESTE (chaveteste-123) com três marcas dizendo isso — a chave real da ONG é a decisão D7, ainda pendente.</td>
+  </tr><tr>
+    <td class="id">RF36</td>
+    <td><strong>Visualização e download</strong></td>
+    <td class="evidencia">Abrir e baixar, sem cadastro. ACHADO: o atributo download é ignorado entre origens — corrigido com ?download=. O CONTADOR de downloads não existe: exigiria função security definer.</td>
+  </tr><tr>
+    <td class="id">RNF07</td>
+    <td><strong>Autonomia de manutenção</strong></td>
+    <td class="evidencia">Manual escrito (docs/manual-da-equipe.md) e guia de uma página para imprimir. O TREINAMENTO presencial que o requisito também pede não aconteceu.</td>
+  </tr></tbody>
+</table>
+
+<h3>As migrações, e por que este repositório não aplica nenhuma</h3>
+
+<p>Este repositório <strong>não tem, e não vai ter, credencial capaz de aplicar migração</strong>:
+a chave de serviço do banco nunca entra no código-fonte. Quem aplica é uma pessoa, no editor
+SQL do provedor — e o sistema é escrito para continuar de pé enquanto uma não foi aplicada,
+avisando no log, e não quebrando na cara de quem usa.</p>
+
+<p><strong>As treze estão aplicadas</strong>, e isso foi conferido uma a uma contra o banco de
+produção em 4 de setembro de 2026, sem gravar nada:</p>
+
+<ul>
+  <li><strong>007</strong> — a função de registro respondeu com a violação da regra de
+  consentimento. O erro prova mais que um "existe": a função foi executada e chegou até a
+  gravação.</li>
+  <li><strong>008</strong> — o endereço público do repositório de fotos responde
+  <em>bucket não encontrado</em>. Ele é privado, e o endereço de cada foto vence em uma hora.</li>
+  <li><strong>009</strong> — as colunas de imagem respondem na tabela de atividades.</li>
+  <li><strong>010</strong> — a função de vagas restantes devolveu um número.</li>
+  <li><strong>011 e 012</strong> — as tabelas de envios e avisos respondem
+  <em>permissão negada</em>. Isso é o desenho, não defeito: existir e o papel anônimo não
+  alcançar são a mesma frase aqui. Se não existissem, o erro seria outro — o de tabela
+  inexistente.</li>
+  <li><strong>013</strong> — os privilégios do papel de serviço, sem os quais o e-mail de
+  confirmação era montado e nunca saía.</li>
+</ul>
+
+<h3>O caminho autenticado do painel</h3>
+
+<p>As 21 telas do painel respondem <strong>página inexistente para quem não é equipe</strong>, e
+isso está medido. <strong>O caminho de dentro também</strong>: uma conta recebeu o papel de
+equipe, e as telas foram abertas com sessão de verdade, contra o banco de produção — as capturas
+de painel que estão na pasta de protótipos são dali. Isso deixou de ser pendência em 3 de
+setembro de 2026, e foi assim que <strong>três defeitos que 1264 testes verdes não pegaram</strong>
+apareceram: um campo que continuava na tela depois de removido do código, um formulário servido
+sem o script que revela o campo de quantia, e dois botões saindo colados. É a regra do
+repositório valendo — bateria de testes não substitui abrir a página.</p>
+
+<p>O que <em>não</em> foi percorrido, e está escrito assim na linha correspondente: o envio do
+formulário de inscrição pelo navegador contra o banco de produção. É escolha, não falta de
+caminho — gravaria uma linha numa tabela cuja tela não apaga de propósito, porque o que a
+pessoa preencheu é registro.</p>
+
+<h2 class="secao">9. Como isto foi verificado</h2>
+
+<p>Quatro camadas independentes, e elas medem coisas diferentes:</p>
+
+<ul>
+  <li><strong>1268 testes em modo offline</strong>, sem rede e sem credencial — determinísticos.
+  Incluem varreduras de código-fonte que cobram a presença <em>e a ausência</em> de guardas:
+  há teste que falha se a ação pública de inscrição ganhar uma guarda de equipe, e teste
+  irmão que falha se a ação do painel perder a dela.</li>
+  <li><strong>1269 testes contra o banco de produção</strong> — é o que impede o site de servir
+  conteúdo versionado achando que está lendo o banco.</li>
+  <li><strong>118 testes contra um PostgreSQL real</strong> com as migrações reais aplicadas.
+  É onde a política de acesso de cada tabela é exercitada de verdade, inclusive as tentativas
+  de escalada de privilégio.</li>
+  <li><strong>Navegador</strong> — Firefox, com e sem JavaScript, a 375px e 1280px. Dois
+  defeitos visíveis já passaram por uma bateria verde neste projeto; por isso a regra do
+  repositório diz que bateria de testes não substitui abrir a página.</li>
+</ul>
+
+<div class="nota">
+  <strong>Um teste que apodreceu, e o que se aprendeu com ele</strong>
+  Um teste afirmava "a agenda está vazia hoje" e ficou vermelho quando a equipe publicou um
+  evento — e estava certo em ficar. O conserto não foi afrouxar a asserção: foi cobrar a
+  relação entre o conteúdo e a tela (<em>ou está vazia e traz o estado vazio, ou tem itens e o
+  estado vazio não aparece</em>). Afirmação sobre o conteúdo de hoje envelhece; afirmação sobre
+  a relação, não. O mesmo princípio governa a verificação deste pacote de entrega, que é
+  reconciliada com o regulamento por teste automatizado.
+</div>
+
+<p class="rodape-doc">
+  Ateliê Afro Cultural · Documento de Requisitos · gerado a partir do repositório em
+  4 de setembro de 2026. Os status descrevem o que estava verificado nesta data.
+</p>
+
+</body>
+</html>

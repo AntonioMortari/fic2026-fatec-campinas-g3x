@@ -1,0 +1,75 @@
+COMO PUBLICAR O VIDEO DE DEFESA
+===============================
+
+ATENCAO: o arquivo Link_Video.txt ao lado esta' PROPOSITALMENTE INVALIDO.
+Enquanto ele nao for preenchido, `npm run test:entrega` fica vermelho —
+e e' assim que se descobre que falta, em vez de descobrir pela banca.
+
+ERRAR AQUI DESCLASSIFICA (§7.3). Nao tira ponto: tira a equipe.
+
+
+POR QUE O LINK ATUAL NAO SERVE
+------------------------------
+
+O pacote anterior entregava um link de PASTA do Google Drive. O
+Regulamento Tecnico exige, no §7.2.2 e no Anexo V §1:
+
+  · a plataforma e' o YOUTUBE, nao o Drive nem o Vimeo;
+  · a visibilidade e' NAO LISTADO (nem publico, nem privado);
+  · o arquivo Link_Video.txt contem APENAS A URL, numa linha,
+    sem texto ao redor.
+
+Video PRIVADO nao abre para a banca nem com o link em maos, e a equipe
+perde o entregavel inteiro.
+
+
+ANTES DE GRAVAR
+---------------
+
+  [ ] Alvo de duracao: 4:30. A faixa e' de 3 a 5 minutos e NAO ha'
+      tolerancia declarada nesta etapa. Ver docs/roteiro-video-apresentacao.md.
+  [ ] TODOS os integrantes aparecem. E' criterio pontuado ("Participacao
+      da equipe", Anexo II §3.2) e tambem item da elegibilidade.
+  [ ] Cada pessoa se apresenta pelo nome e diz o proprio papel na equipe.
+  [ ] Antes de mostrar a Agenda e as Noticias no video: publique um evento
+      futuro e uma noticia no painel, senao as duas telas aparecem vazias.
+
+
+PUBLICAR
+--------
+
+  1. Entrar no YouTube com a conta DA EQUIPE — nao a pessoal de um
+     integrante que possa perder o acesso (Anexo V §1.5).
+  2. Enviar video.
+  3. Titulo, exatamente neste padrao:
+       FIC 2026 - <NOME_DA_FATEC> - <NOME_DA_EQUIPE> - Video de Defesa
+  4. Publico-alvo: "Nao, nao e' conteudo para criancas".
+  5. Visibilidade: NAO LISTADO.
+  6. Copiar o link. Ele tem o formato https://youtu.be/XXXXXXXXXXX
+
+
+CONFERIR
+--------
+
+Janela anonima (Ctrl+Shift+N), colar o link, confirmar que o video TOCA
+SEM PEDIR LOGIN. Se pedir, a visibilidade esta' como Privado.
+
+
+REGISTRAR
+---------
+
+Substituir todo o conteudo de Link_Video.txt pela URL, numa linha so'.
+Sem cabecalho, sem instrucao, sem linha em branco antes. Depois:
+
+    npm run test:entrega
+
+Ele confere o formato, recusa link de Drive e recusa resto de
+placeholder. Verde ali significa que esta parte da elegibilidade passou.
+
+
+DEPOIS DE ENTREGAR
+------------------
+
+Nao apagar, nao trocar a visibilidade, nao substituir por uma versao
+melhor. O link precisa continuar de pe' durante TODO o periodo de
+avaliacao.

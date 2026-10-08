@@ -1,0 +1,80 @@
+%% 04 — Modelo de dados: as tabelas que se RELACIONAM
+%% ---
+%% As outras sete (atividades, publicacoes, midia, acervo, clipping,
+%% contatos, envios_recentes) nao tem chave estrangeira nenhuma — sao
+%% ilhas, e o Mermaid as enfileira na horizontal, o que esparramava o
+%% diagrama e o tornava ilegivel numa folha. Elas estao na TABELA de
+%% arquitetura.md, com a mesma informacao.
+%% ---
+%% CADA TABELA DIZ QUEM A ALCANCA, e essa e' a informacao que decide todo
+%% o resto do desenho — por isso ela e' uma linha da propria tabela, com o
+%% tipo `RLS`, e nao uma legenda a parte.
+%% ---
+%% `presencas` aponta para `perfis` (marcada_por): e' uma chave estrangeira
+%% de verdade, e desenha-la juntou dois blocos que antes flutuavam
+%% separados. O terceiro (avisos/envios) continua solto porque
+%% `envios.referencia_id` NAO e' chave estrangeira — ele aponta para
+%% tabelas diferentes conforme o tipo, e fingir um FK aqui seria desenhar
+%% uma garantia que o banco nao da'.
+erDiagram
+  perfis    ||--o{ voluntarios : "se candidata"
+  perfis    ||--o{ doacoes     : "oferta"
+  perfis    ||--o{ presencas   : "confere quem veio"
+  voluntarios        ||--o{ voluntario_areas : "escolhe"
+  areas_voluntariado ||--o{ voluntario_areas : "é escolhida em"
+  eventos    ||--o{ inscricoes : "recebe"
+  inscricoes ||--o| presencas  : "é conferida em"
+  avisos     ||--o{ envios     : "é mandado em"
+
+  perfis {
+    uuid id PK "= auth.users.id"
+    bool eh_equipe "SÓ pelo painel do Supabase"
+    text tipo_pessoa "PF ou PJ"
+    RLS leitura "a própria pessoa, ou a equipe"
+  }
+  voluntarios {
+    uuid perfil_id FK "not null — exige conta"
+    text situacao "novo / em_contato / ativo / inativo"
+    RLS leitura "a própria pessoa, ou a equipe"
+  }
+  areas_voluntariado {
+    text nome "as cinco áreas reais da ONG"
+    RLS leitura "PÚBLICA"
+  }
+  voluntario_areas {
+    uuid voluntario_id FK
+    uuid area_id FK
+    RLS leitura "a própria pessoa, ou a equipe"
+  }
+  doacoes {
+    numeric valor "SÓ a equipe escreve — RN08"
+    text doador_email "quando veio de fora do site"
+    RLS leitura "quem doou, ou a equipe"
+  }
+  eventos {
+    bool exige_cpf "RN06 — decidido por evento"
+    int vagas "nulo = sem limite"
+    bool publicado "nasce FALSE"
+    RLS leitura "publicado OU equipe"
+  }
+  inscricoes {
+    text responsavel_nome "RN02 — obrigatório se menor"
+    bool autoriza_imagem "RN07"
+    RLS escrita "QUALQUER PESSOA, sem conta"
+    RLS leitura "SÓ A EQUIPE"
+  }
+  presencas {
+    bool presente "a AUSÊNCIA da linha = não conferido"
+    uuid marcada_por FK "quem conferiu"
+    RLS leitura "SÓ A EQUIPE"
+  }
+  avisos {
+    bool publicado "aqui isto NUNCA significa público"
+    RLS leitura "VOLUNTÁRIO ATIVO ou equipe"
+  }
+  envios {
+    text destinatario "HASH, nunca o e-mail"
+    text situacao "enviado / falhou / recusado"
+    RLS escrita "só a Edge Function"
+    RLS leitura "SÓ A EQUIPE"
+  }
