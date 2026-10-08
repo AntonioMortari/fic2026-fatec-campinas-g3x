@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipos — Ateliê Afro Cultural</title>
+<style>
+  :root { --ocre:#D69A10; --tinta:#2B2019; --creme:#F4EFE6; --linha:#C9BFB2; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--creme); color: var(--tinta);
+    font-family: Georgia, 'Times New Roman', serif; line-height: 1.55;
+  }
+  header { background: var(--tinta); color: var(--creme); padding: 2rem 1.5rem; }
+  header h1 { margin: 0 0 .3rem; font-size: 1.7rem; }
+  header p { margin: 0; opacity: .85; }
+  header .faixa { height: 8px; background: var(--ocre); margin: 1.2rem -1.5rem -2rem; }
+  nav { position: sticky; top: 0; background: #fff; border-bottom: 2px solid var(--tinta);
+        padding: .7rem 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem; z-index: 2; }
+  nav a { color: var(--tinta); font-weight: bold; text-decoration: none; border-bottom: 2px solid transparent; }
+  nav a:hover, nav a:focus { border-bottom-color: var(--ocre); }
+  main { max-width: 68rem; margin: 0 auto; padding: 1.5rem; }
+  section { margin-bottom: 3rem; }
+  h2 { font-size: 1.4rem; border-bottom: 2px solid var(--tinta); padding-bottom: .3rem; }
+  .resumo { margin-top: .3rem; }
+  .tela { background: #fff; border: 1.5px solid var(--tinta); padding: 1rem 1.2rem; margin: 1.2rem 0; }
+  .tela h3 { margin: 0 0 .2rem; font-size: 1.1rem; }
+  .rf { font-size: .78rem; font-weight: normal; background: var(--creme);
+        border: 1px solid var(--linha); padding: .1em .45em; margin-left: .4em; white-space: nowrap; }
+  .rota { margin: 0 0 .9rem; font-family: ui-monospace,'Courier New',monospace;
+          font-size: .82rem; opacity: .75; word-break: break-all; }
+  .capturas { display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: flex-start; }
+  figure { margin: 0; }
+  figure img { display: block; border: 1px solid var(--linha); background: #fff; }
+  /* O celular sai em tamanho quase real; o desktop reduzido para caber ao lado. */
+  figure:first-child img { width: 300px; }
+  figure:last-child img { width: 560px; }
+  figcaption { font-size: .8rem; margin-top: .3rem; opacity: .75; }
+  .tela--faltando { border-style: dashed; }
+  .ausente { background: #FBEFD0; border-left: 5px solid var(--ocre); padding: .6rem .8rem; margin: 0; }
+  .ressalva { background: #fff; border-left: 5px solid var(--ocre); padding: .7rem .9rem; }
+  footer { border-top: 2px solid var(--tinta); margin-top: 2rem; padding: 1.2rem 0; font-size: .85rem; }
+  @media (max-width: 46rem) {
+    figure:first-child img, figure:last-child img { width: 100%; max-width: 340px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Protótipos de interface</h1>
+  <p>Ateliê Afro Cultural — 41 de 41 telas,
+     em duas larguras</p>
+  <div class="faixa"></div>
+</header>
+
+<nav><a href="#institucional">Site institucional</a><a href="#participar">Participar</a><a href="#conta">Conta</a><a href="#painel">Painel da equipe</a></nav>
+
+<main>
+  <p><strong>Estas não são maquetes.</strong> São capturas do sistema rodando, com o banco de
+  dados real da ONG — o que significa que o protótipo não pode mostrar uma tela que não
+  funcione. Cada uma aparece a <strong>390px</strong> (celular) e <strong>1280px</strong>
+  (notebook), porque a ONG não possui computador e opera tudo do celular.</p>
+
+  <p>Clique numa captura para abri-la no tamanho original. Tudo aqui funciona
+  <strong>sem internet</strong>.</p>
+
+  <p class="ressalva"><strong>O dado pessoal de terceiro foi mascarado</strong> nas telas do
+  painel — 50 campos, nesta geração. Nome, e-mail, telefone e o texto que a pessoa
+  escreveu viram <em>"Nome de quem escreveu"</em>, <em>pessoa@exemplo.invalid</em> e afins,
+  <strong>antes</strong> da fotografia. O que se vê é o layout de verdade com dados de
+  mentira, e não um recorte: as telas continuam inteiras.
+  Isto vale só para o painel — em <em>Contato</em>, o e-mail e o telefone que aparecem são
+  os da <strong>própria ONG</strong>, dado público que a página existe para mostrar.</p>
+
+  <p class="ressalva"><strong>Uma ressalva sobre a largura.</strong> As capturas de celular
+  saem a <strong>450px</strong>, e não a 390px, porque o navegador usado para fotografar tem
+  largura mínima de janela — medido, e é limite da ferramenta, não do site. Entre 390px e
+  450px existe uma única regra de estilo no projeto inteiro, e ela apenas mostra o rótulo
+  escrito do botão de WhatsApp em vez de só o ícone. <strong>Nenhuma quebra de layout mora
+  nessa faixa</strong>, então o que se vê aqui é o que um celular recebe.</p>
+
+  
+<section id="institucional">
+  <h2>Site institucional</h2>
+  <p class="resumo">O que qualquer pessoa vê ao chegar. Tudo renderizado no servidor.</p>
+  <article class="tela">
+    <h3>Página inicial <span class="rf">RF01</span></h3>
+    <p class="rota">/</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/institucional--celular.png">
+        <img src="telas/institucional--celular.png" alt="Página inicial — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/institucional--desktop.png">
+        <img src="telas/institucional--desktop.png" alt="Página inicial — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Quem somos <span class="rf">RF02</span></h3>
+    <p class="rota">/quem-somos</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/institucional-quem-somos-celular.png">
+        <img src="telas/institucional-quem-somos-celular.png" alt="Quem somos — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/institucional-quem-somos-desktop.png">
+        <img src="telas/institucional-quem-somos-desktop.png" alt="Quem somos — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Projetos e atividades <span class="rf">RF03</span></h3>
+    <p class="rota">/projetos</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/institucional-projetos-celular.png">
+        <img src="telas/institucional-projetos-celular.png" alt="Projetos e atividades — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/institucional-projetos-desktop.png">
+        <img src="telas/institucional-projetos-desktop.png" alt="Projetos e atividades — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Um projeto <span class="rf">RF03</span></h3>
+    <p class="rota">/projetos/banzo</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/institucional-projetos-banzo-celular.png">
+        <img src="telas/institucional-projetos-banzo-celular.png" alt="Um projeto — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/institucional-projetos-banzo-desktop.png">
+        <img src="telas/institucional-projetos-banzo-desktop.png" alt="Um projeto — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Notícias <span class="rf">RF04</span></h3>
+    <p class="rota">/noticias</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/institucional-noticias-celular.png">
+        <img src="telas/institucional-noticias-celular.png" alt="Notícias — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/institucional-noticias-desktop.png">
+        <img src="telas/institucional-noticias-desktop.png" alt="Notícias — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Galeria <span class="rf">RF05</span></h3>
+    <p class="rota">/galeria</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/institucional-galeria-celular.png">
+        <img src="telas/institucional-galeria-celular.png" alt="Galeria — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/institucional-galeria-desktop.png">
+        <img src="telas/institucional-galeria-desktop.png" alt="Galeria — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Acervo aberto <span class="rf">RF35</span></h3>
+    <p class="rota">/acervo</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/institucional-acervo-celular.png">
+        <img src="telas/institucional-acervo-celular.png" alt="Acervo aberto — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/institucional-acervo-desktop.png">
+        <img src="telas/institucional-acervo-desktop.png" alt="Acervo aberto — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Para escolas <span class="rf">RF38</span></h3>
+    <p class="rota">/para-escolas</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/institucional-para-escolas-celular.png">
+        <img src="telas/institucional-para-escolas-celular.png" alt="Para escolas — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/institucional-para-escolas-desktop.png">
+        <img src="telas/institucional-para-escolas-desktop.png" alt="Para escolas — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Contato <span class="rf">RF06 · RF07</span></h3>
+    <p class="rota">/contato</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/institucional-contato-celular.png">
+        <img src="telas/institucional-contato-celular.png" alt="Contato — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/institucional-contato-desktop.png">
+        <img src="telas/institucional-contato-desktop.png" alt="Contato — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Política de privacidade <span class="rf">RNF09</span></h3>
+    <p class="rota">/privacidade</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/institucional-privacidade-celular.png">
+        <img src="telas/institucional-privacidade-celular.png" alt="Política de privacidade — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/institucional-privacidade-desktop.png">
+        <img src="telas/institucional-privacidade-desktop.png" alt="Política de privacidade — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article>
+</section>
+<section id="participar">
+  <h2>Participar</h2>
+  <p class="resumo">Agenda, inscrição sem conta, voluntariado e doação.</p>
+  <article class="tela">
+    <h3>Agenda <span class="rf">RF14</span></h3>
+    <p class="rota">/agenda</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/participar-agenda-celular.png">
+        <img src="telas/participar-agenda-celular.png" alt="Agenda — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/participar-agenda-desktop.png">
+        <img src="telas/participar-agenda-desktop.png" alt="Agenda — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Inscrição sem conta <span class="rf">RF15</span></h3>
+    <p class="rota">/agenda/b161303a-bc7f-4916-b2fa-5fab27cfcaa7/inscricao</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/participar-agenda-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-inscricao-celular.png">
+        <img src="telas/participar-agenda-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-inscricao-celular.png" alt="Inscrição sem conta — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/participar-agenda-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-inscricao-desktop.png">
+        <img src="telas/participar-agenda-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-inscricao-desktop.png" alt="Inscrição sem conta — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Voluntariado <span class="rf">RF24</span></h3>
+    <p class="rota">/voluntariado</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/participar-voluntariado-celular.png">
+        <img src="telas/participar-voluntariado-celular.png" alt="Voluntariado — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/participar-voluntariado-desktop.png">
+        <img src="telas/participar-voluntariado-desktop.png" alt="Voluntariado — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Candidatura <span class="rf">RF25</span></h3>
+    <p class="rota">/voluntariado/candidatura</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/participar-voluntariado-candidatura-celular.png">
+        <img src="telas/participar-voluntariado-candidatura-celular.png" alt="Candidatura — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/participar-voluntariado-candidatura-desktop.png">
+        <img src="telas/participar-voluntariado-candidatura-desktop.png" alt="Candidatura — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Como apoiar <span class="rf">RF23</span></h3>
+    <p class="rota">/doar</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/participar-doar-celular.png">
+        <img src="telas/participar-doar-celular.png" alt="Como apoiar — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/participar-doar-desktop.png">
+        <img src="telas/participar-doar-desktop.png" alt="Como apoiar — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Oferecer doação <span class="rf">RF19</span></h3>
+    <p class="rota">/doar/ofertar</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/participar-doar-ofertar-celular.png">
+        <img src="telas/participar-doar-ofertar-celular.png" alt="Oferecer doação — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/participar-doar-ofertar-desktop.png">
+        <img src="telas/participar-doar-ofertar-desktop.png" alt="Oferecer doação — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article>
+</section>
+<section id="conta">
+  <h2>Conta</h2>
+  <p class="resumo">Entrar, recuperar acesso e a área do usuário.</p>
+  <article class="tela">
+    <h3>Entrar e criar conta <span class="rf">RF08 · RF09 · RF10 · RF12</span></h3>
+    <p class="rota">/entrar</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/conta-entrar-celular.png">
+        <img src="telas/conta-entrar-celular.png" alt="Entrar e criar conta — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/conta-entrar-desktop.png">
+        <img src="telas/conta-entrar-desktop.png" alt="Entrar e criar conta — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Recuperar acesso <span class="rf">RF10</span></h3>
+    <p class="rota">/recuperar-acesso</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/conta-recuperar-acesso-celular.png">
+        <img src="telas/conta-recuperar-acesso-celular.png" alt="Recuperar acesso — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/conta-recuperar-acesso-desktop.png">
+        <img src="telas/conta-recuperar-acesso-desktop.png" alt="Recuperar acesso — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Definir nova senha <span class="rf">RF10</span></h3>
+    <p class="rota">/nova-senha</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/conta-nova-senha-celular.png">
+        <img src="telas/conta-nova-senha-celular.png" alt="Definir nova senha — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/conta-nova-senha-desktop.png">
+        <img src="telas/conta-nova-senha-desktop.png" alt="Definir nova senha — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Minha conta <span class="rf">RF11</span></h3>
+    <p class="rota">/minha-conta</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/conta-minha-conta-celular.png">
+        <img src="telas/conta-minha-conta-celular.png" alt="Minha conta — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/conta-minha-conta-desktop.png">
+        <img src="telas/conta-minha-conta-desktop.png" alt="Minha conta — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Minhas candidaturas <span class="rf">RF11 · RF25</span></h3>
+    <p class="rota">/minha-conta/candidaturas</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/conta-minha-conta-candidaturas-celular.png">
+        <img src="telas/conta-minha-conta-candidaturas-celular.png" alt="Minhas candidaturas — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/conta-minha-conta-candidaturas-desktop.png">
+        <img src="telas/conta-minha-conta-candidaturas-desktop.png" alt="Minhas candidaturas — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Minhas doações <span class="rf">RF22</span></h3>
+    <p class="rota">/minha-conta/doacoes</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/conta-minha-conta-doacoes-celular.png">
+        <img src="telas/conta-minha-conta-doacoes-celular.png" alt="Minhas doações — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/conta-minha-conta-doacoes-desktop.png">
+        <img src="telas/conta-minha-conta-doacoes-desktop.png" alt="Minhas doações — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Mural de avisos <span class="rf">RF27</span></h3>
+    <p class="rota">/avisos</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/conta-avisos-celular.png">
+        <img src="telas/conta-avisos-celular.png" alt="Mural de avisos — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/conta-avisos-desktop.png">
+        <img src="telas/conta-avisos-desktop.png" alt="Mural de avisos — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article>
+</section>
+<section id="painel">
+  <h2>Painel da equipe</h2>
+  <p class="resumo">Mobile-first: a ONG não possui computador. Responde 404 para quem não é equipe.</p>
+  <article class="tela">
+    <h3>Início do painel <span class="rf">RF33 · RF30</span></h3>
+    <p class="rota">/admin</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-celular.png">
+        <img src="telas/painel-admin-celular.png" alt="Início do painel — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-desktop.png">
+        <img src="telas/painel-admin-desktop.png" alt="Início do painel — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Projetos <span class="rf">RF03</span></h3>
+    <p class="rota">/admin/atividades</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-atividades-celular.png">
+        <img src="telas/painel-admin-atividades-celular.png" alt="Projetos — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-atividades-desktop.png">
+        <img src="telas/painel-admin-atividades-desktop.png" alt="Projetos — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Adicionar projeto <span class="rf">RF03</span></h3>
+    <p class="rota">/admin/atividades/editar</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-atividades-editar-celular.png">
+        <img src="telas/painel-admin-atividades-editar-celular.png" alt="Adicionar projeto — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-atividades-editar-desktop.png">
+        <img src="telas/painel-admin-atividades-editar-desktop.png" alt="Adicionar projeto — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Notícias <span class="rf">RF04</span></h3>
+    <p class="rota">/admin/publicacoes</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-publicacoes-celular.png">
+        <img src="telas/painel-admin-publicacoes-celular.png" alt="Notícias — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-publicacoes-desktop.png">
+        <img src="telas/painel-admin-publicacoes-desktop.png" alt="Notícias — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Escrever notícia <span class="rf">RF04</span></h3>
+    <p class="rota">/admin/publicacoes/editar</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-publicacoes-editar-celular.png">
+        <img src="telas/painel-admin-publicacoes-editar-celular.png" alt="Escrever notícia — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-publicacoes-editar-desktop.png">
+        <img src="telas/painel-admin-publicacoes-editar-desktop.png" alt="Escrever notícia — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Galeria <span class="rf">RF05</span></h3>
+    <p class="rota">/admin/galeria</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-galeria-celular.png">
+        <img src="telas/painel-admin-galeria-celular.png" alt="Galeria — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-galeria-desktop.png">
+        <img src="telas/painel-admin-galeria-desktop.png" alt="Galeria — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Acervo <span class="rf">RF37</span></h3>
+    <p class="rota">/admin/acervo</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-acervo-celular.png">
+        <img src="telas/painel-admin-acervo-celular.png" alt="Acervo — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-acervo-desktop.png">
+        <img src="telas/painel-admin-acervo-desktop.png" alt="Acervo — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Agenda <span class="rf">RF13</span></h3>
+    <p class="rota">/admin/eventos</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-eventos-celular.png">
+        <img src="telas/painel-admin-eventos-celular.png" alt="Agenda — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-eventos-desktop.png">
+        <img src="telas/painel-admin-eventos-desktop.png" alt="Agenda — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Cadastrar evento <span class="rf">RF13</span></h3>
+    <p class="rota">/admin/eventos/editar</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-eventos-editar-celular.png">
+        <img src="telas/painel-admin-eventos-editar-celular.png" alt="Cadastrar evento — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-eventos-editar-desktop.png">
+        <img src="telas/painel-admin-eventos-editar-desktop.png" alt="Cadastrar evento — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Inscritos <span class="rf">RF16</span></h3>
+    <p class="rota">/admin/eventos/inscritos?id=b161303a-bc7f-4916-b2fa-5fab27cfcaa7</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-eventos-inscritos-id-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-celular.png">
+        <img src="telas/painel-admin-eventos-inscritos-id-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-celular.png" alt="Inscritos — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-eventos-inscritos-id-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-desktop.png">
+        <img src="telas/painel-admin-eventos-inscritos-id-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-desktop.png" alt="Inscritos — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Lista de presença <span class="rf">RF17</span></h3>
+    <p class="rota">/admin/eventos/presenca?id=b161303a-bc7f-4916-b2fa-5fab27cfcaa7</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-eventos-presenca-id-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-celular.png">
+        <img src="telas/painel-admin-eventos-presenca-id-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-celular.png" alt="Lista de presença — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-eventos-presenca-id-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-desktop.png">
+        <img src="telas/painel-admin-eventos-presenca-id-b161303a-bc7f-4916-b2fa-5fab27cfcaa7-desktop.png" alt="Lista de presença — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Mensagens recebidas <span class="rf">RF29</span></h3>
+    <p class="rota">/admin/contatos</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-contatos-celular.png">
+        <img src="telas/painel-admin-contatos-celular.png" alt="Mensagens recebidas — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-contatos-desktop.png">
+        <img src="telas/painel-admin-contatos-desktop.png" alt="Mensagens recebidas — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Voluntários <span class="rf">RF26</span></h3>
+    <p class="rota">/admin/voluntarios</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-voluntarios-celular.png">
+        <img src="telas/painel-admin-voluntarios-celular.png" alt="Voluntários — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-voluntarios-desktop.png">
+        <img src="telas/painel-admin-voluntarios-desktop.png" alt="Voluntários — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Doações <span class="rf">RF20 · RF21</span></h3>
+    <p class="rota">/admin/doacoes</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-doacoes-celular.png">
+        <img src="telas/painel-admin-doacoes-celular.png" alt="Doações — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-doacoes-desktop.png">
+        <img src="telas/painel-admin-doacoes-desktop.png" alt="Doações — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Registrar doação <span class="rf">RF21</span></h3>
+    <p class="rota">/admin/doacoes/registrar</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-doacoes-registrar-celular.png">
+        <img src="telas/painel-admin-doacoes-registrar-celular.png" alt="Registrar doação — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-doacoes-registrar-desktop.png">
+        <img src="telas/painel-admin-doacoes-registrar-desktop.png" alt="Registrar doação — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Avisos <span class="rf">RF27 · RF28</span></h3>
+    <p class="rota">/admin/avisos</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-avisos-celular.png">
+        <img src="telas/painel-admin-avisos-celular.png" alt="Avisos — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-avisos-desktop.png">
+        <img src="telas/painel-admin-avisos-desktop.png" alt="Avisos — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Escrever aviso <span class="rf">RF27</span></h3>
+    <p class="rota">/admin/avisos/editar</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-avisos-editar-celular.png">
+        <img src="telas/painel-admin-avisos-editar-celular.png" alt="Escrever aviso — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-avisos-editar-desktop.png">
+        <img src="telas/painel-admin-avisos-editar-desktop.png" alt="Escrever aviso — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article><article class="tela">
+    <h3>Relatório em PDF <span class="rf">RF32</span></h3>
+    <p class="rota">/admin/relatorio</p>
+    <div class="capturas">
+    <figure>
+      <a href="telas/painel-admin-relatorio-celular.png">
+        <img src="telas/painel-admin-relatorio-celular.png" alt="Relatório em PDF — Celular (450px)" loading="lazy">
+      </a>
+      <figcaption>Celular (450px)</figcaption>
+    </figure>
+    <figure>
+      <a href="telas/painel-admin-relatorio-desktop.png">
+        <img src="telas/painel-admin-relatorio-desktop.png" alt="Relatório em PDF — Desktop (1280px)" loading="lazy">
+      </a>
+      <figcaption>Desktop (1280px)</figcaption>
+    </figure></div>
+  </article>
+</section>
+
+  <footer>
+    Ateliê Afro Cultural · protótipos gerados a partir do sistema em
+    04 de setembro de 2026.
+    O sistema está no ar em <strong>www.atelieafrocultural.site</strong>.
+  </footer>
+</main>
+
+</body>
+</html>

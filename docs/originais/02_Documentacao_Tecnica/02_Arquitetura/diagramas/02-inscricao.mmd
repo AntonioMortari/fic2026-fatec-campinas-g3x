@@ -1,0 +1,52 @@
+%% 02 — Uma inscricao em evento, ponta a ponta (RF15)
+%% ---
+%% Escolhido por ser o caminho que atravessa TODAS as camadas e todas as
+%% travas: entrada publica sem conta, validacao, limite por visitante,
+%% concorrencia por vaga, e e-mail. Quem entende este, entende o resto.
+%% ---
+%% As notas numeradas sao as DECISOES, nao os passos: o `autonumber` ja'
+%% conta as mensagens. Cada nota responde "por que assim, e nao do jeito
+%% obvio" — e e' por isso que elas ficam do lado de quem decide.
+sequenceDiagram
+  autonumber
+  actor V as Visitante<br/>sem conta
+  participant N as Next.js<br/>Server Action
+  participant PG as PostgreSQL
+  participant EF as Edge Function
+  participant RS as Resend
+
+  V->>N: POST do formulário<br/>(funciona sem JavaScript)
+
+  Note over N: 1 · lê o FormData CAMPO A CAMPO,<br/>nunca espalhando o objeto
+
+  N->>PG: lê o evento (exige_cpf, vagas)
+  PG-->>N: o evento, só se publicado
+
+  Note over N: 2 · valida com a regra do BANCO,<br/>nunca com o que veio no corpo
+
+  alt algum campo inválido
+    N-->>V: devolve o formulário PREENCHIDO,<br/>com o erro no campo
+  else tudo certo
+    Note over N: 3 · calcula o hash do IP<br/>(o IP nunca é gravado)
+
+    N->>PG: registrar_inscricao(hash, dados)
+
+    Note over PG: 4 · trava a linha do evento<br/>(for update) e conta as vagas
+
+    alt evento lotado
+      PG-->>N: "lotado"
+      N-->>V: "as vagas acabaram<br/>enquanto você preenchia"
+    else há vaga
+      Note over PG: 5 · trigger conta o balde<br/>por visitante (30/hora)
+      PG-->>N: "ok" + linha gravada
+
+      N->>EF: { tipo, evento_id, email }<br/>NUNCA o texto do e-mail
+      EF->>PG: busca a inscrição e o evento
+      EF->>PG: reserva em envios<br/>(índice único impede reenvio)
+      EF->>RS: envia
+      RS-->>EF: ok
+      EF-->>N: ok
+
+      N-->>V: redirect 303 — "inscrição registrada<br/>e confirmação enviada"
+    end
+  end
