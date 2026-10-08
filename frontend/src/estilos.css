@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/*
+ * Os tokens do design system (cores, tipografia, sombras) entram aqui, num
+ * bloco @theme, no PR do design system. Até lá, só o Tailwind padrão.
+ */
