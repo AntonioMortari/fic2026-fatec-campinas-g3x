@@ -89,3 +89,23 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **O que fica em aberto:** o RNF07 (autonomia de manutenção pela ONG) era o argumento do RNF04;
   a equipe decide na v2 do Documento de Requisitos como ele fica.
 - **PR:** branch `feat/project-foundation`
+
+## 2026-10-09 — RF14 (Agenda pública): como a página passa a se comportar
+- **Artefato:** Protótipos · Requisitos (RF14)
+- **Antes:** `/agenda` com duas seções empilhadas ("Em breve" e "Já aconteceu"), texto de apoio "…basta
+  preencher o formulário do evento", botões "Adicionar à agenda" e "Compartilhar" em cada evento e
+  dados estruturados de evento (JSON-LD) para buscadores.
+- **Depois:** abas Em breve / Já aconteceu, eventos agrupados por mês, filtro por tipo, próximo
+  evento em destaque e "+ Agenda" (arquivo `.ics`), como nas telas 2b e 6b da Análise UX/UI. O texto
+  de apoio é o do desenho ("…Para se inscrever não é preciso criar conta."), mais curto que o
+  original: a frase "basta preencher o formulário do evento" promete uma tela que ainda não existe
+  (RF15).
+- **O que deixou de existir, e a equipe precisa decidir se volta:** o botão **Compartilhar** (não
+  está no novo desenho) e os **dados estruturados para buscadores** (uma aplicação React de página
+  única não os entrega no HTML; voltaria com pré-renderização ou com a geração no servidor).
+- **O que o critério de aceitação continua exigindo, e foi testado:** o que ainda vem fica separado do
+  que já passou; só o que ainda vem oferece inscrição; sem evento publicado aparece o estado vazio, e
+  ele some quando há evento; datas no fuso de São Paulo.
+- **Por quê:** adoção do novo padrão de página (sobretítulo → título → apoio) e do filtro por tipo
+  definidos na Análise UX/UI.
+- **PR:** branch `feat/agenda-page`
