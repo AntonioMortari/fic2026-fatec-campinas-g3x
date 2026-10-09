@@ -485,12 +485,38 @@ export const openApiDocument = {
         security: [{}, { bearerAuth: [] }],
         requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/RegistrationRequest' } } } },
         responses: {
-          '201': { description: 'Inscrição registrada; devolve o evento com as vagas já descontadas' },
+          '201': { description: 'Inscrição registrada; devolve o evento com as vagas já descontadas e `registration.cancelCode`, o código do link pessoal que cancela esta inscrição' },
           '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '401': { description: 'Token enviado, mas inválido ou de conta que não existe mais', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '404': { description: 'Evento inexistente ou não publicado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '409': { description: '`event_full`, `registrations_closed` (evento acabou) ou `already_registered`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '429': { description: '`too_many_registrations` (5 pessoas por e-mail no evento) ou `too_many_requests` (30 inscrições por hora vindas da mesma conexão)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/registrations/cancel/{code}': {
+      get: {
+        tags: ['Events'],
+        summary: 'Mostra a inscrição que o link pessoal cancelaria (RF15)',
+        description:
+          'Aberta, sem sessão: quem se inscreveu sem conta também precisa poder desistir. O código é um UUID aleatório que só quem se inscreveu recebeu. Devolve só o evento e o nome abreviado ("Ana S."), nunca contato, CPF nem responsável. `state`: `active`, `cancelled` ou `over` (a atividade já aconteceu).',
+        parameters: [{ name: 'code', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'A inscrição e o estado' },
+          '400': { description: 'Não é um UUID', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`registration_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      post: {
+        tags: ['Events'],
+        summary: 'Cancela a inscrição do link pessoal (RF15)',
+        description:
+          'Marca `cancelled_at`; a linha fica como registro e deixa de contar (vagas, lista da equipe, presença, planilha, "Minhas inscrições"). Quem cancelou pode se inscrever de novo. Dois toques ao mesmo tempo cancelam uma vez só.',
+        parameters: [{ name: 'code', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'A inscrição, já com `state: cancelled`' },
+          '404': { description: '`registration_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: '`already_cancelled` ou `registrations_closed` (a atividade já aconteceu)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },
