@@ -2,6 +2,7 @@ import { act, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
+import { AuthProvider } from '../contexts/AuthProvider'
 import { ReadingPreferencesProvider } from '../contexts/ReadingPreferencesProvider'
 import { routes } from '../routes'
 import { renderRoute } from './render'
@@ -44,7 +45,9 @@ describe('focus on navigation', () => {
       <StrictMode>
         <ReadingPreferencesProvider>
           <QueryClientProvider client={new QueryClient()}>
-            <RouterProvider router={createMemoryRouter(routes, { initialEntries: ['/'] })} />
+            <AuthProvider>
+              <RouterProvider router={createMemoryRouter(routes, { initialEntries: ['/'] })} />
+            </AuthProvider>
           </QueryClientProvider>
         </ReadingPreferencesProvider>
       </StrictMode>,

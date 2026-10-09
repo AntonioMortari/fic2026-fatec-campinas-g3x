@@ -1,6 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../../contexts/useAuth'
 import { cn } from '../../lib/cn'
 import { DESKTOP_NAV, SUPPORT, isActiveRoute } from '../../lib/navigation'
+import { useSignOut } from '../auth/useSignOut'
 import { Chevron } from '../ui/Chevron'
 import { Logo } from './Logo'
 import type { OpenMenu } from './Menu'
@@ -10,6 +12,8 @@ const CONTROL =
 
 export function Header({ openMenu }: { openMenu: OpenMenu }) {
   const { pathname } = useLocation()
+  const { user } = useAuth()
+  const signOut = useSignOut()
 
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-cream">
@@ -59,12 +63,31 @@ export function Header({ openMenu }: { openMenu: OpenMenu }) {
           >
             Aa
           </button>
-          <Link
-            to="/entrar"
-            className={cn(CONTROL, 'inline-flex px-3.5 text-small whitespace-nowrap desktop:px-4 desktop:text-[0.9375rem]')}
-          >
-            Entrar
-          </Link>
+          {user ? (
+            <>
+              <Link
+                to="/minha-conta"
+                aria-label={`Minha conta, ${user.name}`}
+                className={cn(CONTROL, 'inline-flex max-w-32 px-3.5 text-small desktop:max-w-48 desktop:px-4 desktop:text-[0.9375rem]')}
+              >
+                <span className="truncate">{user.name.split(' ')[0]}</span>
+              </Link>
+              <button
+                type="button"
+                onClick={signOut}
+                className={cn(CONTROL, 'hidden bg-transparent px-4 text-[0.9375rem] desktop:inline-flex')}
+              >
+                Sair
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/entrar"
+              className={cn(CONTROL, 'inline-flex px-3.5 text-small whitespace-nowrap desktop:px-4 desktop:text-[0.9375rem]')}
+            >
+              Entrar
+            </Link>
+          )}
           <Link to={SUPPORT.to} className={cn(CONTROL, 'hidden bg-ochre px-4.5 text-[0.9375rem] font-bold desktop:inline-flex')}>
             {SUPPORT.label}
           </Link>

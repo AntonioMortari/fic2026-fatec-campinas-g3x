@@ -1,10 +1,12 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../../contexts/useAuth'
 import { MAX_FONT_STEP, MIN_FONT_STEP } from '../../contexts/reading-context'
 import { useReadingPreferences } from '../../contexts/useReadingPreferences'
 import { cn } from '../../lib/cn'
 import { CONTACTS } from '../../lib/contacts'
 import { MENU_GROUPS } from '../../lib/navigation'
+import { useSignOut } from '../auth/useSignOut'
 
 export type MenuSection = 'start' | 'reading'
 export type OpenMenu = (section: MenuSection) => void
@@ -25,6 +27,8 @@ export function Menu({ open, section, onClose, bottomBar }: MenuProps) {
   const dialog = useRef<HTMLDialogElement>(null)
   const readingHeading = useRef<HTMLHeadingElement>(null)
   const reading = useReadingPreferences()
+  const { user } = useAuth()
+  const signOut = useSignOut()
 
   useEffect(() => {
     const element = dialog.current
@@ -95,6 +99,37 @@ export function Menu({ open, section, onClose, bottomBar }: MenuProps) {
               </section>
             ))}
           </nav>
+
+          {user && (
+            <section aria-labelledby="menu-account">
+              <h3 id="menu-account" className={cn(OVERLINE, 'mt-6 mb-0.5 text-brown-400')}>
+                Sua conta
+              </h3>
+              <ul className="m-0 list-none p-0">
+                <li className="border-b border-line">
+                  <Link
+                    to="/minha-conta"
+                    onClick={onClose}
+                    className="flex min-h-13 items-center text-item font-semibold text-brown no-underline hover:text-brown"
+                  >
+                    Minha conta
+                  </Link>
+                </li>
+                <li className="border-b border-line">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose()
+                      signOut()
+                    }}
+                    className="flex min-h-13 w-full cursor-pointer items-center bg-transparent p-0 text-left text-item font-semibold text-brown"
+                  >
+                    Sair da conta
+                  </button>
+                </li>
+              </ul>
+            </section>
+          )}
 
           <h3 className={cn(OVERLINE, 'mt-6 mb-2.5 text-brown-400')}>Fale com a gente</h3>
           <div className="grid grid-cols-2 gap-2">
