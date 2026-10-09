@@ -406,6 +406,36 @@ export const openApiDocument = {
         },
       },
     },
+    '/me': {
+      patch: {
+        tags: ['Account'],
+        summary: 'Altera os meus dados (RF11)',
+        description:
+          'Grava só `name`, `phone` e `personType` da conta do token. E-mail, senha e papéis **não mudam por aqui**, seja qual for o corpo (trocar o e-mail pede confirmação por e-mail, que ainda não existe). Telefone em branco apaga o número; telefone a um dígito de valer responde "Falta um dígito".',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name', 'personType'],
+                properties: {
+                  name: { type: 'string', maxLength: 120 },
+                  phone: { type: 'string', nullable: true, description: 'Com DDD; só os dígitos são guardados.' },
+                  personType: { type: 'string', enum: ['individual', 'organization'] },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'A conta já com os dados novos', content: { 'application/json': { schema: { type: 'object', properties: { user: { $ref: '#/components/schemas/User' } } } } } },
+          '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão, ou conta que não existe mais', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
     '/me/registrations': {
       get: {
         tags: ['Account'],

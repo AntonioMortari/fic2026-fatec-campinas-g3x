@@ -55,3 +55,15 @@ export function useMe() {
     retry: false,
   })
 }
+
+export interface ProfileInput {
+  name: string
+  phone: string
+  personType: PersonType
+}
+
+export function useUpdateProfile() {
+  return useMutation({
+    mutationFn: async (input: ProfileInput) => (await api.patch<{ user: AuthUser }>('/me', input)).data.user,
+  })
+}

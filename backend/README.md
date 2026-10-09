@@ -108,6 +108,7 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 | `GET /api/admin/events/:id/registrations` · `.csv` | **só equipe** (RF16): inscritos com contato, CPF, responsável e autorização de imagem; a planilha usa `;`, BOM UTF-8 e neutraliza fórmulas. Só leitura, sem cache |
 | `GET /api/admin/events/:id/attendance` · `PATCH …/attendance/:registrationId` | **só equipe** (RF17): lista de presença (nome, menor de idade e a marca, sem contato) e `{ "attended": true \| false \| null }`; `null` desmarca. A planilha ganha a coluna "Presença" |
 | `GET` · `POST /api/registrations/cancel/:code` | **aberta, sem sessão**: mostra e cancela a inscrição do link pessoal (UUID entregue a quem se inscreveu). Só devolve o evento e o nome abreviado. A linha fica como registro e deixa de contar; 409 `already_cancelled` / `registrations_closed` |
+| `PATCH /api/me` | **conta logada** (RF11): altera `name`, `phone` e `personType` da conta do token. E-mail, senha e papéis não mudam por aqui, seja qual for o corpo |
 | `GET /api/me/registrations` | **conta logada** (RF11): as inscrições ligadas à conta do token, com o evento e o `cancelCode`; `attendanceRecorded` só é verdadeiro quando a equipe marcou presença |
 | `GET /api/auth/me` | a ficha de quem está autenticado; 401 sem token válido, ou se a conta foi apagada |
 

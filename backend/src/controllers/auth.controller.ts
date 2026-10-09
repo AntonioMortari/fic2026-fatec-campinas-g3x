@@ -9,6 +9,7 @@ const MAX_PASSWORD_BYTES = 72;
 const EMAIL_MESSAGE = 'Confira o e-mail: ele precisa ter um endereço completo, como nome@exemplo.com.';
 const PASSWORD_MIN_MESSAGE = 'A senha precisa ter pelo menos 8 caracteres.';
 const PHONE_MESSAGE = 'O telefone precisa incluir o DDD, como (11) 95396-8344.';
+const PHONE_MISSING_DIGIT_MESSAGE = 'Falta um dígito. Exemplo: (11) 98765-4321.';
 
 const emailField = z
   .string({ error: EMAIL_MESSAGE })
@@ -19,16 +20,27 @@ const emailField = z
 
 const fitsBcrypt = (value: string) => Buffer.byteLength(value) <= MAX_PASSWORD_BYTES;
 
+export const nameField = z.string({ error: 'Escreva seu nome.' }).trim().min(1, 'Escreva seu nome.').max(120, 'O nome passou de 120 caracteres.');
+
+export const phoneField = z
+  .string({ error: PHONE_MESSAGE })
+  .trim()
+  .nullish()
+  .superRefine((value, ctx) => {
+    if (!value) return;
+    const digits = value.replace(/\D/g, '');
+    if (/^\d{10,11}$/.test(digits)) return;
+    ctx.addIssue({ code: 'custom', message: digits.length === 9 ? PHONE_MISSING_DIGIT_MESSAGE : PHONE_MESSAGE });
+  })
+  .transform((value) => (value ? value.replace(/\D/g, '') : null));
+
+export const personTypeField = z.enum(['individual', 'organization'], { error: 'Escolha se a conta é de uma pessoa ou de uma instituição.' });
+
 const registerFields = z.object({
-  name: z.string({ error: 'Escreva seu nome.' }).trim().min(1, 'Escreva seu nome.').max(120, 'O nome passou de 120 caracteres.'),
+  name: nameField,
   email: emailField,
-  phone: z
-    .string({ error: PHONE_MESSAGE })
-    .trim()
-    .nullish()
-    .refine((value) => !value || /^\d{10,11}$/.test(value.replace(/\D/g, '')), PHONE_MESSAGE)
-    .transform((value) => (value ? value.replace(/\D/g, '') : null)),
-  personType: z.enum(['individual', 'organization'], { error: 'Escolha se a conta é de uma pessoa ou de uma instituição.' }),
+  phone: phoneField,
+  personType: personTypeField,
   password: z
     .string({ error: PASSWORD_MIN_MESSAGE })
     .min(8, PASSWORD_MIN_MESSAGE)
