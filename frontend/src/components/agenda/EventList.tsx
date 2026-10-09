@@ -15,7 +15,7 @@ export function EventList({ events, period, nextEventId }: EventListProps) {
     <div className="flex flex-col gap-7">
       {groups.map((group, groupIndex) => (
         <section key={group.key} aria-labelledby={`month-${group.key}`} className="flex flex-col gap-3.5">
-          <h2 id={`month-${group.key}`} className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-brown-400">
+          <h2 id={`month-${group.key}`} className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-brown-400 desktop:text-[0.8125rem]">
             {group.heading}
           </h2>
           <div className="flex flex-col gap-3.5">

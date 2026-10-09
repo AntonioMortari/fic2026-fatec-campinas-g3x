@@ -56,8 +56,8 @@
   --text-h1--line-height: 1.1;
   --text-h2-desktop: 1.75rem;
   --text-h2-desktop--line-height: 1.2;
-  --text-h1-desktop: 3rem;
-  --text-h1-desktop--line-height: 1.06;
+  --text-h1-desktop: 3.25rem;
+  --text-h1-desktop--line-height: 1.05;
 
   --radius-control: 3px;
 
@@ -91,7 +91,7 @@
     }
   }
 
-  --container-page: 75rem;
+  --container-page: 79rem;
   --breakpoint-desktop: 64rem;
 }
 
@@ -121,6 +121,7 @@
 
   a {
     color: var(--color-blue-deep);
+    text-decoration-line: underline;
     text-underline-offset: 0.15em;
   }
 

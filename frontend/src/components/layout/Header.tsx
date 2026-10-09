@@ -8,7 +8,7 @@ import { Logo } from './Logo'
 import type { OpenMenu } from './Menu'
 
 const CONTROL =
-  'min-h-11 items-center justify-center rounded-control border-[1.5px] border-brown font-semibold text-brown no-underline hover:text-brown cursor-pointer'
+  'min-h-11 items-center justify-center rounded-control border-[1.5px] border-brown text-brown no-underline hover:text-brown cursor-pointer'
 
 export function Header({ openMenu }: { openMenu: OpenMenu }) {
   const { pathname } = useLocation()
@@ -70,14 +70,14 @@ export function Header({ openMenu }: { openMenu: OpenMenu }) {
               <Link
                 to="/minha-conta"
                 aria-label={`Minha conta, ${user.name}`}
-                className={cn(CONTROL, 'inline-flex max-w-24 px-3 text-small desktop:max-w-48 desktop:px-4 desktop:text-[0.9375rem]')}
+                className={cn(CONTROL, 'inline-flex max-w-24 px-3 font-semibold text-small desktop:max-w-48 desktop:px-4 desktop:text-[0.9375rem]')}
               >
                 <span className="truncate">{user.name.split(' ')[0]}</span>
               </Link>
               <button
                 type="button"
                 onClick={signOut}
-                className={cn(CONTROL, 'hidden bg-transparent px-4 text-[0.9375rem] desktop:inline-flex')}
+                className={cn(CONTROL, 'hidden bg-transparent px-4 text-[0.9375rem] font-semibold desktop:inline-flex')}
               >
                 Sair
               </button>
@@ -85,7 +85,7 @@ export function Header({ openMenu }: { openMenu: OpenMenu }) {
           ) : (
             <Link
               to="/entrar"
-              className={cn(CONTROL, 'inline-flex px-3.5 text-small whitespace-nowrap desktop:px-4 desktop:text-[0.9375rem]')}
+              className={cn(CONTROL, 'inline-flex px-3.5 font-semibold text-small whitespace-nowrap desktop:px-4 desktop:text-[0.9375rem]')}
             >
               Entrar
             </Link>
