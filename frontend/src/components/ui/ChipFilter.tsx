@@ -11,11 +11,16 @@ interface ChipFilterProps {
   selected: string
   onSelect: (value: string) => void
   label: string
+  listOnDesktop?: boolean
 }
 
-export function ChipFilter({ options, selected, onSelect, label }: ChipFilterProps) {
+export function ChipFilter({ options, selected, onSelect, label, listOnDesktop = false }: ChipFilterProps) {
   return (
-    <div role="group" aria-label={label} className="flex gap-2 overflow-x-auto pb-1 desktop:flex-wrap">
+    <div
+      role="group"
+      aria-label={label}
+      className={cn('flex gap-2 overflow-x-auto pb-1 desktop:flex-wrap', listOnDesktop && 'desktop:flex-col desktop:flex-nowrap desktop:gap-0 desktop:overflow-visible desktop:pb-0')}
+    >
       {options.map((option) => {
         const active = option.value === selected
         return (
@@ -27,6 +32,8 @@ export function ChipFilter({ options, selected, onSelect, label }: ChipFilterPro
             className={cn(
               'inline-flex min-h-11 flex-none cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] border-brown px-3.5 text-small font-semibold',
               active ? 'bg-brown text-cream' : 'bg-card text-brown',
+              listOnDesktop && 'desktop:min-h-12 desktop:w-full desktop:justify-between desktop:rounded-none desktop:border-0 desktop:px-3 desktop:text-body desktop:font-semibold',
+              listOnDesktop && !active && 'desktop:bg-transparent',
             )}
           >
             {option.label}

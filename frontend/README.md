@@ -54,13 +54,17 @@ src/
 ├── styles.css          Tailwind + tokens do design system (@theme), alto contraste
 ├── components/
 │   ├── ui/             peças: Button, TextField, PasswordField, Card, PageHeader,
-│   │                   ListItem, DateBadge, Tabs, ChipFilter, EmptyState, StripedBand
-│   └── layout/         moldura: Layout, FocusedLayout, Header, BottomBar, Menu,
-│                       Footer, SkipLink
+│   │                   ListItem, DateBadge, Tabs/TabList, ChipFilter, EmptyState,
+│   │                   ActionBar, BackLink, Toast, StripedBand
+│   ├── layout/         moldura: Layout, FocusedLayout, Header, BottomBar, Menu,
+│   │                   Footer, SkipLink
+│   ├── home/           seções da página inicial
+│   └── agenda/         EventCard, EventList, SchoolsPromo
 ├── contexts/           preferências de leitura (A−/A/A+, alto contraste)
-├── lib/                navegação, contatos da ONG, datas, validação de destino
+├── lib/                navegação, contatos da ONG, datas, eventos, validação de destino
 ├── pages/              uma tela por arquivo
-├── services/           cliente da API e configuração do React Query
+├── services/           cliente da API, hooks de eventos e configuração do React Query
+├── types/              tipos que espelham a resposta da API
 └── tests/              testes e preparação do ambiente de teste
 ```
 

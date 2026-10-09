@@ -10,7 +10,13 @@ function ActiveMarker() {
   return <span aria-hidden="true" className="absolute inset-x-[22%] -top-[1.5px] h-1 bg-ochre" />
 }
 
-export function BottomBar({ openMenu, menuOpen }: { openMenu: OpenMenu; menuOpen: boolean }) {
+interface BottomBarProps {
+  openMenu: OpenMenu
+  menuOpen: boolean
+  onCloseMenu?: () => void
+}
+
+export function BottomBar({ openMenu, menuOpen, onCloseMenu }: BottomBarProps) {
   const { pathname } = useLocation()
 
   return (
@@ -22,6 +28,7 @@ export function BottomBar({ openMenu, menuOpen }: { openMenu: OpenMenu; menuOpen
             <li key={destination.to}>
               <Link
                 to={destination.to}
+                onClick={onCloseMenu}
                 aria-current={active ? 'page' : undefined}
                 className={cn(ITEM, active ? 'font-bold text-brown' : 'font-semibold text-brown-400', 'hover:text-brown')}
               >
@@ -32,7 +39,12 @@ export function BottomBar({ openMenu, menuOpen }: { openMenu: OpenMenu; menuOpen
           )
         })}
         <li>
-          <Link to={SUPPORT.to} aria-current={isActiveRoute(SUPPORT.to, pathname) ? 'page' : undefined} className={ITEM}>
+          <Link
+            to={SUPPORT.to}
+            onClick={onCloseMenu}
+            aria-current={!menuOpen && isActiveRoute(SUPPORT.to, pathname) ? 'page' : undefined}
+            className={ITEM}
+          >
             <span className="rounded-control bg-ochre px-2 py-1.75 font-bold text-brown">{SUPPORT.label}</span>
           </Link>
         </li>
@@ -40,7 +52,7 @@ export function BottomBar({ openMenu, menuOpen }: { openMenu: OpenMenu; menuOpen
           <button
             type="button"
             aria-expanded={menuOpen}
-            onClick={() => openMenu('start')}
+            onClick={menuOpen && onCloseMenu ? onCloseMenu : () => openMenu('start')}
             className={cn(ITEM, 'w-full cursor-pointer bg-transparent', menuOpen ? 'font-bold text-brown' : 'font-semibold text-brown-400')}
           >
             {menuOpen && <ActiveMarker />}

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { MAX_FONT_STEP, MIN_FONT_STEP } from '../../contexts/reading-context'
 import { useReadingPreferences } from '../../contexts/useReadingPreferences'
@@ -18,9 +18,10 @@ interface MenuProps {
   open: boolean
   section: MenuSection
   onClose: () => void
+  bottomBar?: ReactNode
 }
 
-export function Menu({ open, section, onClose }: MenuProps) {
+export function Menu({ open, section, onClose, bottomBar }: MenuProps) {
   const dialog = useRef<HTMLDialogElement>(null)
   const readingHeading = useRef<HTMLHeadingElement>(null)
   const reading = useReadingPreferences()
@@ -156,6 +157,7 @@ export function Menu({ open, section, onClose }: MenuProps) {
           </div>
         </div>
       </div>
+      {bottomBar}
     </dialog>
   )
 }

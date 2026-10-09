@@ -46,8 +46,22 @@ npm run dev                 # http://localhost:3333/api
 | `npm run dev` | servidor com recarga automática |
 | `npm run build` / `npm start` | compila para `dist/` e roda o compilado |
 | `npm test` | testes (Jest + Supertest), sem precisar de banco |
+| `npm run test:db` | testes de integração contra um MySQL de verdade (ver abaixo) |
 | `npm run typecheck` | confere os tipos |
 | `npm run db:migrate` / `db:migrate:undo` | aplica as pendentes / desfaz a última |
+
+### Testes de integração
+
+`npm test` não usa banco. Os de `tests/integration/` rodam contra um MySQL real e só entram com
+`npm run test:db`, num banco só para teste (as migrations são aplicadas nele pelo próprio teste):
+
+```bash
+docker compose exec db mysql -uroot -proot-dev -e "create database atelie_test character set utf8mb4; grant all on atelie_test.* to 'atelie'@'%';"
+DB_HOST=127.0.0.1 DB_NAME=atelie_test DB_USER=atelie DB_PASSWORD=atelie-dev npm run test:db
+```
+
+Ao inserir dados à mão pelo cliente `mysql`, use `--default-character-set=utf8mb4`: sem isso os
+acentos são gravados duas vezes codificados ("CafÃº") e o banco guarda lixo sem avisar.
 
 ## Organização
 
@@ -68,6 +82,14 @@ tests/                  Jest + Supertest
 ```
 
 O fluxo de uma requisição é sempre `routes → middlewares → controller → service → model`.
+
+### Rotas
+
+| Rota | O que faz |
+|---|---|
+| `GET /api/health` | API e banco respondendo |
+| `GET /api/events?period=upcoming\|past&limit=` | eventos **publicados**; `upcoming` do mais próximo ao mais distante, `past` do mais recente ao mais antigo |
+| `GET /api/events/:id/calendar.ics` | o evento como arquivo de calendário; 404 se não existe ou não está publicado |
 
 ### Contratos da API
 

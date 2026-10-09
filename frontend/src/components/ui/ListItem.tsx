@@ -9,6 +9,7 @@ interface ListItemProps {
   to: string
   number?: string
   tone?: 'ochre' | 'blue' | 'brown'
+  className?: string
 }
 
 const TONES = {
@@ -17,13 +18,13 @@ const TONES = {
   brown: 'text-brown-400',
 }
 
-export function ListItem({ title, description, to, number, tone = 'ochre' }: ListItemProps) {
+export function ListItem({ title, description, to, number, tone = 'ochre', className }: ListItemProps) {
   return (
-    <li className="border-b border-line last:border-b-0">
+    <li className={cn('border-b border-line last:border-b-0', className)}>
       <Link
         to={to}
         className={cn(
-          'grid min-h-18 items-center gap-2 py-3 text-brown no-underline hover:text-brown',
+          'grid min-h-18 items-center gap-2 py-3 text-brown no-underline hover:text-brown desktop:min-h-21 desktop:gap-2.5',
           number ? 'grid-cols-[2rem_1fr_1rem]' : 'grid-cols-[1fr_1rem]',
         )}
       >
@@ -33,8 +34,8 @@ export function ListItem({ title, description, to, number, tone = 'ochre' }: Lis
           </span>
         )}
         <span>
-          <span className="block text-item font-bold">{title}</span>
-          {description && <span className="block text-small text-brown-400">{description}</span>}
+          <span className="block text-item font-bold desktop:text-h3">{title}</span>
+          {description && <span className="block text-small text-brown-400 desktop:text-[0.9375rem]">{description}</span>}
         </span>
         <Chevron />
       </Link>

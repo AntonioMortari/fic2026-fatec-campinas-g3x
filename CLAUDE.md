@@ -32,6 +32,7 @@ docker compose up --build                       # MySQL + API + front-end
 docker compose exec backend npm run db:migrate  # migrations
 
 cd backend  && npm test && npm run typecheck    # Jest + Supertest (sem banco)
+cd backend  && npm run test:db                  # integração contra MySQL real (ver backend/README.md)
 cd frontend && npm test && npm run typecheck && npm run lint
 ```
 
@@ -77,9 +78,12 @@ API em `:3333/api`, Swagger em `:3333/api-docs`, front em `:5173`.
 13. **O papel de equipe nunca vem do cadastro.** Ninguém se promove pela API; o back-end ignora
     qualquer campo de papel vindo do corpo da requisição (os esquemas Zod descartam campo
     desconhecido).
-14. **Verificar olhando.** Teste verde não substitui abrir a tela. Neste repositório já aconteceu:
-    35 testes verdes com o "Apoiar" aparecendo no cabeçalho do celular e o foco sendo roubado na
-    carga da página — os dois só apareceram no Chromium, a 390px.
+14. **Verificar olhando.** Teste verde não substitui abrir a tela. Neste repositório já aconteceu
+    três vezes, e nas três os testes estavam verdes: o "Apoiar" no cabeçalho do celular e o foco
+    roubado na carga (35 testes); a agenda com rolagem horizontal e a lista espremida em 40px no
+    desktop (78 testes — o jsdom não aplica CSS, então não existe layout para ele medir); e os
+    acentos gravados em dobro ("CafÃº") por um seed feito com o cliente `mysql` sem
+    `--default-character-set=utf8mb4`. Abrir a tela no Chromium a 390 e 1440px não é opcional.
 
 ## Convenções de código
 
@@ -112,6 +116,13 @@ Valem para toda tela nova. Os tokens estão em `frontend/src/styles.css` (bloco 
 - **Alvo de toque mínimo de 44px.** CTA de 52px.
 - **Navegação de uma fonte só:** `frontend/src/lib/navigation.ts` alimenta a barra
   inferior, o cabeçalho do desktop e o menu em folha.
+- **Layout em grid no desktop: todo item que se sobrepõe a outro precisa de coluna E linha
+  explícitas.** Com só `col-span-2` o navegador empurra o item para a coluna seguinte e cria uma
+  coluna implícita (medido na agenda). E use `minmax(0, 1fr)`, não `1fr`, que não encolhe abaixo do
+  conteúdo e faz a página rolar para o lado.
+- **Texto escondido para leitor de tela (`sr-only`) leva o espaço FORA do `<span>`**
+  (`Inscrever <span class="sr-only">em Banzo</span>`): dentro dele o espaço some e o nome sai
+  "Inscreverem Banzo". Já aconteceu duas vezes.
 - **Contato e acessibilidade moram no menu em folha.** Não há botão flutuante de WhatsApp nem barra
   fixa de acessibilidade — foi uma decisão da análise (camadas flutuantes sobre o conteúdo).
 - **Datas sempre no fuso de São Paulo** (`lib/dates.ts`), nunca no do aparelho.
@@ -171,6 +182,12 @@ versão `.html` ao lado, mais fácil de ler). Quando o documento evoluir, a v2 v
   `sub`; papéis são lidos do banco a cada requisição que precisar deles.
 - **Variáveis de ambiente** validadas em `config/env.ts`: falta de segredo impede a API de subir.
 - **Banco**: tabelas nascem por migration (`src/database/migrations/`, Umzug), nunca por `sync()`.
+  Teste que depende de SQL de verdade fica em `tests/integration/` — filtro de data com `NULL`,
+  `CHECK` e acento só se provam contra o MySQL, e foi o que pegou o `NOT(...)` que derrubava os
+  eventos sem horário de término do período "passado".
+- **Eventos**: a API pública só devolve `published = true`; a tela nunca recebe rascunho.
+  `period=upcoming` é `COALESCE(ends_at, starts_at) >= agora`, e `past` é o complemento escrito por
+  extenso (não `NOT`). Horários guardados em UTC e exibidos no fuso de São Paulo.
 - **Swagger** em `src/docs/openapi.ts`: rota nova entra lá no mesmo PR.
 - **Front-end** (`frontend/src`): rotas em `routes.tsx`, uma instância Axios em `services/api.ts`,
   React Query para todo dado vindo da API, Tailwind com os tokens do design system em `styles.css`.
@@ -196,9 +213,12 @@ Atualizado em 08/10/2026.
 | Back-end base: Express, CORS, helmet, erro único, validação, JWT, bcrypt, Swagger | **pronto** — 22 testes Jest; `/api/health` medido contra MySQL 8.4 real (200 com banco, 503 sem) |
 | Migrations (Umzug) | **pronto** — `up`/`down` medidos contra MySQL real; nenhuma tabela ainda |
 | Front-end base: Vite, React Router, React Query, Axios, Tailwind | **pronto** |
-| Design system — fundação visual (F1): tokens, Bitter local, escala de tipo, 3 níveis de elevação, Button, TextField, PasswordField, PageHeader, ListItem, Card, DateBadge, Tabs, ChipFilter, EmptyState | **pronto** — 35 testes Vitest; conferido no Chromium a 320, 390 e 1440px, com A+ no máximo e alto contraste: sem rolagem horizontal, nenhum alvo abaixo de 44px |
-| Estrutura (F2): cabeçalho, barra inferior, menu em folha, rodapé, layout focado, link de pular, foco na troca de rota | **pronto** — Esc, retorno do foco e trava de rolagem medidos no Chromium. A barra de ação das telas de detalhe (F2.5) **falta**: entra com a primeira tela de detalhe |
-| Páginas | **só a casca** — Início provisório e 404. Todos os links do menu levam ao 404 até cada tela ser migrada |
+| Design system — fundação visual (F1): tokens, Bitter local, escala de tipo, 3 níveis de elevação, Button (com estado "Enviando…"), TextField, PasswordField, PageHeader, ListItem, Card, DateBadge, Tabs, ChipFilter, EmptyState, BackLink, ActionBar, aviso fixo (toast) com ação | **pronto** — 49 testes Vitest; conferido no Chromium a 320, 390 e 1440px, com A+ no máximo e alto contraste: sem rolagem horizontal, nenhum alvo abaixo de 44px |
+| Estrutura (F2): cabeçalho, barra inferior, menu em folha (com a barra visível por baixo, como na 3a), rodapé, layout focado, link de pular, foco e fade de 150ms na troca de rota | **pronto** — Esc, retorno do foco e trava de rolagem medidos no Chromium. Uma rota pode trocar a barra inferior pela barra de ação com `handle: { hideBottomBar: true }`; **nenhuma tela usa isso ainda** |
+| Home (RF01, tarefa 4.1) | **pronta**: herói, "Por onde começar", "O que fazemos" e escolas conferidos lado a lado com as telas 2a e 6a, e "Próxima atividade" ligada à API de eventos (conferida no navegador com evento real; sem evento publicado ou com a API fora do ar, o bloco não aparece) |
+| Agenda (RF14, tarefa 4.2) | **pronta, com 4 diferenças do desenho listadas abaixo**: `/agenda` com abas Em breve / Já aconteceu, filtro por tipo (chips no celular, coluna no desktop), próximo evento em destaque, "+ Agenda" (`.ics`) e estados vazio, carregando e falha. Conferida no Chromium contra o backend e o MySQL reais, a 320, 390, 1024 e 1440px, com A+ no máximo e alto contraste. Backend: `GET /api/events` e `GET /api/events/:id/calendar.ics`, 39 testes unitários + 7 de integração |
+| Eventos no banco | **tabela e API prontas, mas NINGUÉM consegue criar evento ainda** — o cadastro pela equipe é o RF13 e não existe. Hoje só por SQL. A agenda em produção abre vazia |
+| Páginas | Home, agenda, 404 e catálogo. Os outros links do menu levam ao 404 até cada tela ser migrada |
 | Docker Compose (MySQL + API + front) | **escrito** — o MySQL subiu e foi usado; as imagens do back-end e do front não foram construídas neste ambiente (o `npm ci` dentro do container não alcança o registro do npm daqui) |
 | Funcionalidades (RF01–RF39) | **falta** — migrar de `venturus-atelie`, um RF por PR |
 | Deploy | **falta** |
@@ -214,5 +234,17 @@ Atualizado em 08/10/2026.
    com qual autorização; chave Pix real; listas fechadas de gêneros, temas e faixas etárias; quem
    produz o conteúdo da biblioteca.
 4. Plataforma de deploy, que precisa de MySQL gerenciado (afeta o RNF10, custo).
+5. **Agenda — o que o desenho tem e o código ainda não:**
+   - **foto no destaque do próximo evento** (6b): não há upload de imagem nem coluna para ela;
+   - **"Ver detalhes"** no lugar de "Inscrever" em alguns eventos: não há página de detalhe nem
+     critério para quando um evento não aceita inscrição;
+   - **tipo do evento (Contação, Apresentação, Oficina)**: o Plano de Migração (F3.1/F3.2) liga o
+     tipo ao gênero da atividade, numa lista fechada que a ONG ainda não definiu. Hoje é o texto
+     livre `events.category`, e os chips nascem do que existir — texto livre gera chips repetidos
+     ("Contação" × "Contação de história") se a equipe digitar de dois jeitos;
+   - **"N vagas" é a capacidade, não as vagas restantes**: não há tabela de inscrições. Quando o
+     RF15 existir, o service passa a descontar as inscrições — e o texto precisa dizer "restantes".
+6. **"Quero me inscrever" leva a `/agenda/:id/inscricao`, que ainda não existe (RF15)**: a pessoa
+   cai no 404. Vale o mesmo para "Ver como funciona" e "Ler nossa história completa".
 5. Requisitos do projeto que a troca de stack afetou (RNF08, RNF09, RNF11, RNF12): ver o
    Changelog. A equipe decide como cada um fica na v2 do Documento de Requisitos.

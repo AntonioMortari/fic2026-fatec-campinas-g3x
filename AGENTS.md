@@ -21,6 +21,7 @@ que ela fez, e quem da equipe revisou e respondeu pelo resultado.
 | 08/10/2026 | Claude Code (Anthropic) | Estrutura inicial do monorepo conforme o Anexo I/III do regulamento: esqueleto do back-end (Express, Sequelize, middlewares de validação, JWT e erro, Swagger, testes) e do front-end (Vite, React Router, React Query, Axios, Tailwind), Docker Compose e READMEs | `feat/project-foundation` | _a preencher_ |
 | 08/10/2026 | Claude Code (Anthropic) | Cópia dos originais para `docs/originais/`; design system base no front-end (tokens no Tailwind, componentes, cabeçalho, barra inferior, menu em folha, rodapé) a partir da "Análise UX/UI" e do "Plano de Migração" do Claude Design; entradas do Changelog | `feat/project-foundation` | _a preencher_ |
 | 08/10/2026 | Claude Code (Anthropic) | Passagem do código e dos nomes de arquivo para inglês, remoção de comentários dispensáveis, histórico refeito em Conventional Commits | `feat/project-foundation` | _a preencher_ |
+| 09/10/2026 | Claude Code (Anthropic) | Agenda pública (RF14): tabela, model, API de eventos e exportação `.ics` no back-end; página, filtro, abas e ligação da home à API no front-end; correção do healthcheck do MySQL no Docker Compose | `feat/agenda-page` | _a preencher_ |
 
 **Como registrar uma nova entrada:** uma linha por PR em que a IA produziu código, documentação ou
 decisão de arquitetura. Uso pontual (tirar uma dúvida, explicar um erro) não precisa de linha.
