@@ -10,6 +10,7 @@ import { useRouteFocus } from './useRouteFocus'
 
 export interface RouteHandle {
   hideBottomBar?: boolean
+  hideHeaderOnMobile?: boolean
   backTo?: string
 }
 

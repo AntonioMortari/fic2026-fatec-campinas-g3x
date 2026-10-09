@@ -1,52 +1,69 @@
 import { cn } from '../../lib/cn'
 import type { AttendanceEntry } from '../../types/attendance'
-import { Card } from '../ui'
 
 interface AttendanceRowProps {
   entry: AttendanceEntry
+  displayName: string
   onMark: (attended: boolean | null) => void
 }
 
-const STATE_TEXT = { true: 'Veio', false: 'Não veio', null: 'Ainda não conferido' } as const
+const ROW = 'flex items-center gap-2 border-b border-line'
 
-function MarkButton({ pressed, label, name, onClick }: { pressed: boolean; label: string; name: string; onClick: () => void }) {
+function Names({ entry, displayName, muted }: { entry: AttendanceEntry; displayName: string; muted?: boolean }) {
   return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      onClick={onClick}
-      className={cn(
-        'inline-flex min-h-13 cursor-pointer items-center justify-center gap-1.5 border-[1.5px] border-brown px-3 text-body font-semibold select-none',
-        'transition-[transform,background-color] duration-[90ms] active:scale-[.98]',
-        pressed ? 'bg-brown text-cream' : 'bg-transparent text-brown',
+    <div className="min-w-0 flex-1">
+      <span className={cn('block text-body break-words', muted ? 'font-semibold text-brown-400' : 'font-bold')}>{displayName}</span>
+      {entry.isMinor && !muted && (
+        <span className="block text-[0.8125rem] text-brown-400">
+          Responsável{entry.guardianPhoneHint ? `: ${entry.guardianPhoneHint}` : ''}
+        </span>
       )}
-    >
-      {pressed && <span aria-hidden="true">✓</span>}
-      {label} <span className="sr-only">{name}</span>
-    </button>
+    </div>
   )
 }
 
-export function AttendanceRow({ entry, onMark }: AttendanceRowProps) {
-  const { name, isMinor, attended } = entry
+export function AttendanceRow({ entry, displayName, onMark }: AttendanceRowProps) {
+  if (entry.attended === null) {
+    return (
+      <li className={cn(ROW, 'min-h-17 py-2')}>
+        <Names entry={entry} displayName={displayName} />
+        <button
+          type="button"
+          onClick={() => onMark(true)}
+          className="inline-grid min-h-12 min-w-16 cursor-pointer place-items-center border-[1.5px] border-brown bg-brown px-3 text-small font-semibold text-cream"
+        >
+          Veio <span className="sr-only">{displayName}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onMark(false)}
+          className="inline-grid min-h-12 min-w-16 cursor-pointer place-items-center border-[1.5px] border-brown bg-transparent px-3 text-small font-semibold text-brown"
+        >
+          Faltou <span className="sr-only">{displayName}</span>
+        </button>
+      </li>
+    )
+  }
 
+  const came = entry.attended
   return (
-    <Card as="li" className="flex flex-col gap-3 p-4">
-      <div className="flex min-w-0 flex-col gap-1">
-        <h3 className="m-0 text-h3 leading-tight font-bold break-words">{name}</h3>
-        <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-small text-brown-400">
-          <span>{STATE_TEXT[String(attended) as keyof typeof STATE_TEXT]}</span>
-          {isMinor && (
-            <span className="border-[1.5px] border-brown px-2 py-0.5 text-[0.6875rem] font-bold uppercase tracking-[0.1em] text-brown">
-              Menor de idade
-            </span>
-          )}
-        </p>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <MarkButton pressed={attended === true} label="Veio" name={name} onClick={() => onMark(attended === true ? null : true)} />
-        <MarkButton pressed={attended === false} label="Não veio" name={name} onClick={() => onMark(attended === false ? null : false)} />
-      </div>
-    </Card>
+    <li className={cn(ROW, 'min-h-15')}>
+      <span
+        className={cn(
+          'shrink-0 px-2 py-0.5 text-[0.75rem] font-bold',
+          came ? 'bg-ochre text-brown' : 'border-[1.5px] border-brown-400 text-brown-400',
+        )}
+      >
+        {came ? 'Veio' : 'Faltou'}
+      </span>
+      <Names entry={entry} displayName={displayName} muted={!came} />
+      <button
+        type="button"
+        onClick={() => onMark(null)}
+        className="min-h-11 shrink-0 cursor-pointer bg-transparent px-1.5 text-small font-semibold text-blue-deep"
+      >
+        Limpar <span className="sr-only">{displayName}</span>
+      </button>
+    </li>
   )
 }

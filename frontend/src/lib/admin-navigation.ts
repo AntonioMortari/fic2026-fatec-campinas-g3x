@@ -5,6 +5,10 @@ export const ADMIN_EVENTS: Destination = { label: 'Agenda', to: '/admin/eventos'
 
 export const ADMIN_BOTTOM_BAR: Destination[] = [ADMIN_HOME, ADMIN_EVENTS]
 
+// The side menu of the desktop panel (screen 7j). Only screens that exist: the design also lists Atividades, Pessoas,
+// Conteúdo, Biblioteca and Configurações, which are not built yet and would lead to the 404.
+export const ADMIN_SIDEBAR: Destination[] = [ADMIN_HOME, { label: 'Agenda e presença', to: '/admin/eventos' }]
+
 export const ADMIN_QUICK_ACTIONS: Destination[] = [{ label: 'Novo evento', to: '/admin/eventos/novo' }]
 
 export const ADMIN_SCREENS: (Destination & { description: string })[] = [

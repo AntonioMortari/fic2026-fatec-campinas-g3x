@@ -333,7 +333,7 @@ export const openApiDocument = {
         summary: 'Planilha dos inscritos (equipe)',
         description:
           'CSV com `;` e BOM UTF-8, para abrir direto no Excel em português. Células que começariam com `=`, `+`, `-` ou `@` levam um apóstrofo na frente: sem isso viram fórmula. ' +
-          'A coluna "Autorizou imagem" vem antes das de contato; "Presença" é Veio, Não veio ou Não conferido.',
+          'A coluna "Autorizou imagem" vem antes das de contato; "Presença" é Veio, Faltou ou Não conferido.',
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
         security: [{ bearerAuth: [] }],
         responses: {
@@ -348,7 +348,7 @@ export const openApiDocument = {
       get: {
         tags: ['Admin'],
         summary: 'Lista de presença: só nome, menor de idade e a marca (equipe, RF17)',
-        description: 'Em ordem alfabética, sem e-mail, telefone nem CPF: é a tela que fica virada para uma fila. Três estados: `true` veio, `false` não veio, `null` ninguém conferiu.',
+        description: 'Em ordem alfabética, sem e-mail, telefone nem CPF (o telefone do responsável de um menor vem mascarado, como `(11) 9····-1234`): é a tela que fica virada para uma fila. Três estados: `true` veio, `false` não veio, `null` ninguém conferiu.',
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
         security: [{ bearerAuth: [] }],
         responses: {
@@ -368,6 +368,7 @@ export const openApiDocument = {
                           id: { type: 'string', format: 'uuid' },
                           name: { type: 'string' },
                           isMinor: { type: 'boolean' },
+                          guardianPhoneHint: { type: 'string', nullable: true, description: 'Só para menor de idade, mascarado.' },
                           attended: { type: 'boolean', nullable: true },
                         },
                       },

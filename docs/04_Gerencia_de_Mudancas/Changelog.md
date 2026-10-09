@@ -233,3 +233,19 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Continua adiado:** relatório contando presentes (RF30–RF32), cancelar a própria inscrição, e-mail de
   confirmação (RF18).
 - **PR:** branch `feat/attendance-my-registrations`
+
+## 2026-10-09 — Painel no desktop (desenho 7j) e lista de presença conforme o desenho 3g
+- **Artefato:** Protótipos (2c, 3g, 7j) · Arquitetura
+- **Antes:** o painel era o mesmo cabeçalho escuro no celular e no desktop; a lista de presença tinha dois
+  botões por pessoa em cartões ("Veio" / "Não veio") e o nome inteiro.
+- **Depois:**
+  - No desktop o painel ganha cabeçalho creme com logotipo e selo "PAINEL" e um menu lateral; o celular
+    segue com a barra inferior. O menu lateral só tem as telas que existem.
+  - A lista de presença segue o desenho: progresso e busca fixos, "Sem conferir" em cima e "Conferidos" embaixo,
+    aviso com "Desfazer", "Faltou" no lugar de "Não veio", nome abreviado e telefone do responsável mascarado
+    para menor. A planilha usa "Faltou".
+- **O que o desenho não cobria e foi decidido aqui:** o cabeçalho escuro da lista some só no celular; no
+  desktop a lista fica numa coluna estreita; itens do menu lateral sem tela (Atividades, Pessoas, Conteúdo,
+  Biblioteca, Relatório, Configurações) não aparecem até a tela existir.
+- **Combinado de processo:** tela sem desenho não se inventa; para-se e avisa-se quem desenha (CLAUDE.md).
+- **PR:** branch `feat/panel-desktop-attendance`

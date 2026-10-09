@@ -2,21 +2,34 @@ import { Registration } from '../models';
 import { ApiError } from '../utils/api-error';
 import { getAdminEvent, type AdminEvent } from './admin-events.service';
 
-// Only what the person at the door needs: no e-mail, no CPF, no phone. A phone turned toward a queue must not show them.
+// Only what the person at the door needs: no e-mail, no CPF, no whole phone. A phone turned toward a queue must not
+// show them. The guardian's number comes masked, enough to tell which family is at the door.
 export interface AttendanceEntry {
   id: string;
   name: string;
   isMinor: boolean;
+  guardianPhoneHint: string | null;
   attended: boolean | null;
 }
 
-const toEntry = (row: Registration): AttendanceEntry => ({ id: row.id, name: row.name, isMinor: row.isMinor, attended: row.attended });
+export function maskPhone(digits: string | null): string | null {
+  const match = /^(\d{2})(\d)(\d{3,4})(\d{4})$/.exec(digits ?? '');
+  return match ? `(${match[1]}) ${match[2]}····-${match[4]}` : null;
+}
+
+const toEntry = (row: Registration): AttendanceEntry => ({
+  id: row.id,
+  name: row.name,
+  isMinor: row.isMinor,
+  guardianPhoneHint: row.isMinor ? maskPhone(row.guardianPhone) : null,
+  attended: row.attended,
+});
 
 export async function listAttendance(eventId: string): Promise<{ event: AdminEvent; entries: AttendanceEntry[] }> {
   const event = await getAdminEvent(eventId);
   const rows = await Registration.findAll({
     where: { eventId },
-    attributes: ['id', 'name', 'isMinor', 'attended'],
+    attributes: ['id', 'name', 'isMinor', 'guardianPhone', 'attended'],
     order: [['name', 'ASC'], ['createdAt', 'ASC']],
   });
   return { event, entries: rows.map(toEntry) };

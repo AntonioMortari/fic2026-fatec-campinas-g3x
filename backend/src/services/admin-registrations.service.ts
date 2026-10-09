@@ -77,7 +77,7 @@ export function registrationsCsv(registrations: AdminRegistration[]): string {
     formatCpf(registration.cpf),
     registration.hasAccount ? 'Sim' : 'Não',
     formatDateTime(registration.createdAt),
-    registration.attended === null ? 'Não conferido' : registration.attended ? 'Veio' : 'Não veio',
+    registration.attended === null ? 'Não conferido' : registration.attended ? 'Veio' : 'Faltou',
   ]);
   return toCsv([header, ...rows]);
 }
