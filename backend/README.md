@@ -97,6 +97,9 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 | `POST /api/auth/login` | `{ token, user }`; 401 `invalid_credentials` com a mesma frase para e-mail inexistente e senha errada |
 | `POST /api/auth/refresh` | troca o cookie `af_refresh` (httpOnly) por `{ token, user }` novos e **gira** o cookie. 401 sem cookie, expirado, já usado (após 10 s de tolerância, apaga todas as sessões da conta) ou conta apagada. Exige `X-Requested-With` |
 | `POST /api/auth/logout` | apaga o cookie de renovação no banco e no navegador; sempre 204. Exige `X-Requested-With` |
+| `GET /api/admin/events` · `GET /api/admin/events/:id` | **só equipe**: todos os eventos, rascunhos incluídos |
+| `POST /api/admin/events` · `PUT /api/admin/events/:id` | **só equipe**: cria (sempre rascunho) e corrige um evento. Data e hora como `2026-11-20T15:00`, lidas no horário de São Paulo; limite de vagas e `requiresCpf` opcionais. Não aceitam `published` |
+| `PATCH /api/admin/events/:id/publication` | **só equipe**: `{ "published": true \| false }`, o único caminho que publica ou tira do ar. Não existe `DELETE` |
 | `GET /api/auth/me` | a ficha de quem está autenticado; 401 sem token válido, ou se a conta foi apagada |
 
 ### Contratos da API
@@ -107,6 +110,7 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 - Rotas protegidas esperam `Authorization: Bearer <token>`.
 - Nenhum campo de papel entra pelo corpo: o cadastro lista as colunas uma a uma e `is_staff` nasce
   `false`. Quem vira equipe é promovido à mão no banco (`update users set is_staff = true where email = '…'`).
+- Equipe é a coluna `users.is_staff`, lida do banco a cada requisição. Para promover alguém: `update users set is_staff = true where email = '…';` — não há rota para isso, de propósito.
 - As rotas `/auth` respondem com `Cache-Control: no-store`.
 - O CORS aceita credenciais só das origens de `CORS_ORIGINS`. `REFRESH_TOKEN_DAYS` (padrão 7) e `COOKIE_SAMESITE` (`lax`, `strict` ou `none`; `none` força `Secure`) configuram o cookie.
 - Toda rota nova entra em `src/docs/openapi.ts` no mesmo PR.
