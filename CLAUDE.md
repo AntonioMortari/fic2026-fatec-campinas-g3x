@@ -200,12 +200,31 @@ versão `.html` ao lado, mais fácil de ler). Quando o documento evoluir, a v2 v
   React Query para todo dado vindo da API, Tailwind com os tokens do design system em `styles.css`.
   `components/ui/` são as peças (Button, TextField, Card…); `components/layout/` é a moldura
   (Layout, FocusedLayout, Header, BottomBar, Menu, Footer).
-- **Sessão do front-end**: o token vive só na memória do módulo (`services/session.ts`), nunca em
-  `localStorage`, `sessionStorage` ou cookie — qualquer script da página leria. Custo assumido:
-  **recarregar a página encerra a sessão** (medido). O refresh por cookie `httpOnly` é o próximo passo.
-  Um 401 em requisição que levou token limpa a sessão e `/entrar` avisa que ela terminou; 401 de senha
-  errada não conta (não havia token). `RequireAuth` manda quem não entrou para
-  `/entrar?voltar=<caminho>`, e o destino passa por `safeRedirect`, uma lista de caracteres permitidos.
+- **Sessão** (duas peças, de propósito): o **token de acesso** (JWT, 1 h) vive só na memória do módulo
+  (`services/session.ts`) — em `localStorage` qualquer script da página o leria. O que atravessa o
+  recarregar é o **token de renovação**: valor aleatório de 32 bytes num cookie `httpOnly`, `SameSite=Lax`,
+  `Path=/api/auth`, 7 dias (`utils/refresh-cookie.ts`), do qual o banco guarda só o SHA-256
+  (`refresh_tokens`). Ao abrir a página, `AuthProvider` chama `POST /auth/refresh` e recebe de volta o
+  usuário e um token de acesso novo; quando o token de acesso vence no meio do uso, o interceptor do
+  Axios renova **uma vez** e repete a requisição. Regras que não são dedutíveis:
+  - **o cookie gira a cada uso** (rotação). Dois usos paralelos gastariam o mesmo cookie, então a
+    renovação é de **uma requisição por vez** no front (`refreshSession`, medido sob StrictMode) e o
+    back-end tolera 10 s de reuso do cookie recém-trocado (duas abas abertas juntas). Passados os 10 s,
+    reuso de cookie já trocado é tratado como vazamento: **todas as sessões da conta são apagadas**
+    (apagadas, e não marcadas como revogadas — revogada ainda passaria dentro da tolerância; um teste de
+    integração pegou isso);
+  - **sair apaga a linha** do cookie (também sem tolerância) e o cookie do navegador;
+  - **`X-Requested-With` é obrigatório** em `/auth/refresh` e `/auth/logout`: cruzando sites, o cabeçalho
+    só passa por um preflight de CORS, que só as origens liberadas vencem. Reforça o `SameSite`;
+  - **`af-session` no `localStorage` é só uma dica** ("vale a pena pedir sessão ao abrir"), sem segredo.
+    Sem ela o visitante não faz requisição nenhuma e não vê `401` no console. Resposta do servidor
+    recusando o cookie → "sua sessão terminou"; **sem resposta (rede) a dica fica** e a página não
+    afirma que a sessão acabou;
+  - **domínios diferentes entre site e API** pedem `COOKIE_SAMESITE=none` (o cookie passa a `Secure`);
+  - 401 de senha errada não é sessão expirada: `/auth/login` e `/auth/register` não disparam renovação.
+  `RequireAuth` espera a restauração terminar antes de decidir (sem isso um recarregar em `/minha-conta`
+  cairia em `/entrar`), e manda quem não entrou para `/entrar?voltar=<caminho>`; o destino passa por
+  `safeRedirect`, uma lista de caracteres permitidos.
   Sair navega para `/` **com `flushSync` antes** de limpar a sessão: do contrário a página protegida
   ainda montada redireciona para `/entrar` (medido no navegador; o jsdom não mostra).
 - **Preferências de leitura** (A−/A/A+ e alto contraste) em Context API
@@ -226,14 +245,14 @@ Atualizado em 09/10/2026.
 | Estrutura do repositório (Anexo I, 3.2) | **pronto** |
 | `docs/originais/` | **pronto** — cópia do .zip da Submissão Institucional, conferida arquivo a arquivo com `diff` |
 | Back-end base: Express, CORS, helmet, erro único, validação, JWT, bcrypt, Swagger | **pronto** — 22 testes Jest; `/api/health` medido contra MySQL 8.4 real (200 com banco, 503 sem) |
-| Migrations (Umzug) | **pronto** — `up`/`down` medidos contra MySQL real; tabelas `events` e `users` |
+| Migrations (Umzug) | **pronto** — `up`/`down` medidos contra MySQL real; tabelas `events`, `users` e `refresh_tokens` |
 | Front-end base: Vite, React Router, React Query, Axios, Tailwind | **pronto** |
 | Design system — fundação visual (F1): tokens, Bitter local, escala de tipo, 3 níveis de elevação, Button (com estado "Enviando…"), TextField, PasswordField, PageHeader, ListItem, Card, DateBadge, Tabs, ChipFilter, EmptyState, BackLink, ActionBar, aviso fixo (toast) com ação | **pronto** — 49 testes Vitest; conferido no Chromium a 320, 390 e 1440px, com A+ no máximo e alto contraste: sem rolagem horizontal, nenhum alvo abaixo de 44px |
 | Estrutura (F2): cabeçalho, barra inferior, menu em folha (com a barra visível por baixo, como na 3a), rodapé, layout focado, link de pular, foco e fade de 150ms na troca de rota | **pronto** — Esc, retorno do foco e trava de rolagem medidos no Chromium. Uma rota pode trocar a barra inferior pela barra de ação com `handle: { hideBottomBar: true }`; **nenhuma tela usa isso ainda** |
 | Home (RF01, tarefa 4.1) | **pronta**: herói, "Por onde começar", "O que fazemos" e escolas conferidos lado a lado com as telas 2a e 6a, e "Próxima atividade" ligada à API de eventos (conferida no navegador com evento real; sem evento publicado ou com a API fora do ar, o bloco não aparece) |
 | Agenda (RF14, tarefa 4.2) | **pronta, com 4 diferenças do desenho listadas abaixo**: `/agenda` com abas Em breve / Já aconteceu, filtro por tipo (chips no celular, coluna no desktop), próximo evento em destaque, "+ Agenda" (`.ics`) e estados vazio, carregando e falha. Conferida no Chromium contra o backend e o MySQL reais, a 320, 390, 1024 e 1440px, com A+ no máximo e alto contraste. Backend: `GET /api/events` e `GET /api/events/:id/calendar.ics`, 39 testes unitários + 7 de integração |
 | Eventos no banco | **tabela e API prontas, mas NINGUÉM consegue criar evento ainda** — o cadastro pela equipe é o RF13 e não existe. Hoje só por SQL. A agenda em produção abre vazia |
-| Cadastro e login (RF08, RF09, RF10, RF12) | **prontos, com RF10 parcial**: `/entrar` (abas Entrar / Criar conta), `/minha-conta` (só a ficha, leitura), cabeçalho com o primeiro nome + "Sair", bloco "Sua conta" no menu. Backend: 45 testes unitários + 13 de integração (corpo hostil, cadastro simultâneo → 201 + 409, hash gravado, acento e emoji no nome). Conferido no Chromium contra a API e o MySQL reais a 320, 390 e 1440px, com A+ e alto contraste: sem rolagem lateral, nenhum alvo abaixo de 44px, token fora de storage e cookie, recarregar derruba a sessão, `is_staff` continua 0 com corpo hostil. **Falta: recuperar senha** (exige envio de e-mail, que depende de escolher o provedor) |
+| Cadastro e login (RF08, RF09, RF10, RF12) | **prontos, com RF10 parcial**: `/entrar` (abas Entrar / Criar conta), `/minha-conta` (só a ficha, leitura), cabeçalho com o primeiro nome + "Sair", bloco "Sua conta" no menu. **A sessão sobrevive ao recarregar** (cookie de renovação `httpOnly` + token de acesso em memória; ver Arquitetura). Backend: 63 testes unitários de auth/sessão + 25 de integração (corpo hostil, cadastro simultâneo → 201 + 409, hash gravado, rotação, reuso, logout, conta apagada). Conferido no Chromium contra a API e o MySQL reais a 320, 390 e 1440px, com A+ e alto contraste: sem rolagem lateral, nenhum alvo abaixo de 44px, o script da página só enxerga `af-session=1` (cookie `httpOnly` invisível, token fora de storage), recarregar mantém a sessão, duas abas recarregando juntas ficam as duas logadas, token de acesso vencido é renovado sem a pessoa notar (`401` → `refresh` → repete), sair apaga o cookie e recarregar não restaura, `is_staff` continua 0 com corpo hostil. **Ainda não medido:** `COOKIE_SAMESITE=none` entre domínios de verdade, e HTTPS (`Secure`) — só há `localhost`. **Falta: recuperar senha** (exige envio de e-mail, que depende de escolher o provedor) |
 | Contas — o que ainda falta | RF11 só tem a ficha (sem editar dados nem candidaturas e doações, que não existem). **Ninguém é equipe ainda**: só por SQL. **Sem limite de tentativas de login** — adiado de propósito: sem saber a topologia do deploy (proxy confiável), um limite por IP trancaria uma escola inteira atrás do mesmo IP. O texto do "lead" de `/entrar` não promete candidatura nem doação, que ainda não existem |
 | Páginas | Home, agenda, entrar, minha conta, 404 e catálogo. Os outros links do menu levam ao 404 até cada tela ser migrada |
 | Docker Compose (MySQL + API + front) | **escrito** — o MySQL subiu e foi usado; as imagens do back-end e do front não foram construídas neste ambiente (o `npm ci` dentro do container não alcança o registro do npm daqui) |

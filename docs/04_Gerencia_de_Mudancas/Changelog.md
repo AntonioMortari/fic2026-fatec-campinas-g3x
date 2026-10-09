@@ -119,8 +119,9 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   - "Sem JavaScript" **deixa de valer**: não existe formulário que funcione sem script numa aplicação
     de página única. A verificação passa a ser que o servidor recusa tudo o que o navegador deixaria
     passar (maioridade, consentimento, papel de equipe) — testado no back-end com corpo montado à mão.
-  - A sessão é um JWT guardado **só na memória** da página. Recarregar encerra a sessão; a renovação
-    automática (refresh token em cookie `httpOnly`) fica para um próximo PR.
+  - A sessão tem duas peças: um JWT de acesso de 1 hora **só na memória** da página, e um token de
+    renovação de 7 dias num cookie `httpOnly` (no banco guarda-se só o hash), trocado a cada uso. Recarregar
+    a página mantém a sessão; sair a encerra no servidor. Nenhum token fica em `localStorage`.
   - O papel de equipe segue sem entrar pelo cadastro; o esquema Zod descarta o campo e a coluna nasce
     `false` (critério de RF08 mantido, e mais forte: há teste contra o MySQL real).
   - Maioridade (RN01) e consentimento ficam gravados como **data e hora**, e não como um booleano.
