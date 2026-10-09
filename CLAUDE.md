@@ -188,11 +188,26 @@ versão `.html` ao lado, mais fácil de ler). Quando o documento evoluir, a v2 v
 - **Eventos**: a API pública só devolve `published = true`; a tela nunca recebe rascunho.
   `period=upcoming` é `COALESCE(ends_at, starts_at) >= agora`, e `past` é o complemento escrito por
   extenso (não `NOT`). Horários guardados em UTC e exibidos no fuso de São Paulo.
+- **Autenticação (RF08, RF10, RF12)**: `POST /api/auth/register|login`, `GET /api/auth/me`. O cadastro
+  grava só colunas listadas à mão (`auth.service.ts`), com `is_staff` fixo em `false` — o esquema Zod
+  descarta o resto, e há teste de integração com corpo hostil. A senha é bcrypt custo 12 (limite de
+  72 *bytes*, validado). O login compara contra um hash fixo quando o e-mail não existe, para que o
+  tempo de resposta não revele quem tem conta; a frase de credencial errada é a mesma nos dois casos.
+  `409 email_taken` revela que o e-mail existe — troca aceita, porque sem ela a pessoa não sabe que
+  deve entrar em vez de cadastrar. Maioridade e consentimento são gravados como data, não como booleano.
 - **Swagger** em `src/docs/openapi.ts`: rota nova entra lá no mesmo PR.
 - **Front-end** (`frontend/src`): rotas em `routes.tsx`, uma instância Axios em `services/api.ts`,
   React Query para todo dado vindo da API, Tailwind com os tokens do design system em `styles.css`.
   `components/ui/` são as peças (Button, TextField, Card…); `components/layout/` é a moldura
   (Layout, FocusedLayout, Header, BottomBar, Menu, Footer).
+- **Sessão do front-end**: o token vive só na memória do módulo (`services/session.ts`), nunca em
+  `localStorage`, `sessionStorage` ou cookie — qualquer script da página leria. Custo assumido:
+  **recarregar a página encerra a sessão** (medido). O refresh por cookie `httpOnly` é o próximo passo.
+  Um 401 em requisição que levou token limpa a sessão e `/entrar` avisa que ela terminou; 401 de senha
+  errada não conta (não havia token). `RequireAuth` manda quem não entrou para
+  `/entrar?voltar=<caminho>`, e o destino passa por `safeRedirect`, uma lista de caracteres permitidos.
+  Sair navega para `/` **com `flushSync` antes** de limpar a sessão: do contrário a página protegida
+  ainda montada redireciona para `/entrar` (medido no navegador; o jsdom não mostra).
 - **Preferências de leitura** (A−/A/A+ e alto contraste) em Context API
   (`contexts/ReadingPreferencesProvider.tsx`), aplicadas como `data-font-scale`/`data-contrast` no
   `<html>` e reaplicadas por um script em `index.html` antes da primeira pintura. Alto contraste é
@@ -204,21 +219,23 @@ versão `.html` ao lado, mais fácil de ler). Quando o documento evoluir, a v2 v
 
 ## Status por módulo
 
-Atualizado em 08/10/2026.
+Atualizado em 09/10/2026.
 
 | Item | Status |
 |---|---|
 | Estrutura do repositório (Anexo I, 3.2) | **pronto** |
 | `docs/originais/` | **pronto** — cópia do .zip da Submissão Institucional, conferida arquivo a arquivo com `diff` |
 | Back-end base: Express, CORS, helmet, erro único, validação, JWT, bcrypt, Swagger | **pronto** — 22 testes Jest; `/api/health` medido contra MySQL 8.4 real (200 com banco, 503 sem) |
-| Migrations (Umzug) | **pronto** — `up`/`down` medidos contra MySQL real; nenhuma tabela ainda |
+| Migrations (Umzug) | **pronto** — `up`/`down` medidos contra MySQL real; tabelas `events` e `users` |
 | Front-end base: Vite, React Router, React Query, Axios, Tailwind | **pronto** |
 | Design system — fundação visual (F1): tokens, Bitter local, escala de tipo, 3 níveis de elevação, Button (com estado "Enviando…"), TextField, PasswordField, PageHeader, ListItem, Card, DateBadge, Tabs, ChipFilter, EmptyState, BackLink, ActionBar, aviso fixo (toast) com ação | **pronto** — 49 testes Vitest; conferido no Chromium a 320, 390 e 1440px, com A+ no máximo e alto contraste: sem rolagem horizontal, nenhum alvo abaixo de 44px |
 | Estrutura (F2): cabeçalho, barra inferior, menu em folha (com a barra visível por baixo, como na 3a), rodapé, layout focado, link de pular, foco e fade de 150ms na troca de rota | **pronto** — Esc, retorno do foco e trava de rolagem medidos no Chromium. Uma rota pode trocar a barra inferior pela barra de ação com `handle: { hideBottomBar: true }`; **nenhuma tela usa isso ainda** |
 | Home (RF01, tarefa 4.1) | **pronta**: herói, "Por onde começar", "O que fazemos" e escolas conferidos lado a lado com as telas 2a e 6a, e "Próxima atividade" ligada à API de eventos (conferida no navegador com evento real; sem evento publicado ou com a API fora do ar, o bloco não aparece) |
 | Agenda (RF14, tarefa 4.2) | **pronta, com 4 diferenças do desenho listadas abaixo**: `/agenda` com abas Em breve / Já aconteceu, filtro por tipo (chips no celular, coluna no desktop), próximo evento em destaque, "+ Agenda" (`.ics`) e estados vazio, carregando e falha. Conferida no Chromium contra o backend e o MySQL reais, a 320, 390, 1024 e 1440px, com A+ no máximo e alto contraste. Backend: `GET /api/events` e `GET /api/events/:id/calendar.ics`, 39 testes unitários + 7 de integração |
 | Eventos no banco | **tabela e API prontas, mas NINGUÉM consegue criar evento ainda** — o cadastro pela equipe é o RF13 e não existe. Hoje só por SQL. A agenda em produção abre vazia |
-| Páginas | Home, agenda, 404 e catálogo. Os outros links do menu levam ao 404 até cada tela ser migrada |
+| Cadastro e login (RF08, RF09, RF10, RF12) | **prontos, com RF10 parcial**: `/entrar` (abas Entrar / Criar conta), `/minha-conta` (só a ficha, leitura), cabeçalho com o primeiro nome + "Sair", bloco "Sua conta" no menu. Backend: 45 testes unitários + 13 de integração (corpo hostil, cadastro simultâneo → 201 + 409, hash gravado, acento e emoji no nome). Conferido no Chromium contra a API e o MySQL reais a 320, 390 e 1440px, com A+ e alto contraste: sem rolagem lateral, nenhum alvo abaixo de 44px, token fora de storage e cookie, recarregar derruba a sessão, `is_staff` continua 0 com corpo hostil. **Falta: recuperar senha** (exige envio de e-mail, que depende de escolher o provedor) |
+| Contas — o que ainda falta | RF11 só tem a ficha (sem editar dados nem candidaturas e doações, que não existem). **Ninguém é equipe ainda**: só por SQL. **Sem limite de tentativas de login** — adiado de propósito: sem saber a topologia do deploy (proxy confiável), um limite por IP trancaria uma escola inteira atrás do mesmo IP. O texto do "lead" de `/entrar` não promete candidatura nem doação, que ainda não existem |
+| Páginas | Home, agenda, entrar, minha conta, 404 e catálogo. Os outros links do menu levam ao 404 até cada tela ser migrada |
 | Docker Compose (MySQL + API + front) | **escrito** — o MySQL subiu e foi usado; as imagens do back-end e do front não foram construídas neste ambiente (o `npm ci` dentro do container não alcança o registro do npm daqui) |
 | Funcionalidades (RF01–RF39) | **falta** — migrar de `venturus-atelie`, um RF por PR |
 | Deploy | **falta** |

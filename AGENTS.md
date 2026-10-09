@@ -49,3 +49,4 @@ arquitetura, comandos, status — está em `CLAUDE.md`.
     `docs/04_Gerencia_de_Mudancas/Changelog.md` no mesmo PR.
 11. **Rodar os testes antes de propor o PR**: `npm test` e `npm run typecheck` em `backend/` e em
     `frontend/`.
+| 09/10/2026 | Claude Code (Anthropic) | Cadastro e login (RF08, RF10, RF12): migration, model, service e rotas de autenticação com testes unitários e de integração; sessão em memória, formulários, rota protegida, cabeçalho e menu no front-end; ajuste no `docker-compose.yml` para aplicar as migrations ao subir | `feat/auth` | _a preencher_ |
