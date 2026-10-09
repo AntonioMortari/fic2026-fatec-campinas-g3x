@@ -177,3 +177,25 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **O que não muda:** a paleta da ONG. O vermelho é só de erro; não substitui ocre, azul nem marrom.
 - **PR:** branch `feat/error-color`
 
+## 2026-10-09 — RF15 (Inscrição em evento): com conta também, e o que a troca de stack muda
+- **Artefato:** Requisitos (RF15) · Arquitetura
+- **Antes:** o critério diz "inscrição sem conta … funciona sem sessão e sem JavaScript", com a vaga
+  conferida no banco, a confirmação por e-mail (RF18) e a leitura pela equipe (RF16).
+- **Depois:**
+  - A inscrição funciona **sem conta e também com conta** (pedido do grupo). Com conta, os dados
+    entram preenchidos e a inscrição fica ligada à conta; sem conta, nada muda.
+  - "Sem JavaScript" **deixa de valer** (aplicação de página única), como já registrado para RF08 e RF10.
+    O que continua valendo, e é testado: a validação inteira roda no servidor.
+  - A vaga é conferida **no banco, com a linha do evento travada**, numa transação, e há teste de
+    concorrência contra o MySQL real.
+  - A agenda e a home passam a mostrar as **vagas restantes** em vez da capacidade.
+  - O limite contra abuso é **por e-mail e por evento** (5 pessoas); o limite por IP segue adiado.
+- **O que o critério não cobria e foi decidido aqui:** a mesma pessoa não se inscreve duas vezes no mesmo
+  evento; "Inscrever outra pessoa" logo depois de inscrever; a lista de inscritos não se apaga junto com o
+  evento (o banco recusa).
+- **O que não existe ainda:** a leitura dos inscritos pela equipe (RF16) e o e-mail de confirmação
+  (RF18). O texto da tela **não promete** e-mail.
+- **Confirmar com a ONG:** o formulário de levantamento que ela enviou não diz "sem conta" nem "com conta"
+  para a inscrição; só lista voluntários e doadores como tipos de conta e pede para facilitar as inscrições.
+- **PR:** branch `feat/event-registration`
+

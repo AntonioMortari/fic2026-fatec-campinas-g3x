@@ -54,4 +54,5 @@ arquitetura, comandos, status — está em `CLAUDE.md`.
 | 09/10/2026 | Claude Code (Anthropic) | Moldura própria do painel da equipe conforme a tela 2c: cabeçalho escuro, barra inferior do painel, home com ações rápidas, menu "Mais" com a conta primeiro; 404 do painel dentro da moldura pública | `feat/admin-shell` | _a preencher_ |
 | 09/10/2026 | Claude Code (Anthropic) | Cor de erro do design system (tokens, ícone, campo, aviso, estado de falha e aviso fixo) como padrão para os próximos formulários | `feat/error-color` | _a preencher_ |
 | 09/10/2026 | Claude Code (Anthropic) | Seed de desenvolvimento com uma conta de equipe e uma comum, travada contra produção e contra banco remoto; ligada ao `docker compose up` | `feat/dev-seed` | _a preencher_ |
+| 09/10/2026 | Claude Code (Anthropic) | Inscrição em evento com e sem conta (RF15): tabela, vaga conferida com a linha do evento travada, CPF condicional, responsável de menor, limite por e-mail; formulário, vagas restantes na agenda e na home | `feat/event-registration` | _a preencher_ |
 
