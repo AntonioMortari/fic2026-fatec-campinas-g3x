@@ -31,6 +31,7 @@ alguma obrigatória faltar ou for inválida — o erro diz qual.
 | `DB_NAME`, `DB_USER`, `DB_PASSWORD` | sim | banco e credenciais |
 | `JWT_SECRET` | sim | chave de assinatura do JWT, mínimo de 32 caracteres |
 | `JWT_EXPIRES_IN` | não | validade do token (padrão `1h`) |
+| `TRUST_PROXY` | não | quantos proxies há entre a internet e a API (padrão `0`). **No deploy, precisa ser o número certo**: com `0` atrás de um proxy todo visitante parece ter o IP do proxy e o limite de inscrições por conexão vira um balde só; alto demais, o IP pode ser forjado pelo cabeçalho `X-Forwarded-For` |
 
 ## Execução
 
@@ -94,6 +95,8 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 |---|---|
 | `GET /api/health` | API e banco respondendo |
 | `GET /api/events?period=upcoming\|past&limit=` | eventos **publicados**; `upcoming` do mais próximo ao mais distante, `past` do mais recente ao mais antigo |
+| `GET /api/events/:id` | um evento publicado, com `requiresCpf`, `spotsLeft` e `registrationsOpen` (o que o formulário de inscrição precisa) |
+| `POST /api/events/:id/registrations` | inscreve alguém, **com ou sem conta** (RF15). Com token, liga a inscrição à conta; token ruim dá 401. Vaga conferida no banco com a linha do evento travada; CPF só se o evento pede; responsável obrigatório para menor; 409 `event_full`/`registrations_closed`/`already_registered`; 429 acima de 5 pessoas por e-mail no evento ou de 30 inscrições por hora vindas da mesma conexão (o IP nunca é gravado, só um HMAC) |
 | `GET /api/events/:id/calendar.ics` | o evento como arquivo de calendário; 404 se não existe ou não está publicado |
 | `POST /api/auth/register` | cria a conta e já devolve `{ token, user }` (201). 400 sem maioridade (RN01), sem consentimento ou sem ao menos uma forma de participar; 409 `email_taken` se o e-mail já existe |
 | `POST /api/auth/login` | `{ token, user }`; 401 `invalid_credentials` com a mesma frase para e-mail inexistente e senha errada |
@@ -102,6 +105,7 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 | `GET /api/admin/events` · `GET /api/admin/events/:id` | **só equipe**: todos os eventos, rascunhos incluídos |
 | `POST /api/admin/events` · `PUT /api/admin/events/:id` | **só equipe**: cria (sempre rascunho) e corrige um evento. Data e hora como `2026-11-20T15:00`, lidas no horário de São Paulo; limite de vagas e `requiresCpf` opcionais. Não aceitam `published` |
 | `PATCH /api/admin/events/:id/publication` | **só equipe**: `{ "published": true \| false }`, o único caminho que publica ou tira do ar. Não existe `DELETE` |
+| `GET /api/admin/events/:id/registrations` · `.csv` | **só equipe** (RF16): inscritos com contato, CPF, responsável e autorização de imagem; a planilha usa `;`, BOM UTF-8 e neutraliza fórmulas. Só leitura, sem cache |
 | `GET /api/auth/me` | a ficha de quem está autenticado; 401 sem token válido, ou se a conta foi apagada |
 
 ### Contratos da API

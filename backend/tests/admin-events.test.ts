@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 import { createApp } from '../src/app';
-import { Event, User } from '../src/models';
+import { Event, Registration, User } from '../src/models';
 import { signToken } from '../src/utils/token';
 
 const app = createApp();
@@ -46,6 +46,10 @@ function storedEvent(overrides: Record<string, unknown> = {}) {
 function asStaff(isStaff: boolean) {
   jest.spyOn(User, 'findByPk').mockResolvedValue({ id: STAFF_ID, isStaff } as unknown as User);
 }
+
+beforeEach(() => {
+  jest.spyOn(Registration, 'findAll').mockResolvedValue([]);
+});
 
 afterEach(() => jest.restoreAllMocks());
 

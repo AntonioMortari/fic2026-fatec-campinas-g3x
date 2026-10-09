@@ -17,7 +17,12 @@ function Category({ event, isNext }: { event: EventSummary; isNext: boolean }) {
   return <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-blue-deep">{text}</span>
 }
 
+function SoldOut({ className }: { className?: string }) {
+  return <span className={cn('inline-flex min-h-11 items-center font-semibold text-brown-400', className)}>Vagas esgotadas</span>
+}
+
 function RegisterLink({ event, className }: { event: EventSummary; className?: string }) {
+  if (event.spotsLeft === 0) return <SoldOut />
   return (
     <Link to={`/agenda/${event.id}/inscricao`} className={className}>
       Inscrever <span className="sr-only">em {event.title}</span>
@@ -34,14 +39,18 @@ export function EventCard({ event, variant, isNext = false }: EventCardProps) {
           <div className="flex min-w-0 flex-col gap-1 desktop:gap-1.5">
             <Category event={event} isNext={isNext} />
             <h3 className="m-0 text-h3 leading-tight font-bold desktop:text-[2rem]">{event.title}</h3>
-            <p className="m-0 text-small text-brown-400 desktop:text-body">{eventMeta(event)}</p>
+            <p className="m-0 text-small text-brown-400 desktop:text-body">{eventMeta(event, { withCapacity: event.spotsLeft !== 0 })}</p>
             {event.description && <p className="m-0 mt-1.5 hidden text-body text-brown-600 desktop:block">{event.description}</p>}
           </div>
         </div>
         <div className="grid grid-cols-[1fr_auto] gap-2 px-4 pb-4 desktop:flex desktop:items-end desktop:px-7 desktop:pb-7">
-          <Button to={`/agenda/${event.id}/inscricao`} size="compact" className="min-h-12 desktop:px-6">
-            Quero me inscrever <span className="sr-only">em {event.title}</span>
-          </Button>
+          {event.spotsLeft === 0 ? (
+            <SoldOut className="px-2" />
+          ) : (
+            <Button to={`/agenda/${event.id}/inscricao`} size="compact" className="min-h-12 desktop:px-6">
+              Quero me inscrever <span className="sr-only">em {event.title}</span>
+            </Button>
+          )}
           <Button href={calendarUrl(event.id)} variant="secondary" size="compact" className="min-h-12 desktop:px-5">
             + Agenda <span className="sr-only">: adicionar {event.title} ao calendário</span>
           </Button>
@@ -57,7 +66,7 @@ export function EventCard({ event, variant, isNext = false }: EventCardProps) {
         <div className="flex min-w-0 flex-col gap-1">
           <Category event={event} isNext={false} />
           <h3 className="m-0 text-h3 leading-tight font-bold desktop:text-[1.375rem]">{event.title}</h3>
-          <p className="m-0 text-small text-brown-400 desktop:text-[0.9375rem]">{eventMeta(event, { withCapacity: variant === 'row' })}</p>
+          <p className="m-0 text-small text-brown-400 desktop:text-[0.9375rem]">{eventMeta(event, { withCapacity: variant === 'row' && event.spotsLeft !== 0 })}</p>
         </div>
       </div>
       {variant === 'row' && (

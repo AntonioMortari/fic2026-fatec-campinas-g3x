@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import request from 'supertest';
 import { createApp } from '../src/app';
-import { Event } from '../src/models';
+import { Event, Registration } from '../src/models';
 
 const app = createApp();
 
@@ -20,6 +20,10 @@ function fakeEvent(overrides: Partial<Record<string, unknown>> = {}) {
     ...overrides,
   } as unknown as Event;
 }
+
+beforeEach(() => {
+  jest.spyOn(Registration, 'findAll').mockResolvedValue([]);
+});
 
 afterEach(() => jest.restoreAllMocks());
 
@@ -40,6 +44,7 @@ describe('GET /api/events', () => {
       location: 'Sede, Vila Romero',
       ageRange: 'Livre',
       capacity: 18,
+      spotsLeft: 18,
     });
     const options = findAll.mock.calls[0]![0]!;
     expect(options.where).toMatchObject({ published: true });
@@ -65,7 +70,7 @@ describe('GET /api/events', () => {
     const response = await request(app).get('/api/events');
 
     expect(Object.keys(response.body.data[0]).sort()).toEqual(
-      ['ageRange', 'capacity', 'category', 'description', 'endsAt', 'id', 'location', 'startsAt', 'title'].sort(),
+      ['ageRange', 'capacity', 'category', 'description', 'endsAt', 'id', 'location', 'spotsLeft', 'startsAt', 'title'].sort(),
     );
   });
 

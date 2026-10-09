@@ -21,10 +21,15 @@ export function formatTimeRange(event: Pick<EventSummary, 'startsAt' | 'endsAt'>
   return event.endsAt ? `${start}–${formatTime(event.endsAt)}` : start
 }
 
+export function spotsText(event: Pick<EventSummary, 'spotsLeft'>): string | null {
+  if (event.spotsLeft === null) return null
+  if (event.spotsLeft === 0) return 'Vagas esgotadas'
+  return event.spotsLeft === 1 ? '1 vaga restante' : `${event.spotsLeft} vagas restantes`
+}
+
 export function eventMeta(event: EventSummary, options: { withCapacity?: boolean } = {}): string {
   const { withCapacity = true } = options
-  const capacity = event.capacity === null ? null : event.capacity === 1 ? '1 vaga' : `${event.capacity} vagas`
-  return [formatTimeRange(event), event.location ?? 'Local a confirmar', event.ageRange, withCapacity ? capacity : null]
+  return [formatTimeRange(event), event.location ?? 'Local a confirmar', event.ageRange, withCapacity ? spotsText(event) : null]
     .filter(Boolean)
     .join(' · ')
 }

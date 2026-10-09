@@ -185,6 +185,7 @@ export function ComponentCatalog() {
               location: 'Sede, Vila Romero',
               ageRange: 'Livre',
               capacity: null,
+              spotsLeft: null,
             }}
           />
         </div>

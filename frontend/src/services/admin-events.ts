@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AdminEvent, EventInput } from '../types/admin-event'
+import type { RegistrationsList } from '../types/admin-registration'
 import { api } from './api'
 
 const KEY = ['admin-events']
@@ -41,4 +42,26 @@ export function useSetPublication() {
       (await api.patch<{ event: AdminEvent }>(`/admin/events/${id}/publication`, { published })).data.event,
     onSuccess: refresh,
   })
+}
+
+export function useAdminRegistrations(id: string | undefined) {
+  return useQuery({
+    queryKey: [...KEY, id, 'registrations'],
+    queryFn: async () => (await api.get<RegistrationsList>(`/admin/events/${id}/registrations`)).data,
+    enabled: Boolean(id),
+  })
+}
+
+export async function downloadRegistrationsCsv(id: string): Promise<void> {
+  const response = await api.get<Blob>(`/admin/events/${id}/registrations.csv`, { responseType: 'blob' })
+  const disposition = String(response.headers['content-disposition'] ?? '')
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? 'inscritos.csv'
+  const url = URL.createObjectURL(response.data)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.append(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
 }

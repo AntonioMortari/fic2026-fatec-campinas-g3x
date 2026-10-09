@@ -24,7 +24,9 @@ export function AdminEventCard({ event, busy, onPublication }: AdminEventCardPro
             {event.published ? 'Publicado' : 'Rascunho'}
           </span>
           <h3 className="m-0 text-h3 leading-tight font-bold">{event.title}</h3>
-          <p className="m-0 text-small text-brown-400">{eventMeta(event)}</p>
+          <p className="m-0 text-small text-brown-400">
+            {eventMeta(event)} · {event.registrationCount === 1 ? '1 inscrição' : `${event.registrationCount} inscrições`}
+          </p>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -39,6 +41,9 @@ export function AdminEventCard({ event, busy, onPublication }: AdminEventCardPro
           onClick={() => onPublication(!event.published)}
         >
           {event.published ? 'Tirar do ar' : 'Publicar'} <span className="sr-only">{event.title}</span>
+        </Button>
+        <Button to={`/admin/eventos/${event.id}/inscritos`} variant="secondary" size="compact" className="col-span-2 min-h-12">
+          Ver inscritos ({event.registrationCount}) <span className="sr-only">de {event.title}</span>
         </Button>
       </div>
     </Card>

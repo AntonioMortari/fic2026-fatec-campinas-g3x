@@ -10,6 +10,7 @@ import { useRouteFocus } from './useRouteFocus'
 
 export interface RouteHandle {
   hideBottomBar?: boolean
+  backTo?: string
 }
 
 export function Layout({ children }: { children?: ReactNode }) {

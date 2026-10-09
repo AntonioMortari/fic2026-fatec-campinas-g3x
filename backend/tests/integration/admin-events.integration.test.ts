@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { createApp } from '../../src/app';
 import { migrator } from '../../src/database/migrate';
-import { Event, RefreshToken, sequelize, User } from '../../src/models';
+import { Event, RefreshToken, Registration, sequelize, User } from '../../src/models';
 
 const app = createApp();
 
@@ -48,6 +48,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  await Registration.destroy({ where: {} });
   await Event.destroy({ where: {} });
   await RefreshToken.destroy({ where: {} });
   await User.destroy({ where: {} });

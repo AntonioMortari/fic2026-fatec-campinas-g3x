@@ -21,6 +21,8 @@ const schema = z.object({
   JWT_SECRET: z.string().min(32, 'JWT_SECRET precisa de pelo menos 32 caracteres'),
   JWT_EXPIRES_IN: z.string().default('1h'),
   REFRESH_TOKEN_DAYS: z.coerce.number().int().min(1).max(90).default(7),
+  // How many proxies stand between the internet and this process; 0 when none does. Wrong in either direction breaks the per-origin limit.
+  TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(0),
   COOKIE_SAMESITE: z.enum(['lax', 'strict', 'none']).default('lax'),
 });
 

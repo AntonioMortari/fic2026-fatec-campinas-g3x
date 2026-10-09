@@ -21,10 +21,14 @@ export function NextActivity({ event }: { event: EventSummary }) {
             <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-blue-deep">{event.category}</span>
           )}
           <h3 className="m-0 text-item font-bold desktop:text-[1.375rem]">{event.title}</h3>
-          <span className="text-small text-brown-400 desktop:text-[0.9375rem]">{eventMeta(event)}</span>
-          <Link to={`/agenda/${event.id}/inscricao`} className="mt-1.5 inline-flex min-h-11 items-center font-semibold">
-            Quero me inscrever
-          </Link>
+          <span className="text-small text-brown-400 desktop:text-[0.9375rem]">{eventMeta(event, { withCapacity: event.spotsLeft !== 0 })}</span>
+          {event.spotsLeft === 0 ? (
+            <span className="mt-1.5 inline-flex min-h-11 items-center font-semibold text-brown-400">Vagas esgotadas</span>
+          ) : (
+            <Link to={`/agenda/${event.id}/inscricao`} className="mt-1.5 inline-flex min-h-11 items-center font-semibold">
+              Quero me inscrever
+            </Link>
+          )}
         </div>
       </article>
     </section>

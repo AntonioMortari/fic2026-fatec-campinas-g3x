@@ -3,6 +3,7 @@ import type { EventSummary } from './event'
 export interface AdminEvent extends EventSummary {
   requiresCpf: boolean
   published: boolean
+  registrationCount: number
   updatedAt: string
 }
 

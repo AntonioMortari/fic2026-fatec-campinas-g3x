@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { toLocalInput } from '../lib/dates'
 import type { AdminEvent } from '../types/admin-event'
 import { apiError, fakeUser, mockApi } from './auth-support'
@@ -23,11 +23,13 @@ const draft: AdminEvent = {
   location: 'Casa Verde',
   ageRange: 'Livre',
   capacity: 30,
+  spotsLeft: 30,
+  registrationCount: 0,
   requiresCpf: true,
   published: false,
   updatedAt: '2030-01-01T00:00:00.000Z',
 }
-const live: AdminEvent = { ...draft, id: '22222222-2222-4222-8222-222222222222', title: 'Oficina de turbantes', published: true, capacity: null, requiresCpf: false }
+const live: AdminEvent = { ...draft, id: '22222222-2222-4222-8222-222222222222', title: 'Oficina de turbantes', published: true, capacity: null, spotsLeft: null, registrationCount: 12, requiresCpf: false }
 
 function openAs(account: typeof fakeUser | null, handlers: Handlers = {}) {
   if (account) localStorage.setItem('af-session', '1')
@@ -91,6 +93,15 @@ describe('the list of events', () => {
     expect(screen.getByRole('heading', { name: 'Publicados (1)' })).toBeInTheDocument()
     expect(screen.getByText('Rascunho', { selector: 'span' })).toBeInTheDocument()
     expect(screen.getByText('Publicado', { selector: 'span' })).toBeInTheDocument()
+  })
+
+  it('says how many people signed up, in each event', async () => {
+    openAs(STAFF, list([draft, live]))
+    renderRoute('/admin/eventos')
+    await screen.findByRole('heading', { name: 'Contação de histórias' })
+
+    expect(screen.getByText(/0 inscrições/)).toBeInTheDocument()
+    expect(screen.getByText(/12 inscrições/)).toBeInTheDocument()
   })
 
   it('explains that saving does not publish and that events are not deleted, and offers no way to delete', async () => {
@@ -293,5 +304,98 @@ describe('toLocalInput', () => {
     expect(toLocalInput('2030-11-20T18:00:00.000Z')).toBe('2030-11-20T15:00')
     expect(toLocalInput('2030-11-21T01:30:00.000Z')).toBe('2030-11-20T22:30')
     expect(toLocalInput('2030-01-01T02:59:00.000Z')).toBe('2029-12-31T23:59')
+  })
+})
+
+describe('the registrants of an event (RF16)', () => {
+  const registrants = [
+    { id: 'r1', name: 'Ana Souza', email: 'ana@exemplo.com', phone: '11953968344', cpf: '52998224725', isMinor: false, guardianName: null, guardianPhone: null, imageAuthorized: true, hasAccount: true, createdAt: '2030-11-01T12:00:00.000Z' },
+    { id: 'r2', name: 'Caio Lima', email: 'responsavel@exemplo.com', phone: null, cpf: null, isMinor: true, guardianName: 'Maria Lima', guardianPhone: '11912345678', imageAuthorized: false, hasAccount: false, createdAt: '2030-11-02T12:00:00.000Z' },
+  ]
+  const route = `GET /admin/events/${live.id}/registrations`
+  const page = (data = registrants): Handlers => ({ [route]: () => ({ status: 200, data: { event: live, data } }) })
+
+  it('is only for staff', async () => {
+    openAs(fakeUser)
+    renderRoute(`/admin/eventos/${live.id}/inscritos`)
+
+    expect(await screen.findByRole('heading', { name: 'Página não encontrada' })).toBeInTheDocument()
+    expect(calls(route)).toHaveLength(0)
+  })
+
+  it('is reached from each event of the list, with the count', async () => {
+    openAs(STAFF, { 'GET /admin/events': () => ({ status: 200, data: { data: [live] } }) })
+    renderRoute('/admin/eventos')
+
+    expect(await screen.findByRole('link', { name: /Ver inscritos \(12\)/ })).toHaveAttribute('href', `/admin/eventos/${live.id}/inscritos`)
+  })
+
+  it('states the image authorization of every person, in words, and totals them', async () => {
+    openAs(STAFF, page())
+    renderRoute(`/admin/eventos/${live.id}/inscritos`)
+
+    expect(await screen.findByRole('heading', { name: 'Ana Souza' })).toBeInTheDocument()
+    expect(screen.getByText('Autorizou imagem')).toBeInTheDocument()
+    expect(screen.getByText('Não autorizou imagem')).toBeInTheDocument()
+    expect(screen.getByText(/2 pessoas inscritas · 1 autorizou o uso da imagem · 1 menor de idade/)).toBeInTheDocument()
+    expect(screen.getByText(/Oficina de turbantes/)).toBeInTheDocument()
+  })
+
+  it('shows contact as links and the guardian only for a minor, with the CPF only when there is one', async () => {
+    const user = userEvent.setup()
+    openAs(STAFF, page())
+    renderRoute(`/admin/eventos/${live.id}/inscritos`)
+    await screen.findByRole('heading', { name: 'Ana Souza' })
+    for (const summary of screen.getAllByText(/Contato e dados/)) await user.click(summary)
+
+    expect(screen.getByRole('link', { name: 'ana@exemplo.com' })).toHaveAttribute('href', 'mailto:ana@exemplo.com')
+    expect(screen.getByRole('link', { name: '(11) 95396-8344' })).toHaveAttribute('href', 'tel:11953968344')
+    expect(screen.getAllByText('529.982.247-25')).toHaveLength(1)
+    expect(screen.getAllByText('CPF')).toHaveLength(1)
+    expect(screen.getAllByText('Responsável')).toHaveLength(1)
+    expect(screen.getByText('Maria Lima')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '(11) 91234-5678' })).toHaveAttribute('href', 'tel:11912345678')
+  })
+
+  it('says when nobody signed up, and when it could not load', async () => {
+    openAs(STAFF, page([]))
+    renderRoute(`/admin/eventos/${live.id}/inscritos`)
+    expect(await screen.findByText('Ninguém se inscreveu ainda')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Baixar planilha' })).not.toBeInTheDocument()
+  })
+
+  it('answers the 404 for an event that does not exist', async () => {
+    openAs(STAFF, { [route]: () => apiError(404, 'event_not_found', 'x') })
+    renderRoute(`/admin/eventos/${live.id}/inscritos`)
+
+    expect(await screen.findByRole('heading', { name: 'Página não encontrada' })).toBeInTheDocument()
+  })
+
+  it('offers no way to edit or delete a registration', async () => {
+    openAs(STAFF, page())
+    renderRoute(`/admin/eventos/${live.id}/inscritos`)
+    await screen.findByRole('heading', { name: 'Ana Souza' })
+
+    expect(screen.queryByRole('button', { name: /apagar|excluir|remover|editar/i })).not.toBeInTheDocument()
+    expect(screen.getByText(/não se corrige nem se apaga/)).toBeInTheDocument()
+  })
+
+  it('downloads the spreadsheet with the name the server gives', async () => {
+    const user = userEvent.setup()
+    openAs(STAFF, {
+      ...page(),
+      [`GET /admin/events/${live.id}/registrations.csv`]: () => ({ status: 200, data: new Blob(['x']) }),
+    })
+    const created = vi.fn(() => 'blob:x')
+    vi.stubGlobal('URL', Object.assign(URL, { createObjectURL: created, revokeObjectURL: vi.fn() }))
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
+    renderRoute(`/admin/eventos/${live.id}/inscritos`)
+
+    await user.click(await screen.findByRole('button', { name: 'Baixar planilha' }))
+
+    await waitFor(() => expect(click).toHaveBeenCalledOnce())
+    expect(calls(`GET /admin/events/${live.id}/registrations.csv`)).toHaveLength(1)
+    click.mockRestore()
+    vi.unstubAllGlobals()
   })
 })

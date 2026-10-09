@@ -1,12 +1,18 @@
-import { Link, Outlet, useSearchParams } from 'react-router-dom'
+import { Link, Outlet, useMatches, useSearchParams } from 'react-router-dom'
+import { labelForRoute } from '../../lib/navigation'
 import { safeRedirect } from '../../lib/safe-redirect'
 import { Chevron } from '../ui/Chevron'
+import type { RouteHandle } from './Layout'
 import { SkipLink } from './SkipLink'
 import { useRouteFocus } from './useRouteFocus'
 
 export function FocusedLayout() {
   const [searchParams] = useSearchParams()
-  const back = safeRedirect(searchParams.get('voltar'))
+  const defaultBack = useMatches()
+    .map((match) => (match.handle as RouteHandle | undefined)?.backTo)
+    .findLast(Boolean)
+  const back = safeRedirect(searchParams.get('voltar'), defaultBack ?? '/')
+  const backLabel = back === '/' ? null : labelForRoute(back)
   useRouteFocus()
 
   return (
@@ -19,7 +25,7 @@ export function FocusedLayout() {
             className="flex min-h-11 items-center gap-2 px-3 text-[0.9375rem] font-semibold text-brown no-underline hover:text-brown"
           >
             <Chevron direction="left" />
-            Voltar
+            {backLabel ?? 'Voltar'}
           </Link>
         </div>
       </header>

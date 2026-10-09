@@ -85,6 +85,36 @@ export const openApiDocument = {
           location: { type: ['string', 'null'] },
           ageRange: { type: ['string', 'null'], example: 'Livre' },
           capacity: { type: ['integer', 'null'], minimum: 1 },
+          spotsLeft: { type: ['integer', 'null'], minimum: 0, description: 'Vagas que restam; null quando não há limite.' },
+        },
+      },
+      EventDetail: {
+        allOf: [
+          { $ref: '#/components/schemas/Event' },
+          {
+            type: 'object',
+            required: ['requiresCpf', 'registrationsOpen'],
+            properties: {
+              requiresCpf: { type: 'boolean', description: 'Se a inscrição pede o CPF (RN06).' },
+              registrationsOpen: { type: 'boolean', description: 'Falso quando o evento já acabou ou as vagas acabaram.' },
+            },
+          },
+        ],
+      },
+      RegistrationRequest: {
+        type: 'object',
+        required: ['name', 'email', 'consent'],
+        description: 'O que vem do corpo além disso é descartado, inclusive `userId`: a conta vem do token, nunca do corpo.',
+        properties: {
+          name: { type: 'string', maxLength: 120, description: 'De quem vai participar.' },
+          email: { type: 'string', format: 'email' },
+          phone: { type: ['string', 'null'], description: 'Opcional, com DDD.' },
+          cpf: { type: ['string', 'null'], description: 'Só é lido quando o evento pede (`requiresCpf`). Onze dígitos iguais são recusados.' },
+          isMinor: { type: 'boolean', default: false },
+          guardianName: { type: ['string', 'null'], description: 'Obrigatório se `isMinor`; descartado se não.' },
+          guardianPhone: { type: ['string', 'null'], description: 'Obrigatório se `isMinor`, com DDD; descartado se não.' },
+          imageAuthorized: { type: 'boolean', default: false, description: 'Opcional: dá para participar sem autorizar (RN07).' },
+          consent: { type: 'boolean', enum: [true], description: 'Obrigatório: concordância com o uso dos dados.' },
         },
       },
       AdminEvent: {
@@ -95,6 +125,7 @@ export const openApiDocument = {
             required: ['published', 'requiresCpf'],
             properties: {
               published: { type: 'boolean', description: 'Só muda por PATCH /admin/events/{id}/publication.' },
+              registrationCount: { type: 'integer', minimum: 0, description: 'Quantas pessoas se inscreveram.' },
               requiresCpf: { type: 'boolean', description: 'Se a inscrição pede CPF (RN06).' },
               updatedAt: { type: 'string', format: 'date-time' },
             },
@@ -249,6 +280,69 @@ export const openApiDocument = {
         },
       },
     },
+    '/admin/events/{id}/registrations': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Quem se inscreveu num evento, com contato, CPF e responsável (equipe)',
+        description: 'Dado pessoal: só a equipe lê, e a resposta não é guardada em cache. Ordem de chegada. Só leitura: não há como corrigir nem apagar uma inscrição por aqui.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'O evento e suas inscrições',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    event: { $ref: '#/components/schemas/AdminEvent' },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', format: 'uuid' },
+                          name: { type: 'string' },
+                          email: { type: 'string' },
+                          phone: { type: 'string', nullable: true, description: 'Só dígitos.' },
+                          cpf: { type: 'string', nullable: true, description: 'Só dígitos; só existe quando o evento exige CPF.' },
+                          isMinor: { type: 'boolean' },
+                          guardianName: { type: 'string', nullable: true },
+                          guardianPhone: { type: 'string', nullable: true },
+                          imageAuthorized: { type: 'boolean', description: 'RN07: se a pessoa autorizou o uso da imagem.' },
+                          hasAccount: { type: 'boolean' },
+                          createdAt: { type: 'string', format: 'date-time' },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Evento inexistente', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/events/{id}/registrations.csv': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Planilha dos inscritos (equipe)',
+        description:
+          'CSV com `;` e BOM UTF-8, para abrir direto no Excel em português. Células que começariam com `=`, `+`, `-` ou `@` levam um apóstrofo na frente: sem isso viram fórmula. ' +
+          'A coluna "Autorizou imagem" vem antes das de contato.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Arquivo CSV', content: { 'text/csv': { schema: { type: 'string' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Evento inexistente', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
     '/admin/events/{id}/publication': {
       patch: {
         tags: ['Admin'],
@@ -290,6 +384,37 @@ export const openApiDocument = {
             },
           },
           '400': { description: 'Parâmetros inválidos', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/events/{id}': {
+      get: {
+        tags: ['Events'],
+        summary: 'Um evento publicado, com o que o formulário de inscrição precisa',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'O evento', content: { 'application/json': { schema: { type: 'object', properties: { event: { $ref: '#/components/schemas/EventDetail' } } } } } },
+          '404': { description: 'Não existe ou não está publicado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/events/{id}/registrations': {
+      post: {
+        tags: ['Events'],
+        summary: 'Inscreve alguém num evento, com ou sem conta (RF15)',
+        description:
+          'Sem token, a inscrição é de um visitante. Com `Authorization: Bearer`, ela fica ligada à conta do token — e um token ruim responde 401 em vez de virar visitante, para o cliente renovar e repetir. ' +
+          'A vaga é conferida no banco com a linha do evento travada: duas pessoas enviando ao mesmo tempo não ocupam o mesmo último lugar. Cada e-mail inscreve até 5 pessoas por evento e cada conexão, até 30 por hora; o IP nunca é gravado, só um hash com chave.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{}, { bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/RegistrationRequest' } } } },
+        responses: {
+          '201': { description: 'Inscrição registrada; devolve o evento com as vagas já descontadas' },
+          '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Token enviado, mas inválido ou de conta que não existe mais', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Evento inexistente ou não publicado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: '`event_full`, `registrations_closed` (evento acabou) ou `already_registered`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '429': { description: '`too_many_registrations` (5 pessoas por e-mail no evento) ou `too_many_requests` (30 inscrições por hora vindas da mesma conexão)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },

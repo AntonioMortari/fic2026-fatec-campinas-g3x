@@ -12,6 +12,7 @@ function event(overrides: Partial<EventSummary> = {}): EventSummary {
     location: null,
     ageRange: null,
     capacity: null,
+    spotsLeft: null,
     ...overrides,
   }
 }
@@ -31,20 +32,25 @@ describe('formatTimeRange', () => {
 })
 
 describe('eventMeta', () => {
-  it('joins time, place, age range and capacity', () => {
-    const meta = eventMeta(event({ location: 'Sede, Vila Romero', ageRange: 'Livre', capacity: 18, endsAt: '2026-10-17T18:30:00.000Z' }))
+  it('joins time, place, age range and the spots that are left, not the capacity', () => {
+    const meta = eventMeta(event({ location: 'Sede, Vila Romero', ageRange: 'Livre', capacity: 18, spotsLeft: 11, endsAt: '2026-10-17T18:30:00.000Z' }))
 
-    expect(meta).toBe('14h–15h30 · Sede, Vila Romero · Livre · 18 vagas')
+    expect(meta).toBe('14h–15h30 · Sede, Vila Romero · Livre · 11 vagas restantes')
   })
 
   it('says the place is to be confirmed instead of leaving a gap', () => {
     expect(eventMeta(event())).toBe('14h · Local a confirmar')
   })
 
-  it('uses the singular for one spot and can leave capacity out for past events', () => {
-    expect(eventMeta(event({ capacity: 1 }))).toContain('1 vaga')
-    expect(eventMeta(event({ capacity: 1 }))).not.toContain('vagas')
-    expect(eventMeta(event({ capacity: 18 }), { withCapacity: false })).not.toContain('vagas')
+  it('uses the singular for one spot, says when none is left, and can leave it out for past events', () => {
+    expect(eventMeta(event({ capacity: 5, spotsLeft: 1 }))).toContain('1 vaga restante')
+    expect(eventMeta(event({ capacity: 5, spotsLeft: 1 }))).not.toContain('vagas')
+    expect(eventMeta(event({ capacity: 5, spotsLeft: 0 }))).toContain('Vagas esgotadas')
+    expect(eventMeta(event({ capacity: 18, spotsLeft: 9 }), { withCapacity: false })).not.toContain('vaga')
+  })
+
+  it('says nothing about spots when the event has no limit', () => {
+    expect(eventMeta(event({ capacity: null, spotsLeft: null }))).not.toMatch(/vaga/i)
   })
 })
 

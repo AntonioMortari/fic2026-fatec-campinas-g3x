@@ -177,3 +177,42 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **O que não muda:** a paleta da ONG. O vermelho é só de erro; não substitui ocre, azul nem marrom.
 - **PR:** branch `feat/error-color`
 
+## 2026-10-09 — RF15 (Inscrição em evento): com conta também, e o que a troca de stack muda
+- **Artefato:** Requisitos (RF15) · Arquitetura
+- **Antes:** o critério diz "inscrição sem conta … funciona sem sessão e sem JavaScript", com a vaga
+  conferida no banco, a confirmação por e-mail (RF18) e a leitura pela equipe (RF16).
+- **Depois:**
+  - A inscrição funciona **sem conta e também com conta** (pedido do grupo). Com conta, os dados
+    entram preenchidos e a inscrição fica ligada à conta; sem conta, nada muda.
+  - "Sem JavaScript" **deixa de valer** (aplicação de página única), como já registrado para RF08 e RF10.
+    O que continua valendo, e é testado: a validação inteira roda no servidor.
+  - A vaga é conferida **no banco, com a linha do evento travada**, numa transação, e há teste de
+    concorrência contra o MySQL real.
+  - A agenda e a home passam a mostrar as **vagas restantes** em vez da capacidade.
+  - O limite contra abuso é **por e-mail e por evento** (5 pessoas); o limite por IP segue adiado.
+- **O que o critério não cobria e foi decidido aqui:** a mesma pessoa não se inscreve duas vezes no mesmo
+  evento; "Inscrever outra pessoa" logo depois de inscrever; a lista de inscritos não se apaga junto com o
+  evento (o banco recusa).
+- **O que não existe ainda:** a leitura dos inscritos pela equipe (RF16) e o e-mail de confirmação
+  (RF18). O texto da tela **não promete** e-mail.
+- **Confirmar com a ONG:** o formulário de levantamento que ela enviou não diz "sem conta" nem "com conta"
+  para a inscrição; só lista voluntários e doadores como tipos de conta e pede para facilitar as inscrições.
+- **PR:** branch `feat/event-registration`
+
+## 2026-10-09 — RF16 (Consulta de inscritos) e limite contra abuso por conexão
+- **Artefato:** Requisitos (RF15, RF16) · Arquitetura
+- **Antes:** a equipe não tinha como ler as inscrições; o limite por IP estava adiado.
+- **Depois:**
+  - A equipe lê os inscritos de cada evento no painel, com contato, CPF (quando o evento pede),
+    responsável de menor e **a autorização de imagem de cada pessoa**, e baixa a lista em planilha (CSV).
+    A lista é só leitura: nada se corrige nem se apaga por ela.
+  - A planilha usa ponto e vírgula e BOM UTF-8 (abre direto no Excel em português) e neutraliza células que
+    seriam lidas como fórmula.
+  - Inscrição pública passa a ter **limite por conexão: 30 por hora**, além dos limites já existentes
+    (a mesma pessoa não se inscreve duas vezes; cada e-mail inscreve até 5 pessoas por evento).
+    **O IP não é gravado**: guarda-se só um HMAC dele, com chave do servidor.
+- **O que o critério não cobria e foi decidido aqui:** o limite precisa de `TRUST_PROXY` correto no deploy
+  (variável de ambiente nova, documentada no README do back-end); a lista não tem paginação nem filtro
+  enquanto os eventos forem de dezenas de pessoas.
+- **Continua adiado:** limite de tentativas de login (pode reaproveitar a mesma origem hasheada).
+- **PR:** branch `feat/registrations-admin`
