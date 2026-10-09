@@ -7,6 +7,7 @@ export interface MyRegistration {
   name: string;
   registeredAt: string;
   attendanceRecorded: boolean;
+  cancelCode: string;
   event: { id: string; title: string; startsAt: string; endsAt: string | null; location: string | null; isOver: boolean };
 }
 
@@ -14,8 +15,8 @@ export interface MyRegistration {
 // "Did not come" is never sent back: it is the staff's working note, and "not checked" would read the same to the person.
 export async function listMyRegistrations(userId: string, now: Date = new Date()): Promise<MyRegistration[]> {
   const rows = await Registration.findAll({
-    where: { userId },
-    attributes: ['id', 'eventId', 'name', 'attended', 'createdAt'],
+    where: { userId, cancelledAt: null },
+    attributes: ['id', 'eventId', 'name', 'attended', 'cancelCode', 'createdAt'],
     order: [['createdAt', 'ASC']],
   });
   if (rows.length === 0) return [];
@@ -33,6 +34,7 @@ export async function listMyRegistrations(userId: string, now: Date = new Date()
           name: row.name,
           registeredAt: row.createdAt.toISOString(),
           attendanceRecorded: row.attended === true,
+          cancelCode: row.cancelCode,
           event: {
             id: event.id,
             title: event.title,

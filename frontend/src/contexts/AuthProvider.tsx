@@ -38,6 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessionExpired(false)
   }, [])
 
+  const updateUser = useCallback((updated: AuthUser) => {
+    setUser(updated)
+    queryClient.setQueryData(['me'], updated)
+  }, [queryClient])
+
   const signOut = useCallback(() => {
     // Best effort: without an answer the cookie stays valid on the server until it expires.
     void api.post('/auth/logout').catch(() => undefined)
@@ -74,8 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [clearSession])
 
   const value = useMemo(
-    () => ({ user, status, sessionExpired, signIn, signOut }),
-    [user, status, sessionExpired, signIn, signOut],
+    () => ({ user, status, sessionExpired, signIn, signOut, updateUser }),
+    [user, status, sessionExpired, signIn, signOut, updateUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

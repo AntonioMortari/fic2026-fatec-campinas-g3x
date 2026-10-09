@@ -104,7 +104,7 @@ describe("the desktop frame of the panel (screen 7j)", () => {
     await screen.findByRole('heading', { name: 'Eventos', level: 1 })
     const side = screen.getByRole('navigation', { name: 'Seções do painel' })
 
-    expect(within(side).getAllByRole('link').map((link) => link.textContent)).toEqual(['Início', 'Agenda e presença'])
+    expect(within(side).getAllByRole('link').map((link) => link.textContent)).toEqual(['Início', 'Agenda e presença', 'Relatório'])
     expect(within(side).getByRole('link', { name: 'Agenda e presença' })).toHaveAttribute('aria-current', 'page')
     expect(within(side).getByRole('link', { name: 'Início' })).not.toHaveAttribute('aria-current')
     for (const missing of ['Atividades', 'Pessoas', 'Conteúdo', 'Biblioteca', 'Configurações']) {

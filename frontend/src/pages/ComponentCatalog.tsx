@@ -11,6 +11,7 @@ import {
   ListItem,
   PageHeader,
   PasswordField,
+  SegmentedField,
   Tabs,
   TextField,
   useToast,
@@ -43,6 +44,7 @@ export function ComponentCatalog() {
   const [tab, setTab] = useState('upcoming')
   const [filter, setFilter] = useState('all')
   const [sending, setSending] = useState(false)
+  const [kind, setKind] = useState('individual')
   const showToast = useToast()
 
   return (
@@ -52,6 +54,19 @@ export function ComponentCatalog() {
         title="Catálogo do design system"
         lead="Cada componente base, no estado em que as telas vão usá-lo. Datas, vagas e horários são exemplos."
       />
+
+      <Section title="Escolha entre poucas opções">
+        <SegmentedField
+          legend="Você é"
+          name="catalog-kind"
+          options={[
+            { value: 'individual', label: 'Pessoa física' },
+            { value: 'organization', label: 'Empresa' },
+          ]}
+          value={kind}
+          onChange={setKind}
+        />
+      </Section>
 
       <Section title="Cores">
         <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 desktop:grid-cols-4">

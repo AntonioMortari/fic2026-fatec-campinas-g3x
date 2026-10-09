@@ -8,7 +8,7 @@ export function AdminHeader({ hideOnMobile }: { hideOnMobile: boolean }) {
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 bg-brown text-cream desktop:border-b desktop:border-line desktop:bg-cream desktop:text-brown',
+        'sticky top-0 z-30 bg-brown text-cream print:hidden desktop:border-b desktop:border-line desktop:bg-cream desktop:text-brown',
         hideOnMobile && 'max-desktop:hidden',
       )}
     >

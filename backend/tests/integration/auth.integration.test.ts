@@ -145,3 +145,67 @@ describe('accounts against a real MySQL', () => {
     ).rejects.toThrow();
   });
 });
+
+describe('editing my own data against a real MySQL (RF11, design 7b)', () => {
+  const signUp = async (email: string) => {
+    const response = await request(app).post('/api/auth/register').send({ ...VALID, email });
+    return { token: response.body.token as string, id: response.body.user.id as string };
+  };
+  const patch = (token: string, body: object) => request(app).patch('/api/me').set('Authorization', `Bearer ${token}`).send(body);
+
+  it('saves name, phone and person type, and the next read of the account shows them', async () => {
+    const ana = await signUp('ana@exemplo.com');
+
+    const response = await patch(ana.token, { name: 'Ana Paula Souza 🌍', phone: '(11) 98765-4321', personType: 'organization' });
+
+    expect(response.status).toBe(200);
+    const row = await User.findByPk(ana.id);
+    expect(row).toMatchObject({ name: 'Ana Paula Souza 🌍', phone: '11987654321', personType: 'organization' });
+    const me = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${ana.token}`);
+    expect(me.body.user).toMatchObject({ name: 'Ana Paula Souza 🌍', phone: '11987654321', personType: 'organization' });
+  });
+
+  it('never changes the e-mail, the password, the roles or the preferences, even when asked to', async () => {
+    const ana = await signUp('ana@exemplo.com');
+    const before = await User.findByPk(ana.id);
+
+    await patch(ana.token, {
+      name: 'Ana Souza', phone: '', personType: 'individual',
+      email: 'outro@exemplo.com', isStaff: true, is_staff: true, role: 'admin', password: 'senha-nova-boa', passwordHash: 'x', wantsToDonate: true, wantsToVolunteer: false,
+    });
+
+    const after = await User.findByPk(ana.id);
+    expect(after).toMatchObject({ email: 'ana@exemplo.com', isStaff: false, wantsToDonate: false, wantsToVolunteer: true });
+    expect(after?.passwordHash).toBe(before?.passwordHash);
+    const login = await request(app).post('/api/auth/login').send({ email: 'ana@exemplo.com', password: 'uma-senha-boa' });
+    expect(login.status).toBe(200);
+  });
+
+  it('only ever changes the account of the token, and leaves every other one alone', async () => {
+    const ana = await signUp('ana@exemplo.com');
+    const bia = await signUp('bia@exemplo.com');
+
+    await patch(ana.token, { name: 'Nome novo da Ana', phone: '', personType: 'individual', id: bia.id });
+
+    expect((await User.findByPk(bia.id))?.name).toBe('Ana Souza');
+    expect((await User.findByPk(ana.id))?.name).toBe('Nome novo da Ana');
+  });
+
+  it('refuses a bad phone with the message of the design and keeps what was saved', async () => {
+    const ana = await signUp('ana@exemplo.com');
+
+    const response = await patch(ana.token, { name: 'Outro nome', phone: '(11) 9876-432', personType: 'individual' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.details).toEqual([expect.objectContaining({ field: 'phone', message: 'Falta um dígito. Exemplo: (11) 98765-4321.' })]);
+    expect((await User.findByPk(ana.id))?.name).toBe('Ana Souza');
+  });
+
+  it('answers 401 without a session and for the token of an account that is gone', async () => {
+    const ana = await signUp('ana@exemplo.com');
+    await User.destroy({ where: { id: ana.id } });
+
+    expect((await request(app).patch('/api/me').send({ name: 'x', phone: '', personType: 'individual' })).status).toBe(401);
+    expect((await patch(ana.token, { name: 'x', phone: '', personType: 'individual' })).status).toBe(401);
+  });
+});

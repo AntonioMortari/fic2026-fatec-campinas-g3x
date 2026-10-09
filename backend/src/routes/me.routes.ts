@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { getMyRegistrations } from '../controllers/me.controller';
+import { getMyRegistrations, profileBody, updateMe } from '../controllers/me.controller';
 import { authenticate } from '../middlewares/authenticate';
+import { validate } from '../middlewares/validate';
 
 export const meRoutes = Router();
 
@@ -11,3 +12,4 @@ meRoutes.use((_req, res, next) => {
 });
 
 meRoutes.get('/registrations', getMyRegistrations);
+meRoutes.patch('/', validate({ body: profileBody }), updateMe);

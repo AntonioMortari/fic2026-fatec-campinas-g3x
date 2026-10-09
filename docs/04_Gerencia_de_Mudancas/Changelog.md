@@ -249,3 +249,42 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   Biblioteca, Relatório, Configurações) não aparecem até a tela existir.
 - **Combinado de processo:** tela sem desenho não se inventa; para-se e avisa-se quem desenha (CLAUDE.md).
 - **PR:** branch `feat/panel-desktop-attendance`
+
+## 2026-10-09 — Cancelar inscrição (desenhos 7c e 7d)
+- **Artefato:** Requisitos (RF15) · Arquitetura
+- **Antes:** quem se inscrevia não tinha como desistir; a vaga só voltava com a equipe mexendo no banco.
+- **Depois:** cada inscrição tem um link pessoal que abre uma tela de confirmação e cancela, **sem exigir conta**
+  (a inscrição funciona sem conta, então desistir também). A vaga volta para a agenda na hora e a pessoa pode se
+  inscrever de novo. A inscrição cancelada fica como registro no banco e deixa de contar nas vagas, nas listas
+  da equipe, na presença, na planilha e em "Minhas inscrições". Não cancela depois da atividade.
+- **O que o desenho não cobria e foi decidido aqui:** de onde sai o link enquanto não há e-mail (RF18): da tela
+  "Inscrição registrada" e de "Minhas inscrições", dois pontos de entrada que não estão nos desenhos; o limite
+  por conexão continua contando as inscrições canceladas (foram envios).
+- **PR:** branch `feat/cancel-registration`
+
+## 2026-10-09 — Minha conta e Alterar meus dados (desenhos 7a e 7b)
+- **Artefato:** Requisitos (RF11) · Protótipos
+- **Antes:** `/minha-conta` só mostrava a ficha; não havia como corrigir nome, telefone ou tipo de conta.
+- **Depois:** a ficha segue o desenho (nome, telefone, tipo, e-mail) e há uma tela própria para alterar nome,
+  telefone e tipo de conta. O e-mail não muda por aqui (exigiria confirmação por e-mail, que não existe) e a tela
+  diz isso e aponta o WhatsApp. Papéis e senha não são aceitos por esta rota.
+- **O que o desenho não cobria e foi decidido aqui:** "Candidaturas ao voluntariado", "Minhas doações" e "Trocar
+  minha senha" não aparecem, porque a funcionalidade por trás de cada um não existe; "Minhas inscrições" fica na
+  lista de participações (não está no desenho); "Empresa" é o rótulo só destas duas telas.
+- **PR:** branch `feat/account-edit`
+
+## 2026-10-09 — Relatório do painel (desenhos 7i e 7j)
+- **Artefato:** Requisitos (RF30, RF31, RF32) · Protótipos
+- **Antes:** a equipe não tinha números para a prestação de contas; a presença já era marcada (RF17) mas ninguém a
+  somava.
+- **Depois:** `/admin/relatorio` mostra, por mês, trimestre ou semestre: atividades realizadas, pessoas inscritas,
+  presentes conferidos, crianças e adolescentes presentes, e uma linha por atividade com inscritos, quem veio,
+  quem faltou e quem ninguém conferiu. Baixa em planilha (CSV) e imprime como PDF. Inscrição cancelada não conta.
+  "Sem conferir" nunca vira falta, e contagem que falhou aparece como traço, não como zero.
+- **O que o desenho pedia e não entra:** "novos voluntários", "novos doadores" e "valor recebido". Os módulos de
+  voluntariado e de doações (RF19–RF26) não existem neste repositório, então não há dado para esses números.
+  Entram quando existirem.
+- **O que o desenho não cobria e foi decidido aqui:** a janela do trimestre e do semestre termina no mês atual
+  (como no desenho: "Jul–Set", "Abr–Set"), em vez de seguir o ano civil; a tabela traz as cinco atividades mais
+  recentes e a planilha, todas.
+- **PR:** branch `feat/report`

@@ -36,7 +36,7 @@ function initialValues(account: AuthUser | null): Values {
 interface RegistrationFormProps {
   event: EventDetail
   account: AuthUser | null
-  onDone: (name: string) => void
+  onDone: (done: { name: string; cancelCode: string }) => void
 }
 
 export function RegistrationForm({ event, account, onDone }: RegistrationFormProps) {
@@ -52,7 +52,7 @@ export function RegistrationForm({ event, account, onDone }: RegistrationFormPro
   function handleSubmit(submitEvent: FormEvent) {
     submitEvent.preventDefault()
     feedback.clear()
-    registration.mutate(values, { onSuccess: (result) => onDone(result.registration.name), onError: feedback.fail })
+    registration.mutate(values, { onSuccess: (result) => onDone({ name: result.registration.name, cancelCode: result.registration.cancelCode }), onError: feedback.fail })
   }
 
   return (

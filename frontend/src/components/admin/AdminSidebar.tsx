@@ -6,7 +6,7 @@ export function AdminSidebar() {
   const { pathname } = useLocation()
 
   return (
-    <nav aria-label="Seções do painel" className="sticky top-18 hidden h-[calc(100dvh-4.5rem)] flex-col self-start border-r border-line py-6 desktop:flex">
+    <nav aria-label="Seções do painel" className="sticky top-18 hidden h-[calc(100dvh-4.5rem)] flex-col self-start border-r border-line py-6 desktop:flex print:hidden">
       <ul className="m-0 flex list-none flex-col p-0">
         {ADMIN_SIDEBAR.map((destination) => {
           const active = isActiveAdminRoute(destination.to, pathname)

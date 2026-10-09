@@ -48,7 +48,7 @@ export function useEventRegistration(eventId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (input: RegistrationInput) =>
-      (await api.post<{ registration: { id: string; name: string }; event: EventSummary }>(`/events/${eventId}/registrations`, input)).data,
+      (await api.post<{ registration: { id: string; name: string; cancelCode: string }; event: EventSummary }>(`/events/${eventId}/registrations`, input)).data,
     // The agenda and the home show the spots left: they are stale the moment someone signs up.
     onSettled: () => Promise.all([queryClient.invalidateQueries({ queryKey: ['events'] }), queryClient.invalidateQueries({ queryKey: ['my-registrations'] })]),
   })

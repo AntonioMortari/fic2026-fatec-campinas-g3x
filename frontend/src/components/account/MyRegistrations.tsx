@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { dateParts } from '../../lib/dates'
 import { formatTimeRange } from '../../lib/events'
 import { useMyRegistrations } from '../../services/events'
@@ -5,7 +6,7 @@ import type { MyRegistration } from '../../types/my-registration'
 import { Button, Card, EmptyState } from '../ui'
 
 function RegistrationItem({ registration }: { registration: MyRegistration }) {
-  const { event, name, attendanceRecorded } = registration
+  const { event, name, attendanceRecorded, cancelCode } = registration
   const when = `${dateParts(new Date(event.startsAt)).spoken} · ${formatTimeRange(event)}`
 
   return (
@@ -20,6 +21,11 @@ function RegistrationItem({ registration }: { registration: MyRegistration }) {
         {' · '}
         {event.isOver ? (attendanceRecorded ? 'Presença registrada' : 'Atividade encerrada') : 'Inscrição registrada'}
       </p>
+      {!event.isOver && (
+        <Link to={`/inscricao/cancelar?c=${cancelCode}`} className="inline-flex min-h-11 items-center self-start text-small font-semibold">
+          Cancelar inscrição <span className="sr-only">de {name} em {event.title}</span>
+        </Link>
+      )}
     </Card>
   )
 }
@@ -28,9 +34,9 @@ function Group({ title, items }: { title: string; items: MyRegistration[] }) {
   if (items.length === 0) return null
   return (
     <div className="flex flex-col gap-2.5">
-      <h3 className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-brown-400">
+      <h4 className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-brown-400">
         {title} ({items.length})
-      </h3>
+      </h4>
       <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
         {items.map((registration) => (
           <RegistrationItem key={registration.id} registration={registration} />
@@ -47,9 +53,9 @@ export function MyRegistrations() {
 
   return (
     <section aria-labelledby="my-registrations" className="flex flex-col gap-3">
-      <h2 id="my-registrations" className="m-0 text-h2 font-bold">
+      <h3 id="my-registrations" className="m-0 text-item font-bold">
         Minhas inscrições
-      </h2>
+      </h3>
       {isPending && <p role="status" className="m-0">Carregando suas inscrições…</p>}
       {isError && (
         <EmptyState
