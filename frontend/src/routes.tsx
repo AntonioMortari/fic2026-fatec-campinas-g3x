@@ -7,6 +7,7 @@ import { Account } from './pages/Account'
 import { AdminEventForm } from './pages/admin/AdminEventForm'
 import { AdminEvents } from './pages/admin/AdminEvents'
 import { AdminHome } from './pages/admin/AdminHome'
+import { AdminRegistrants } from './pages/admin/AdminRegistrants'
 import { Auth } from './pages/Auth'
 import { EventRegistration } from './pages/EventRegistration'
 import { ComponentCatalog } from './pages/ComponentCatalog'
@@ -34,6 +35,7 @@ export const routes: RouteObject[] = [
       { path: '/admin/eventos', element: <AdminEvents /> },
       { path: '/admin/eventos/novo', element: <AdminEventForm />, handle: { hideBottomBar: true } },
       { path: '/admin/eventos/:id/editar', element: <AdminEventForm />, handle: { hideBottomBar: true } },
+      { path: '/admin/eventos/:id/inscritos', element: <AdminRegistrants /> },
     ],
   },
   {
