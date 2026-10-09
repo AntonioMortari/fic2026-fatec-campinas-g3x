@@ -61,12 +61,15 @@ export function buildIcs(event: CalendarEvent, now: Date = new Date()): string {
   return lines.map(foldLine).join(CRLF) + CRLF;
 }
 
-export function icsFileName(title: string): string {
-  const slug = title
+export function slugify(title: string): string {
+  return title
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
-  return `${slug || 'event'}.ics`;
+}
+
+export function icsFileName(title: string): string {
+  return `${slugify(title) || 'event'}.ics`;
 }

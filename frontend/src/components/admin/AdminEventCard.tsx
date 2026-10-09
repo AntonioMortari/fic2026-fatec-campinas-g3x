@@ -42,6 +42,9 @@ export function AdminEventCard({ event, busy, onPublication }: AdminEventCardPro
         >
           {event.published ? 'Tirar do ar' : 'Publicar'} <span className="sr-only">{event.title}</span>
         </Button>
+        <Button to={`/admin/eventos/${event.id}/inscritos`} variant="secondary" size="compact" className="col-span-2 min-h-12">
+          Ver inscritos ({event.registrationCount}) <span className="sr-only">de {event.title}</span>
+        </Button>
       </div>
     </Card>
   )

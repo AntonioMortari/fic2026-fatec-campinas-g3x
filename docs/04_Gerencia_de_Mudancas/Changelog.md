@@ -199,3 +199,20 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   para a inscrição; só lista voluntários e doadores como tipos de conta e pede para facilitar as inscrições.
 - **PR:** branch `feat/event-registration`
 
+## 2026-10-09 — RF16 (Consulta de inscritos) e limite contra abuso por conexão
+- **Artefato:** Requisitos (RF15, RF16) · Arquitetura
+- **Antes:** a equipe não tinha como ler as inscrições; o limite por IP estava adiado.
+- **Depois:**
+  - A equipe lê os inscritos de cada evento no painel, com contato, CPF (quando o evento pede),
+    responsável de menor e **a autorização de imagem de cada pessoa**, e baixa a lista em planilha (CSV).
+    A lista é só leitura: nada se corrige nem se apaga por ela.
+  - A planilha usa ponto e vírgula e BOM UTF-8 (abre direto no Excel em português) e neutraliza células que
+    seriam lidas como fórmula.
+  - Inscrição pública passa a ter **limite por conexão: 30 por hora**, além dos limites já existentes
+    (a mesma pessoa não se inscreve duas vezes; cada e-mail inscreve até 5 pessoas por evento).
+    **O IP não é gravado**: guarda-se só um HMAC dele, com chave do servidor.
+- **O que o critério não cobria e foi decidido aqui:** o limite precisa de `TRUST_PROXY` correto no deploy
+  (variável de ambiente nova, documentada no README do back-end); a lista não tem paginação nem filtro
+  enquanto os eventos forem de dezenas de pessoas.
+- **Continua adiado:** limite de tentativas de login (pode reaproveitar a mesma origem hasheada).
+- **PR:** branch `feat/registrations-admin`

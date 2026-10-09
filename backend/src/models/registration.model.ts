@@ -14,6 +14,7 @@ export class Registration extends Model<InferAttributes<Registration>, InferCrea
   declare guardianPhone: string | null;
   declare imageAuthorized: boolean;
   declare consentedAt: Date;
+  declare originHash: string | null;
   declare createdAt: CreationOptional<Date>;
 }
 
@@ -31,6 +32,7 @@ Registration.init(
     guardianPhone: { type: DataTypes.STRING(11), allowNull: true },
     imageAuthorized: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     consentedAt: { type: DataTypes.DATE, allowNull: false },
+    originHash: { type: DataTypes.CHAR(64), allowNull: true },
     createdAt: DataTypes.DATE,
   },
   { sequelize, tableName: 'registrations', updatedAt: false },

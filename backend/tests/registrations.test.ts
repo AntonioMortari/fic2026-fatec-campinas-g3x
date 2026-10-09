@@ -41,24 +41,26 @@ interface Setup {
   event?: Event | null;
   registered?: number;
   sameEmail?: number;
+  fromOrigin?: number;
   duplicate?: boolean;
 }
 
-function setup({ event = storedEvent(), registered = 0, sameEmail = 0, duplicate = false }: Setup = {}) {
+function setup({ event = storedEvent(), registered = 0, sameEmail = 0, fromOrigin = 0, duplicate = false }: Setup = {}) {
   jest.useFakeTimers({ now: NOW, doNotFake: ['nextTick', 'setImmediate', 'setTimeout'] });
   jest.spyOn(sequelize, 'transaction').mockImplementation((async (callback: (t: unknown) => unknown) =>
     callback({ LOCK: { UPDATE: 'UPDATE' } })) as never);
   const findEvent = jest.spyOn(Event, 'findOne').mockResolvedValue(event);
   jest.spyOn(Registration, 'findOne').mockResolvedValue(duplicate ? ({} as Registration) : null);
   jest.spyOn(Registration, 'findAll').mockResolvedValue(registered ? ([{ eventId: EVENT_ID, total: registered }] as never) : []);
-  jest.spyOn(Registration, 'count').mockResolvedValue(sameEmail);
+  const count = jest.spyOn(Registration, 'count').mockImplementation((async (options: { where: { originHash?: string } }) =>
+    options.where.originHash ? fromOrigin : sameEmail) as never);
   const create = jest.spyOn(Registration, 'create').mockImplementation((async (row: Record<string, unknown>) => ({
     id: 'reg-1',
     name: row.name,
     createdAt: NOW,
   })) as never);
   jest.spyOn(User, 'count').mockResolvedValue(1);
-  return { create, findEvent };
+  return { create, findEvent, count };
 }
 
 const post = (body: unknown = VALID, token?: string) => {
@@ -413,5 +415,60 @@ describe('GET /api/events/:id', () => {
 
     expect(body).not.toMatch(/email|guardian|phone|"cpf"/i);
     expect(body).not.toContain('registrationCount');
+  });
+});
+
+describe('the limit per connection', () => {
+  it('stores a keyed hash of the connection, never the address', async () => {
+    const { create } = setup();
+
+    await request(app).post(URL).set('X-Forwarded-For', '203.0.113.7').send(VALID);
+
+    const row = create.mock.calls[0]![0] as { originHash: string };
+    expect(row.originHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(JSON.stringify(create.mock.calls)).not.toContain('203.0.113.7');
+  });
+
+  it('is the same for the same connection and different for another', async () => {
+    const { create } = setup();
+
+    await request(app).post(URL).set('X-Forwarded-For', '203.0.113.7').send(VALID);
+    await request(app).post(URL).set('X-Forwarded-For', '203.0.113.7').send({ ...VALID, name: 'Outra' });
+    await request(app).post(URL).set('X-Forwarded-For', '203.0.113.8').send({ ...VALID, name: 'Terceira' });
+
+    const hashes = create.mock.calls.map(([row]) => (row as { originHash: string }).originHash);
+    expect(hashes[0]).toBe(hashes[1]);
+    expect(hashes[2]).not.toBe(hashes[0]);
+  });
+
+  it('refuses with 429 when the connection already sent the hour\'s share, and writes nothing', async () => {
+    const { create } = setup({ fromOrigin: 30 });
+
+    const response = await post();
+
+    expect(response.status).toBe(429);
+    expect(response.body.error.code).toBe('too_many_requests');
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('lets a whole class through one connection: 29 already is not the limit', async () => {
+    setup({ fromOrigin: 29 });
+
+    expect((await post()).status).toBe(201);
+  });
+
+  it('counts only the last hour', async () => {
+    const { count } = setup({ fromOrigin: 3 });
+
+    await post();
+
+    const originCall = count.mock.calls.map(([options]) => options as { where: { originHash?: string; createdAt?: Record<symbol, Date> } }).find((options) => options.where.originHash);
+    const [since] = Object.getOwnPropertySymbols(originCall!.where.createdAt!).map((symbol) => originCall!.where.createdAt![symbol]!);
+    expect(NOW.getTime() - since!.getTime()).toBe(60 * 60 * 1000);
+  });
+
+  it('is judged after the checks that give a clearer answer: full and already registered come first', async () => {
+    setup({ registered: 30, fromOrigin: 99 });
+    expect((await post()).body.error.code).toBe('event_full');
   });
 });

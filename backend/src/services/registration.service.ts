@@ -1,4 +1,4 @@
-import { UniqueConstraintError } from 'sequelize';
+import { Op, UniqueConstraintError } from 'sequelize';
 import { sequelize, Event, Registration, User } from '../models';
 import { ApiError } from '../utils/api-error';
 import { isValidCpf } from '../utils/cpf';
@@ -6,6 +6,10 @@ import { countRegistrations, isOver, spotsLeft, toPublicEvent, type PublicEvent 
 
 // A guardian may sign up several children with one address; nobody needs a hundred.
 export const MAX_PER_EMAIL = 5;
+
+// A school class leaves through one connection, so this has to hold a whole class; a script cannot get past it.
+export const MAX_PER_ORIGIN_PER_HOUR = 30;
+const HOUR_MS = 60 * 60 * 1000;
 
 export interface RegistrationInput {
   name: string;
@@ -29,6 +33,7 @@ export async function registerForEvent(
   eventId: string,
   input: RegistrationInput,
   accountId: string | null,
+  origin: string | null,
   now: Date = new Date(),
 ): Promise<RegistrationResult> {
   if (accountId && !(await User.count({ where: { id: accountId } }))) {
@@ -62,6 +67,13 @@ export async function registerForEvent(
       throw new ApiError(429, 'too_many_registrations', `Cada e-mail pode inscrever até ${MAX_PER_EMAIL} pessoas na mesma atividade.`);
     }
 
+    if (origin) {
+      const recent = await Registration.count({ where: { originHash: origin, createdAt: { [Op.gte]: new Date(now.getTime() - HOUR_MS) } }, transaction });
+      if (recent >= MAX_PER_ORIGIN_PER_HOUR) {
+        throw new ApiError(429, 'too_many_requests', 'Chegaram muitas inscrições por esta conexão. Tente de novo daqui a pouco.');
+      }
+    }
+
     try {
       // Every column is listed by hand; userId comes from the verified token, never from the body.
       const registration = await Registration.create(
@@ -77,6 +89,7 @@ export async function registerForEvent(
           guardianPhone: input.isMinor ? input.guardianPhone : null,
           imageAuthorized: input.imageAuthorized,
           consentedAt: now,
+          originHash: origin,
         },
         { transaction },
       );

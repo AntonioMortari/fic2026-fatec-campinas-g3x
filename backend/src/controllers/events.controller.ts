@@ -4,6 +4,7 @@ import { findPublishedEvent, getPublishedEventDetail, listPublishedEvents } from
 import { registerForEvent, type RegistrationInput } from '../services/registration.service';
 import { ApiError } from '../utils/api-error';
 import { buildIcs, icsFileName } from '../utils/ics';
+import { originHash } from '../utils/origin';
 
 export const listEventsQuery = z.object({
   period: z.enum(['upcoming', 'past']).default('upcoming'),
@@ -93,6 +94,6 @@ export const registrationBody = registrationFields.and(guardian);
 
 export async function createRegistration(req: Request, res: Response): Promise<void> {
   const { consent: _consent, ...input } = req.body as z.output<typeof registrationBody>;
-  const result = await registerForEvent(req.params.id as string, input as RegistrationInput, req.user?.id ?? null);
+  const result = await registerForEvent(req.params.id as string, input as RegistrationInput, req.user?.id ?? null, originHash(req));
   res.status(201).json(result);
 }
