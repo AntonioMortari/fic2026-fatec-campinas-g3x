@@ -25,9 +25,10 @@ async function makeEvent(overrides: Record<string, unknown> = {}) {
   } as never);
 }
 
-const signUp = (eventId: string, body: object, token?: string) => {
+const signUp = (eventId: string, body: object, token?: string, ip?: string) => {
   const req = request(app).post(`/api/events/${eventId}/registrations`);
   if (token) req.set('Authorization', `Bearer ${token}`);
+  if (ip) req.set('X-Forwarded-For', ip);
   return req.send(body);
 };
 
@@ -235,6 +236,55 @@ describe('event registration against a real MySQL', () => {
   });
 });
 
+describe('the limit per connection', () => {
+  it('stops the thirty-first sign-up from one connection in an hour, while another connection still gets in', async () => {
+    const event = await makeEvent();
+
+    const statuses: number[] = [];
+    for (let n = 1; n <= 31; n += 1) {
+      statuses.push((await signUp(event.id, person(n), undefined, '203.0.113.7')).status);
+    }
+    const blocked = await signUp(event.id, person(32), undefined, '203.0.113.7');
+    const elsewhere = await signUp(event.id, person(33), undefined, '198.51.100.9');
+
+    expect(statuses.slice(0, 30).every((status) => status === 201)).toBe(true);
+    expect(statuses[30]).toBe(429);
+    expect(blocked.body.error.code).toBe('too_many_requests');
+    expect(elsewhere.status).toBe(201);
+  });
+
+  it('counts only the last hour', async () => {
+    const event = await makeEvent();
+    for (let n = 1; n <= 30; n += 1) await signUp(event.id, person(n), undefined, '203.0.113.7');
+    await sequelize.query('update registrations set created_at = created_at - interval 2 hour');
+
+    const response = await signUp(event.id, person(99), undefined, '203.0.113.7');
+
+    expect(response.status).toBe(201);
+  });
+
+  it('keeps a keyed hash of the connection and never the address', async () => {
+    const event = await makeEvent();
+    await signUp(event.id, person(1), undefined, '203.0.113.7');
+
+    const row = await Registration.findOne({ where: { eventId: event.id } });
+    const [stored] = (await sequelize.query('select * from registrations', { type: 'SELECT' })) as Array<Record<string, unknown>>;
+
+    expect(row?.originHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(JSON.stringify(stored)).not.toContain('203.0.113.7');
+  });
+
+  it('treats every address of the same IPv6 /64 as one connection', async () => {
+    const event = await makeEvent();
+    await signUp(event.id, person(1), undefined, '2001:db8:aaaa:bbbb:1::1');
+    await signUp(event.id, person(2), undefined, '2001:db8:aaaa:bbbb:ffff::2');
+
+    const hashes = (await Registration.findAll({ where: { eventId: event.id } })).map((row) => row.originHash);
+
+    expect(new Set(hashes).size).toBe(1);
+  });
+});
+
 describe('what the staff sees about sign-ups', () => {
   it('counts the registrations of each event in the panel list', async () => {
     const event = await makeEvent();
@@ -246,5 +296,85 @@ describe('what the staff sees about sign-ups', () => {
     const list = await request(app).get('/api/admin/events').set('Authorization', `Bearer ${staff.token}`);
 
     expect(list.body.data[0]).toMatchObject({ id: event.id, registrationCount: 2 });
+  });
+});
+
+describe('RF16: the list and the spreadsheet of registrants', () => {
+  async function staffHeader() {
+    const staff = await account('equipe@exemplo.com');
+    await User.update({ isStaff: true }, { where: { id: staff.id } });
+    return { Authorization: `Bearer ${staff.token}` };
+  }
+
+  it('lists everyone in order of arrival with the image authorization of each one', async () => {
+    const event = await makeEvent({ requiresCpf: true });
+    await signUp(event.id, person(1, { cpf: '529.982.247-25', imageAuthorized: true, phone: '(11) 95396-8344' }));
+    await signUp(event.id, person(2, { cpf: '111.444.777-35', isMinor: true, guardianName: 'Maria', guardianPhone: '11 91234-5678' }));
+    const header = await staffHeader();
+
+    const response = await request(app).get(`/api/admin/events/${event.id}/registrations`).set(header);
+
+    expect(response.status).toBe(200);
+    expect(response.headers['cache-control']).toMatch(/no-store/);
+    expect(response.body.event.id).toBe(event.id);
+    expect(response.body.data.map((r: { name: string }) => r.name)).toEqual(['Pessoa 1', 'Pessoa 2']);
+    expect(response.body.data[0]).toMatchObject({ cpf: '52998224725', imageAuthorized: true, phone: '11953968344', hasAccount: false });
+    expect(response.body.data[1]).toMatchObject({ isMinor: true, guardianName: 'Maria', imageAuthorized: false });
+    expect(JSON.stringify(response.body)).not.toMatch(/originHash|origin_hash|userId/);
+  });
+
+  it('shows a draft event too, and answers 404 for one that does not exist', async () => {
+    const draft = await makeEvent({ published: false });
+    const header = await staffHeader();
+
+    expect((await request(app).get(`/api/admin/events/${draft.id}/registrations`).set(header)).status).toBe(200);
+    const missing = await request(app).get('/api/admin/events/3b3a6c52-6b0e-4d0b-9c58-1d2a5f1c9a10/registrations').set(header);
+    expect(missing.status).toBe(404);
+  });
+
+  it.each(['', '.csv'])('refuses without a session (401) and to a common account (403) on the route%s', async (suffix) => {
+    const event = await makeEvent();
+    await signUp(event.id, person(1));
+    const common = await account('comum@exemplo.com');
+
+    const anonymous = await request(app).get(`/api/admin/events/${event.id}/registrations${suffix}`);
+    const refused = await request(app).get(`/api/admin/events/${event.id}/registrations${suffix}`).set('Authorization', `Bearer ${common.token}`);
+
+    expect(anonymous.status).toBe(401);
+    expect(refused.status).toBe(403);
+    expect(refused.text).not.toContain('Pessoa 1');
+  });
+
+  it('downloads a spreadsheet Excel opens in Portuguese, neutralizing formulas', async () => {
+    const event = await makeEvent({ title: 'Cafú e o Café' });
+    await signUp(event.id, person(1, { name: '=HYPERLINK("http://x")', imageAuthorized: true }));
+    await signUp(event.id, person(2, { name: 'José; "Zé" Conceição' }));
+    const header = await staffHeader();
+
+    const response = await request(app).get(`/api/admin/events/${event.id}/registrations.csv`).set(header).buffer(true).parse((res, done) => {
+      const chunks: Buffer[] = [];
+      res.on('data', (chunk: Buffer) => chunks.push(chunk));
+      res.on('end', () => done(null, Buffer.concat(chunks)));
+    });
+
+    const bytes = response.body as Buffer;
+    expect(response.headers['content-type']).toContain('text/csv');
+    expect(response.headers['content-disposition']).toBe('attachment; filename="inscritos-cafu-e-o-cafe.csv"');
+    expect([...bytes.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+    const text = bytes.toString('utf8').slice(1);
+    const lines = text.split('\r\n');
+    expect(lines[0]).toBe('Nome;Autorizou imagem;Menor de idade;Responsável;Telefone do responsável;E-mail;Telefone;CPF;Tem conta;Inscrito em');
+    expect(lines[1]).toMatch(/^"'=HYPERLINK\(""http:\/\/x""\)";Sim;Não;/);
+    expect(lines[2]).toMatch(/^"José; ""Zé"" Conceição";Não;/);
+  });
+
+  it('has no way to change or delete a registration through these routes', async () => {
+    const event = await makeEvent();
+    const header = await staffHeader();
+
+    for (const method of ['post', 'put', 'patch', 'delete'] as const) {
+      const response = await request(app)[method](`/api/admin/events/${event.id}/registrations`).set(header);
+      expect(response.status).toBe(404);
+    }
   });
 });

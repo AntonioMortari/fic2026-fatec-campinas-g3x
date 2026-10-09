@@ -8,6 +8,8 @@ import {
   updateEvent,
   type EventInput,
 } from '../services/admin-events.service';
+import { listRegistrations, registrationsCsv } from '../services/admin-registrations.service';
+import { slugify } from '../utils/ics';
 import { localToUtc } from '../utils/time-zone';
 
 const DATE_MESSAGE = 'Informe a data e a hora de início.';
@@ -85,4 +87,17 @@ export async function update(req: Request, res: Response): Promise<void> {
 export async function setPublication(req: Request, res: Response): Promise<void> {
   const { published } = req.body as z.output<typeof publicationBody>;
   res.json({ event: await setEventPublished(req.params.id as string, published) });
+}
+
+export async function getRegistrations(req: Request, res: Response): Promise<void> {
+  const { event, registrations } = await listRegistrations(req.params.id as string);
+  res.json({ event, data: registrations });
+}
+
+export async function downloadRegistrations(req: Request, res: Response): Promise<void> {
+  const { event, registrations } = await listRegistrations(req.params.id as string);
+  res
+    .type('text/csv; charset=utf-8')
+    .set('Content-Disposition', `attachment; filename="inscritos-${slugify(event.title) || 'evento'}.csv"`)
+    .send(registrationsCsv(registrations));
 }
