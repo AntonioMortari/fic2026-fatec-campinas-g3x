@@ -10,4 +10,10 @@ export interface EventSummary {
   location: string | null
   ageRange: string | null
   capacity: number | null
+  spotsLeft: number | null
+}
+
+export interface EventDetail extends EventSummary {
+  requiresCpf: boolean
+  registrationsOpen: boolean
 }

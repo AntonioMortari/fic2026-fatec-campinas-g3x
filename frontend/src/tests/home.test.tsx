@@ -12,6 +12,7 @@ const EVENT = {
   location: 'Sede, Vila Romero',
   ageRange: 'Livre',
   capacity: null,
+  spotsLeft: null,
 }
 
 describe('home page (UX/UI analysis 2a and 6a)', () => {
@@ -64,6 +65,14 @@ describe('home page (UX/UI analysis 2a and 6a)', () => {
     expect(within(section).getByRole('heading', { name: 'Cafú e o Café' })).toBeInTheDocument()
     expect(within(section).getByText('sábado, 17 de outubro')).toBeInTheDocument()
     expect(within(section).getByRole('link', { name: 'Quero me inscrever' })).toHaveAttribute('href', '/agenda/cafu-e-o-cafe/inscricao')
+  })
+
+  it('says the spots are over, with no link, when none is left', () => {
+    renderWithRouter(<Home nextEvent={{ ...EVENT, capacity: 5, spotsLeft: 0 }} />)
+    const section = screen.getByRole('region', { name: 'Próxima atividade' })
+
+    expect(within(section).queryByRole('link', { name: 'Quero me inscrever' })).not.toBeInTheDocument()
+    expect(within(section).getAllByText('Vagas esgotadas').length).toBeGreaterThan(0)
   })
 
   it('keeps at most one applique on the screen', () => {

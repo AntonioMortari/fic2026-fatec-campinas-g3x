@@ -8,6 +8,7 @@ import { AdminEventForm } from './pages/admin/AdminEventForm'
 import { AdminEvents } from './pages/admin/AdminEvents'
 import { AdminHome } from './pages/admin/AdminHome'
 import { Auth } from './pages/Auth'
+import { EventRegistration } from './pages/EventRegistration'
 import { ComponentCatalog } from './pages/ComponentCatalog'
 import { Agenda } from './pages/Agenda'
 import { HomeContainer } from './pages/HomeContainer'
@@ -35,5 +36,11 @@ export const routes: RouteObject[] = [
       { path: '/admin/eventos/:id/editar', element: <AdminEventForm />, handle: { hideBottomBar: true } },
     ],
   },
-  { element: <FocusedLayout />, children: [{ path: '/entrar', element: <Auth /> }] },
+  {
+    element: <FocusedLayout />,
+    children: [
+      { path: '/entrar', element: <Auth /> },
+      { path: '/agenda/:id/inscricao', element: <EventRegistration />, handle: { backTo: '/agenda' } },
+    ],
+  },
 ]

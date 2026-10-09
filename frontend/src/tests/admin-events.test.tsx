@@ -23,11 +23,13 @@ const draft: AdminEvent = {
   location: 'Casa Verde',
   ageRange: 'Livre',
   capacity: 30,
+  spotsLeft: 30,
+  registrationCount: 0,
   requiresCpf: true,
   published: false,
   updatedAt: '2030-01-01T00:00:00.000Z',
 }
-const live: AdminEvent = { ...draft, id: '22222222-2222-4222-8222-222222222222', title: 'Oficina de turbantes', published: true, capacity: null, requiresCpf: false }
+const live: AdminEvent = { ...draft, id: '22222222-2222-4222-8222-222222222222', title: 'Oficina de turbantes', published: true, capacity: null, spotsLeft: null, registrationCount: 12, requiresCpf: false }
 
 function openAs(account: typeof fakeUser | null, handlers: Handlers = {}) {
   if (account) localStorage.setItem('af-session', '1')
@@ -91,6 +93,15 @@ describe('the list of events', () => {
     expect(screen.getByRole('heading', { name: 'Publicados (1)' })).toBeInTheDocument()
     expect(screen.getByText('Rascunho', { selector: 'span' })).toBeInTheDocument()
     expect(screen.getByText('Publicado', { selector: 'span' })).toBeInTheDocument()
+  })
+
+  it('says how many people signed up, in each event', async () => {
+    openAs(STAFF, list([draft, live]))
+    renderRoute('/admin/eventos')
+    await screen.findByRole('heading', { name: 'Contação de histórias' })
+
+    expect(screen.getByText(/0 inscrições/)).toBeInTheDocument()
+    expect(screen.getByText(/12 inscrições/)).toBeInTheDocument()
   })
 
   it('explains that saving does not publish and that events are not deleted, and offers no way to delete', async () => {

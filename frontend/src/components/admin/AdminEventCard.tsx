@@ -24,7 +24,9 @@ export function AdminEventCard({ event, busy, onPublication }: AdminEventCardPro
             {event.published ? 'Publicado' : 'Rascunho'}
           </span>
           <h3 className="m-0 text-h3 leading-tight font-bold">{event.title}</h3>
-          <p className="m-0 text-small text-brown-400">{eventMeta(event)}</p>
+          <p className="m-0 text-small text-brown-400">
+            {eventMeta(event)} · {event.registrationCount === 1 ? '1 inscrição' : `${event.registrationCount} inscrições`}
+          </p>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">

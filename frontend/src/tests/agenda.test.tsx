@@ -15,15 +15,16 @@ function event(overrides: Partial<EventSummary> = {}): EventSummary {
     location: 'Sede, Vila Romero',
     ageRange: 'Livre',
     capacity: 18,
+    spotsLeft: 18,
     ...overrides,
   }
 }
 
 const UPCOMING = [
   event(),
-  event({ id: 'b', title: 'Brasil Negreiro', category: 'Apresentação', startsAt: '2026-10-31T22:00:00.000Z', endsAt: null, location: null, ageRange: null, capacity: null }),
-  event({ id: 'c', title: 'Figurinos com materiais reciclados', category: 'Oficina', startsAt: '2026-11-08T13:00:00.000Z', endsAt: null, ageRange: '6–12 anos', capacity: null }),
-  event({ id: 'd', title: 'Banzo', category: 'Contação de história', startsAt: '2026-11-20T18:00:00.000Z', endsAt: null, capacity: null }),
+  event({ id: 'b', title: 'Brasil Negreiro', category: 'Apresentação', startsAt: '2026-10-31T22:00:00.000Z', endsAt: null, location: null, ageRange: null, capacity: null, spotsLeft: null }),
+  event({ id: 'c', title: 'Figurinos com materiais reciclados', category: 'Oficina', startsAt: '2026-11-08T13:00:00.000Z', endsAt: null, ageRange: '6–12 anos', capacity: null, spotsLeft: null }),
+  event({ id: 'd', title: 'Banzo', category: 'Contação de história', startsAt: '2026-11-20T18:00:00.000Z', endsAt: null, capacity: null, spotsLeft: null }),
 ]
 
 function serve(responses: Partial<Record<EventPeriod, EventSummary[]>>) {
@@ -65,7 +66,7 @@ describe('agenda page (UX/UI analysis 2b and 6b)', () => {
     const [featured, ...others] = screen.getAllByRole('article')
 
     expect(within(featured!).getByText('Próxima · Contação de história')).toBeInTheDocument()
-    expect(within(featured!).getByText('14h–15h30 · Sede, Vila Romero · Livre · 18 vagas')).toBeInTheDocument()
+    expect(within(featured!).getByText('14h–15h30 · Sede, Vila Romero · Livre · 18 vagas restantes')).toBeInTheDocument()
     expect(within(featured!).getByRole('link', { name: 'Quero me inscrever em Cafú e o Café' })).toHaveAttribute(
       'href',
       '/agenda/3b3a6c52-6b0e-4d0b-9c58-1d2a5f1c9a10/inscricao',
@@ -83,6 +84,17 @@ describe('agenda page (UX/UI analysis 2b and 6b)', () => {
 
     expect(screen.getByRole('link', { name: 'Inscrever em Banzo' })).toHaveAttribute('href', '/agenda/d/inscricao')
     expect(screen.getAllByRole('link', { name: /^(Quero me inscrever|Inscrever)/ })).toHaveLength(4)
+  })
+
+  it('shows "Vagas esgotadas" instead of the registration link when no spot is left, on the highlight and on the rows', async () => {
+    await openAgenda({ upcoming: [event({ spotsLeft: 0 }), event({ id: 'b', title: 'Banzo', capacity: 5, spotsLeft: 0, startsAt: '2026-11-20T18:00:00.000Z' }), event({ id: 'c', title: 'Aberta', spotsLeft: 3, startsAt: '2026-11-21T18:00:00.000Z' })] })
+    const [featured, soldOutRow, openRow] = screen.getAllByRole('article')
+
+    expect(within(featured!).getByText('Vagas esgotadas', { selector: 'span.font-semibold' })).toBeInTheDocument()
+    expect(within(featured!).queryByRole('link', { name: /Quero me inscrever/ })).not.toBeInTheDocument()
+    expect(within(soldOutRow!).queryByRole('link', { name: /Inscrever/ })).not.toBeInTheDocument()
+    expect(within(soldOutRow!).getAllByText('Vagas esgotadas').length).toBeGreaterThan(0)
+    expect(within(openRow!).getByRole('link', { name: 'Inscrever em Aberta' })).toBeInTheDocument()
   })
 
   it('shows "Local a confirmar" when the place is not set, never an invented one', async () => {
