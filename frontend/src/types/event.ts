@@ -1,7 +1,13 @@
-export interface UpcomingEvent {
+export type EventPeriod = 'upcoming' | 'past'
+
+export interface EventSummary {
   id: string
   title: string
-  category: string
+  description: string | null
+  category: string | null
   startsAt: string
-  summary: string
+  endsAt: string | null
+  location: string | null
+  ageRange: string | null
+  capacity: number | null
 }

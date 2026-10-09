@@ -4,9 +4,9 @@ import { SchoolsBanner } from '../components/home/SchoolsBanner'
 import { StartingPoints } from '../components/home/StartingPoints'
 import { WhatWeDo } from '../components/home/WhatWeDo'
 import { Container } from '../components/ui'
-import type { UpcomingEvent } from '../types/event'
+import type { EventSummary } from '../types/event'
 
-export function Home({ nextEvent = null }: { nextEvent?: UpcomingEvent | null }) {
+export function Home({ nextEvent = null }: { nextEvent?: EventSummary | null }) {
   return (
     <>
       <HomeHero />
