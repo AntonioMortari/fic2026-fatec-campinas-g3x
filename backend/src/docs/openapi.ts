@@ -26,6 +26,21 @@ export const openApiDocument = {
           },
         },
       },
+      Event: {
+        type: 'object',
+        required: ['id', 'title', 'startsAt'],
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          title: { type: 'string', example: 'Cafú e o Café' },
+          description: { type: ['string', 'null'] },
+          category: { type: ['string', 'null'], example: 'Contação de história' },
+          startsAt: { type: 'string', format: 'date-time' },
+          endsAt: { type: ['string', 'null'], format: 'date-time' },
+          location: { type: ['string', 'null'] },
+          ageRange: { type: ['string', 'null'], example: 'Livre' },
+          capacity: { type: ['integer', 'null'], minimum: 1 },
+        },
+      },
       Health: {
         type: 'object',
         required: ['status', 'database', 'checkedAt'],
@@ -38,6 +53,45 @@ export const openApiDocument = {
     },
   },
   paths: {
+    '/events': {
+      get: {
+        tags: ['Events'],
+        summary: 'Lista os eventos publicados',
+        description: 'Só eventos publicados. "upcoming" vem do mais próximo ao mais distante; "past", do mais recente ao mais antigo.',
+        parameters: [
+          { name: 'period', in: 'query', schema: { type: 'string', enum: ['upcoming', 'past'], default: 'upcoming' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100 } },
+        ],
+        responses: {
+          '200': {
+            description: 'Lista de eventos',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['data'],
+                  properties: { data: { type: 'array', items: { $ref: '#/components/schemas/Event' } } },
+                },
+              },
+            },
+          },
+          '400': { description: 'Parâmetros inválidos', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/events/{id}/calendar.ics': {
+      get: {
+        tags: ['Events'],
+        summary: 'Baixa o evento como arquivo de calendário (.ics)',
+        description: 'Sem horário de término cadastrado, o fim é início + 2 horas.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'Arquivo iCalendar', content: { 'text/calendar': { schema: { type: 'string' } } } },
+          '400': { description: 'Identificador inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Evento inexistente ou não publicado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
     '/health': {
       get: {
         tags: ['Health'],
