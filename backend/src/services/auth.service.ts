@@ -88,6 +88,20 @@ export async function loginUser(input: { email: string; password: string }): Pro
   return authResult(user);
 }
 
+export interface ProfileInput {
+  name: string;
+  phone: string | null;
+  personType: PersonType;
+}
+
+// The three columns are listed by hand: e-mail, password and the roles are not changed from here, whatever the body carries.
+export async function updateProfile(userId: string, input: ProfileInput): Promise<PublicUser> {
+  const user = await User.findByPk(userId, { attributes: { exclude: ['passwordHash'] } });
+  if (!user) throw new ApiError(401, 'unauthenticated', 'Entre na sua conta para continuar.');
+  await user.update({ name: input.name, phone: input.phone, personType: input.personType });
+  return toPublicUser(user);
+}
+
 export async function getProfile(userId: string): Promise<PublicUser> {
   const user = await User.findByPk(userId, { attributes: { exclude: ['passwordHash'] } });
   if (!user) throw new ApiError(401, 'unauthenticated', 'Entre na sua conta para continuar.');

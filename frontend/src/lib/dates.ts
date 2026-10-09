@@ -27,3 +27,10 @@ export function toLocalInput(iso: string): string {
   const value = (type: string) => parts.find((part) => part.type === type)?.value ?? ''
   return `${value('year')}-${value('month')}-${value('day')}T${value('hour')}:${value('minute')}`
 }
+
+// "sáb 18/10": short enough for a list line.
+export function shortDate(iso: string): string {
+  const date = new Date(iso)
+  const weekday = format(date, { weekday: 'short' }).replace('.', '')
+  return `${weekday} ${format(date, { day: '2-digit', month: '2-digit' })}`
+}

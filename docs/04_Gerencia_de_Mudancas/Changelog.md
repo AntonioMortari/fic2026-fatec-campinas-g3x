@@ -216,3 +216,75 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   enquanto os eventos forem de dezenas de pessoas.
 - **Continua adiado:** limite de tentativas de login (pode reaproveitar a mesma origem hasheada).
 - **PR:** branch `feat/registrations-admin`
+
+## 2026-10-09 — RF17 (Lista de presença) e "Minhas inscrições" na área do usuário (RF11)
+- **Artefato:** Requisitos (RF11, RF17) · Arquitetura
+- **Antes:** a equipe lia quem se inscreveu (RF16), mas não registrava quem veio; a área do usuário só
+  mostrava a ficha da conta.
+- **Depois:**
+  - A equipe marca pelo celular se cada pessoa **veio**, **não veio**, ou deixa **sem conferir**. São três
+    estados: quem ninguém conferiu não conta como falta. A lista mostra só o nome e a marca, sem contato.
+  - A planilha de inscritos ganha a coluna "Presença".
+  - `/minha-conta` passa a listar as inscrições feitas com a conta aberta, separando as próximas das que já
+    aconteceram. A pessoa só vê "Presença registrada"; a marca de falta é anotação da equipe e não é mostrada.
+- **O que o critério não cobria e foi decidido aqui:** a lista de presença não tem paginação nem mostra
+  CPF, e-mail ou telefone; inscrição feita sem conta não aparece em "Minhas inscrições" (não tem dono); a área
+  do usuário ainda **não permite editar os próprios dados** nem tem candidaturas e doações, que não existem.
+- **Continua adiado:** relatório contando presentes (RF30–RF32), cancelar a própria inscrição, e-mail de
+  confirmação (RF18).
+- **PR:** branch `feat/attendance-my-registrations`
+
+## 2026-10-09 — Painel no desktop (desenho 7j) e lista de presença conforme o desenho 3g
+- **Artefato:** Protótipos (2c, 3g, 7j) · Arquitetura
+- **Antes:** o painel era o mesmo cabeçalho escuro no celular e no desktop; a lista de presença tinha dois
+  botões por pessoa em cartões ("Veio" / "Não veio") e o nome inteiro.
+- **Depois:**
+  - No desktop o painel ganha cabeçalho creme com logotipo e selo "PAINEL" e um menu lateral; o celular
+    segue com a barra inferior. O menu lateral só tem as telas que existem.
+  - A lista de presença segue o desenho: progresso e busca fixos, "Sem conferir" em cima e "Conferidos" embaixo,
+    aviso com "Desfazer", "Faltou" no lugar de "Não veio", nome abreviado e telefone do responsável mascarado
+    para menor. A planilha usa "Faltou".
+- **O que o desenho não cobria e foi decidido aqui:** o cabeçalho escuro da lista some só no celular; no
+  desktop a lista fica numa coluna estreita; itens do menu lateral sem tela (Atividades, Pessoas, Conteúdo,
+  Biblioteca, Relatório, Configurações) não aparecem até a tela existir.
+- **Combinado de processo:** tela sem desenho não se inventa; para-se e avisa-se quem desenha (CLAUDE.md).
+- **PR:** branch `feat/panel-desktop-attendance`
+
+## 2026-10-09 — Cancelar inscrição (desenhos 7c e 7d)
+- **Artefato:** Requisitos (RF15) · Arquitetura
+- **Antes:** quem se inscrevia não tinha como desistir; a vaga só voltava com a equipe mexendo no banco.
+- **Depois:** cada inscrição tem um link pessoal que abre uma tela de confirmação e cancela, **sem exigir conta**
+  (a inscrição funciona sem conta, então desistir também). A vaga volta para a agenda na hora e a pessoa pode se
+  inscrever de novo. A inscrição cancelada fica como registro no banco e deixa de contar nas vagas, nas listas
+  da equipe, na presença, na planilha e em "Minhas inscrições". Não cancela depois da atividade.
+- **O que o desenho não cobria e foi decidido aqui:** de onde sai o link enquanto não há e-mail (RF18): da tela
+  "Inscrição registrada" e de "Minhas inscrições", dois pontos de entrada que não estão nos desenhos; o limite
+  por conexão continua contando as inscrições canceladas (foram envios).
+- **PR:** branch `feat/cancel-registration`
+
+## 2026-10-09 — Minha conta e Alterar meus dados (desenhos 7a e 7b)
+- **Artefato:** Requisitos (RF11) · Protótipos
+- **Antes:** `/minha-conta` só mostrava a ficha; não havia como corrigir nome, telefone ou tipo de conta.
+- **Depois:** a ficha segue o desenho (nome, telefone, tipo, e-mail) e há uma tela própria para alterar nome,
+  telefone e tipo de conta. O e-mail não muda por aqui (exigiria confirmação por e-mail, que não existe) e a tela
+  diz isso e aponta o WhatsApp. Papéis e senha não são aceitos por esta rota.
+- **O que o desenho não cobria e foi decidido aqui:** "Candidaturas ao voluntariado", "Minhas doações" e "Trocar
+  minha senha" não aparecem, porque a funcionalidade por trás de cada um não existe; "Minhas inscrições" fica na
+  lista de participações (não está no desenho); "Empresa" é o rótulo só destas duas telas.
+- **PR:** branch `feat/account-edit`
+
+## 2026-10-09 — Relatório do painel (desenhos 7i e 7j)
+- **Artefato:** Requisitos (RF30, RF31, RF32) · Protótipos
+- **Antes:** a equipe não tinha números para a prestação de contas; a presença já era marcada (RF17) mas ninguém a
+  somava.
+- **Depois:** `/admin/relatorio` mostra, por mês, trimestre ou semestre: atividades realizadas, pessoas inscritas,
+  presentes conferidos, crianças e adolescentes presentes, e uma linha por atividade com inscritos, quem veio,
+  quem faltou e quem ninguém conferiu. Baixa em planilha (CSV) e imprime como PDF. Inscrição cancelada não conta.
+  "Sem conferir" nunca vira falta, e contagem que falhou aparece como traço, não como zero.
+- **O que o desenho pedia e não entra:** "novos voluntários", "novos doadores" e "valor recebido". Os módulos de
+  voluntariado e de doações (RF19–RF26) não existem neste repositório, então não há dado para esses números.
+  Entram quando existirem.
+- **O que o desenho não cobria e foi decidido aqui:** a janela do trimestre e do semestre termina no mês atual
+  (como no desenho: "Jul–Set", "Abr–Set"), em vez de seguir o ano civil; a tabela traz as cinco atividades mais
+  recentes e a planilha, todas.
+- **PR:** branch `feat/report`

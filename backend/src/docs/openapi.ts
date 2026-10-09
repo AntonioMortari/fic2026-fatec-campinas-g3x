@@ -311,6 +311,7 @@ export const openApiDocument = {
                           guardianPhone: { type: 'string', nullable: true },
                           imageAuthorized: { type: 'boolean', description: 'RN07: se a pessoa autorizou o uso da imagem.' },
                           hasAccount: { type: 'boolean' },
+                          attended: { type: 'boolean', nullable: true, description: 'RF17: true veio, false não veio, null ninguém conferiu.' },
                           createdAt: { type: 'string', format: 'date-time' },
                         },
                       },
@@ -332,7 +333,7 @@ export const openApiDocument = {
         summary: 'Planilha dos inscritos (equipe)',
         description:
           'CSV com `;` e BOM UTF-8, para abrir direto no Excel em português. Células que começariam com `=`, `+`, `-` ou `@` levam um apóstrofo na frente: sem isso viram fórmula. ' +
-          'A coluna "Autorizou imagem" vem antes das de contato.',
+          'A coluna "Autorizou imagem" vem antes das de contato; "Presença" é Veio, Faltou ou Não conferido.',
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
         security: [{ bearerAuth: [] }],
         responses: {
@@ -340,6 +341,150 @@ export const openApiDocument = {
           '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '404': { description: 'Evento inexistente', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/events/{id}/attendance': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Lista de presença: só nome, menor de idade e a marca (equipe, RF17)',
+        description: 'Em ordem alfabética, sem e-mail, telefone nem CPF (o telefone do responsável de um menor vem mascarado, como `(11) 9····-1234`): é a tela que fica virada para uma fila. Três estados: `true` veio, `false` não veio, `null` ninguém conferiu.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'O evento e quem se inscreveu',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    event: { $ref: '#/components/schemas/AdminEvent' },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', format: 'uuid' },
+                          name: { type: 'string' },
+                          isMinor: { type: 'boolean' },
+                          guardianPhoneHint: { type: 'string', nullable: true, description: 'Só para menor de idade, mascarado.' },
+                          attended: { type: 'boolean', nullable: true },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Evento inexistente', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/events/{id}/attendance/{registrationId}': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Marca se a pessoa veio (equipe, RF17)',
+        description: 'Grava só a coluna de presença. `null` desmarca. A inscrição precisa ser deste evento, senão 404.',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          { name: 'registrationId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { type: 'object', required: ['attended'], properties: { attended: { type: 'boolean', nullable: true } } } } },
+        },
+        responses: {
+          '200': { description: 'A linha atualizada' },
+          '400': { description: '`attended` precisa ser true, false ou null', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`registration_not_found` ou evento inexistente', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/me': {
+      patch: {
+        tags: ['Account'],
+        summary: 'Altera os meus dados (RF11)',
+        description:
+          'Grava só `name`, `phone` e `personType` da conta do token. E-mail, senha e papéis **não mudam por aqui**, seja qual for o corpo (trocar o e-mail pede confirmação por e-mail, que ainda não existe). Telefone em branco apaga o número; telefone a um dígito de valer responde "Falta um dígito".',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name', 'personType'],
+                properties: {
+                  name: { type: 'string', maxLength: 120 },
+                  phone: { type: 'string', nullable: true, description: 'Com DDD; só os dígitos são guardados.' },
+                  personType: { type: 'string', enum: ['individual', 'organization'] },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'A conta já com os dados novos', content: { 'application/json': { schema: { type: 'object', properties: { user: { $ref: '#/components/schemas/User' } } } } } },
+          '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão, ou conta que não existe mais', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/me/registrations': {
+      get: {
+        tags: ['Account'],
+        summary: 'As inscrições ligadas à minha conta (RF11)',
+        description:
+          'Só as feitas com sessão aberta (as de visitante não têm dono). Do mais próximo ao mais distante. `attendanceRecorded` é verdadeiro só quando a equipe marcou presença: "não veio" e "ninguém conferiu" aparecem iguais, porque a marca de falta é anotação de trabalho da equipe.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Lista (pode ser vazia)' },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/report': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Relatório do período: números e atividades (equipe, RF30–RF32)',
+        description:
+          'Janela de 1, 3 ou 6 meses que termina no mês atual (`offset` 0) ou nas anteriores (`-1`, `-2`…), com os meses fechados à meia-noite de São Paulo. ' +
+          '"Atividades realizadas" são as publicadas que já acabaram dentro da janela; todo outro número conta as inscrições delas, **sem as canceladas**. ' +
+          'Veio / faltou / sem conferir somam as inscrições: quem ninguém marcou **não** é falta. Uma contagem que falhou vem `null` (a tela mostra um traço), nunca `0`. ' +
+          'A tabela traz as 5 atividades mais recentes (`events`); `eventsTotal` é quantas há. Só números: nenhum nome, e-mail ou documento.',
+        parameters: [
+          { name: 'period', in: 'query', schema: { type: 'string', enum: ['month', 'quarter', 'semester'], default: 'month' } },
+          { name: 'offset', in: 'query', schema: { type: 'integer', maximum: 0, minimum: -240, default: 0 } },
+        ],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'O relatório' },
+          '400': { description: 'Período inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/report/csv': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Planilha do relatório (equipe)',
+        description: 'As mesmas contagens, com **todas** as atividades da janela (não só as 5 da tela) e uma linha de total. Traço (—) onde a contagem falhou. `;`, BOM UTF-8, fórmulas neutralizadas.',
+        parameters: [
+          { name: 'period', in: 'query', schema: { type: 'string', enum: ['month', 'quarter', 'semester'], default: 'month' } },
+          { name: 'offset', in: 'query', schema: { type: 'integer', maximum: 0, minimum: -240, default: 0 } },
+        ],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Arquivo CSV', content: { 'text/csv': { schema: { type: 'string' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },
@@ -409,12 +554,38 @@ export const openApiDocument = {
         security: [{}, { bearerAuth: [] }],
         requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/RegistrationRequest' } } } },
         responses: {
-          '201': { description: 'Inscrição registrada; devolve o evento com as vagas já descontadas' },
+          '201': { description: 'Inscrição registrada; devolve o evento com as vagas já descontadas e `registration.cancelCode`, o código do link pessoal que cancela esta inscrição' },
           '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '401': { description: 'Token enviado, mas inválido ou de conta que não existe mais', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '404': { description: 'Evento inexistente ou não publicado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '409': { description: '`event_full`, `registrations_closed` (evento acabou) ou `already_registered`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '429': { description: '`too_many_registrations` (5 pessoas por e-mail no evento) ou `too_many_requests` (30 inscrições por hora vindas da mesma conexão)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/registrations/cancel/{code}': {
+      get: {
+        tags: ['Events'],
+        summary: 'Mostra a inscrição que o link pessoal cancelaria (RF15)',
+        description:
+          'Aberta, sem sessão: quem se inscreveu sem conta também precisa poder desistir. O código é um UUID aleatório que só quem se inscreveu recebeu. Devolve só o evento e o nome abreviado ("Ana S."), nunca contato, CPF nem responsável. `state`: `active`, `cancelled` ou `over` (a atividade já aconteceu).',
+        parameters: [{ name: 'code', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'A inscrição e o estado' },
+          '400': { description: 'Não é um UUID', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`registration_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      post: {
+        tags: ['Events'],
+        summary: 'Cancela a inscrição do link pessoal (RF15)',
+        description:
+          'Marca `cancelled_at`; a linha fica como registro e deixa de contar (vagas, lista da equipe, presença, planilha, "Minhas inscrições"). Quem cancelou pode se inscrever de novo. Dois toques ao mesmo tempo cancelam uma vez só.',
+        parameters: [{ name: 'code', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'A inscrição, já com `state: cancelled`' },
+          '404': { description: '`registration_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: '`already_cancelled` ou `registrations_closed` (a atividade já aconteceu)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },

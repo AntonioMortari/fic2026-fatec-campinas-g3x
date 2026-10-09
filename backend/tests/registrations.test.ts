@@ -57,6 +57,7 @@ function setup({ event = storedEvent(), registered = 0, sameEmail = 0, fromOrigi
   const create = jest.spyOn(Registration, 'create').mockImplementation((async (row: Record<string, unknown>) => ({
     id: 'reg-1',
     name: row.name,
+    cancelCode: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
     createdAt: NOW,
   })) as never);
   jest.spyOn(User, 'count').mockResolvedValue(1);
@@ -81,7 +82,7 @@ describe('POST /api/events/:id/registrations without an account', () => {
     const response = await post();
 
     expect(response.status).toBe(201);
-    expect(response.body.registration).toEqual({ id: 'reg-1', name: 'Ana Souza', createdAt: NOW.toISOString() });
+    expect(response.body.registration).toEqual({ id: 'reg-1', name: 'Ana Souza', createdAt: NOW.toISOString(), cancelCode: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc' });
     expect(response.body.event).toMatchObject({ id: EVENT_ID, capacity: 30, spotsLeft: 29 });
     expect(create).toHaveBeenCalledWith(expect.objectContaining({ eventId: EVENT_ID, userId: null }), expect.anything());
   });
@@ -470,5 +471,31 @@ describe('the limit per connection', () => {
   it('is judged after the checks that give a clearer answer: full and already registered come first', async () => {
     setup({ registered: 30, fromOrigin: 99 });
     expect((await post()).body.error.code).toBe('event_full');
+  });
+});
+
+describe('a cancelled sign-up stops counting, but the connection still counts it', () => {
+  it('ignores cancelled rows when checking the duplicate, the e-mail limit and the spots', async () => {
+    setup();
+    const findOne = Registration.findOne as jest.Mock;
+    const findAll = Registration.findAll as jest.Mock;
+    const count = Registration.count as jest.Mock;
+
+    await post();
+
+    expect(findOne.mock.calls[0]![0].where).toMatchObject({ eventId: EVENT_ID, email: 'ana@exemplo.com', name: 'Ana Souza', cancelledAt: null });
+    expect(findAll.mock.calls[0]![0].where).toMatchObject({ cancelledAt: null });
+    const emailCall = count.mock.calls.map(([options]) => options as { where: Record<string, unknown> }).find((options) => options.where.email);
+    expect(emailCall!.where).toMatchObject({ cancelledAt: null });
+    const originCall = count.mock.calls.map(([options]) => options as { where: Record<string, unknown> }).find((options) => options.where.originHash);
+    expect(originCall!.where).not.toHaveProperty('cancelledAt');
+  });
+
+  it('hands back the personal link that cancels this sign-up, and only this one', async () => {
+    setup();
+
+    const { body } = await post();
+
+    expect(body.registration.cancelCode).toMatch(/^[0-9a-f-]{36}$/);
   });
 });

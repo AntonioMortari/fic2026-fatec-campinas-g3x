@@ -6,6 +6,7 @@ export interface RecordedRequest {
   method: string
   url: string
   body: unknown
+  params?: Record<string, unknown>
   authorization: string | undefined
 }
 
@@ -23,6 +24,7 @@ export function mockApi(handlers: Record<string, Handler>) {
       method,
       url,
       body: typeof config.data === 'string' ? JSON.parse(config.data) : config.data,
+      params: config.params as Record<string, unknown> | undefined,
       authorization: config.headers.get('Authorization')?.toString(),
     }
     requests.push(request)

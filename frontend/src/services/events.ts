@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { EventDetail, EventPeriod, EventSummary } from '../types/event'
+import type { MyRegistration } from '../types/my-registration'
 import { api } from './api'
 
 async function fetchEvents(period: EventPeriod, limit?: number): Promise<EventSummary[]> {
@@ -47,8 +48,15 @@ export function useEventRegistration(eventId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (input: RegistrationInput) =>
-      (await api.post<{ registration: { id: string; name: string }; event: EventSummary }>(`/events/${eventId}/registrations`, input)).data,
+      (await api.post<{ registration: { id: string; name: string; cancelCode: string }; event: EventSummary }>(`/events/${eventId}/registrations`, input)).data,
     // The agenda and the home show the spots left: they are stale the moment someone signs up.
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onSettled: () => Promise.all([queryClient.invalidateQueries({ queryKey: ['events'] }), queryClient.invalidateQueries({ queryKey: ['my-registrations'] })]),
+  })
+}
+
+export function useMyRegistrations() {
+  return useQuery({
+    queryKey: ['my-registrations'],
+    queryFn: async () => (await api.get<{ data: MyRegistration[] }>('/me/registrations')).data.data,
   })
 }

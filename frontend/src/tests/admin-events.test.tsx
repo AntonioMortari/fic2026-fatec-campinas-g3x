@@ -399,3 +399,155 @@ describe('the registrants of an event (RF16)', () => {
     vi.unstubAllGlobals()
   })
 })
+
+describe('the attendance list (RF17, screen 3g)', () => {
+  const entries = [
+    { id: 'r1', name: 'Ana Paula Souza', isMinor: true, guardianPhoneHint: '(11) 9····-1234', attended: null as boolean | null },
+    { id: 'r2', name: 'Álvaro Lima', isMinor: false, guardianPhoneHint: null, attended: true as boolean | null },
+    { id: 'r3', name: 'Bia Costa', isMinor: false, guardianPhoneHint: null, attended: false as boolean | null },
+    { id: 'r4', name: 'Caio Menezes', isMinor: false, guardianPhoneHint: null, attended: null as boolean | null },
+  ]
+  const route = `GET /admin/events/${live.id}/attendance`
+  const patch = (registrationId: string) => `PATCH /admin/events/${live.id}/attendance/${registrationId}`
+  const list = (data = entries): Handlers => ({ [route]: () => ({ status: 200, data: { event: live, data } }) })
+  const page = `/admin/eventos/${live.id}/presenca`
+  const name = { selector: '.break-words' }
+
+  it('is only for staff, and is reached from each event of the list', async () => {
+    openAs(fakeUser)
+    renderRoute(page)
+    expect(await screen.findByRole('heading', { name: 'Página não encontrada' })).toBeInTheDocument()
+    expect(calls(route)).toHaveLength(0)
+    mock.restore()
+
+    openAs(STAFF, { 'GET /admin/events': () => ({ status: 200, data: { data: [live] } }) })
+    renderRoute('/admin/eventos')
+    expect(await screen.findByRole('link', { name: /Lista de presença/ })).toHaveAttribute('href', page)
+  })
+
+  it('puts who is still to check first and the checked ones below, each group counted', async () => {
+    openAs(STAFF, list())
+    renderRoute(page)
+
+    const pending = await screen.findByRole('heading', { name: 'Sem conferir · 2' })
+    const done = screen.getByRole('heading', { name: 'Conferidos · 2' })
+    expect(pending.compareDocumentPosition(done) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(within(pending.closest('section')!).getByText('Ana S.', name)).toBeInTheDocument()
+    expect(within(done.closest('section')!).getByText('Álvaro L.', name)).toBeInTheDocument()
+  })
+
+  it('shows the progress in words and as a bar, with "faltou" and not "falta" of the not checked', async () => {
+    openAs(STAFF, list())
+    renderRoute(page)
+
+    expect(await screen.findByText('2 de 4 conferidos')).toBeInTheDocument()
+    expect(screen.getByText('1 veio · 1 faltou')).toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: 'Conferidos' })).toHaveAttribute('aria-valuenow', '2')
+    expect(screen.getByRole('progressbar', { name: 'Conferidos' })).toHaveAttribute('aria-valuemax', '4')
+  })
+
+  it('shows only the first name and the initial, and the masked number of the guardian of a minor', async () => {
+    openAs(STAFF, list())
+    renderRoute(page)
+    await screen.findByText('Ana S.', name)
+
+    expect(screen.queryByText('Ana Paula Souza')).not.toBeInTheDocument()
+    expect(screen.getByText('Responsável: (11) 9····-1234')).toBeInTheDocument()
+    const main = within(screen.getByRole('main'))
+    expect(main.queryByText(/@|CPF|E-mail/)).not.toBeInTheDocument()
+  })
+
+  it('keeps the whole name when two people would read the same', async () => {
+    openAs(STAFF, list([
+      { ...entries[0]!, id: 'a', name: 'Ana Souza', isMinor: false, guardianPhoneHint: null },
+      { ...entries[0]!, id: 'b', name: 'Ana Silva', isMinor: false, guardianPhoneHint: null },
+    ]))
+    renderRoute(page)
+
+    expect(await screen.findByText('Ana Souza', name)).toBeInTheDocument()
+    expect(screen.getByText('Ana Silva', name)).toBeInTheDocument()
+  })
+
+  it('marks "came" at once, moves the person down, sends only that and offers to undo', async () => {
+    const user = userEvent.setup()
+    openAs(STAFF, { ...list(), [patch('r4')]: () => ({ status: 200, data: { registration: { ...entries[3], attended: true } } }) })
+    renderRoute(page)
+
+    await user.click(await screen.findByRole('button', { name: 'Veio Caio M.' }))
+
+    expect(await screen.findByRole('heading', { name: 'Conferidos · 3' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Sem conferir · 1' })).toBeInTheDocument()
+    await waitFor(() => expect(calls(patch('r4'))).toHaveLength(1))
+    expect(calls(patch('r4'))[0]?.body).toEqual({ attended: true })
+    expect(await screen.findByText('Caio M. marcado como veio')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Desfazer' })).toBeInTheDocument()
+  })
+
+  it('marks "faltou", and "Desfazer" puts the person back as not checked', async () => {
+    const user = userEvent.setup()
+    openAs(STAFF, {
+      ...list(),
+      [patch('r4')]: (request) => ({ status: 200, data: { registration: { ...entries[3], attended: (request.body as { attended: boolean | null }).attended } } }),
+    })
+    renderRoute(page)
+
+    await user.click(await screen.findByRole('button', { name: 'Faltou Caio M.' }))
+    expect(await screen.findByText('Caio M. marcado como faltou')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Desfazer' }))
+
+    await waitFor(() => expect(calls(patch('r4'))).toHaveLength(2))
+    expect(calls(patch('r4'))[0]?.body).toEqual({ attended: false })
+    expect(calls(patch('r4'))[1]?.body).toEqual({ attended: null })
+    expect(await screen.findByRole('heading', { name: 'Sem conferir · 2' })).toBeInTheDocument()
+  })
+
+  it('"Limpar" takes a checked person back to the queue', async () => {
+    const user = userEvent.setup()
+    openAs(STAFF, { ...list(), [patch('r2')]: () => ({ status: 200, data: { registration: { ...entries[1], attended: null } } }) })
+    renderRoute(page)
+
+    await user.click(await screen.findByRole('button', { name: 'Limpar Álvaro L.' }))
+
+    await waitFor(() => expect(calls(patch('r2'))[0]?.body).toEqual({ attended: null }))
+    expect(await screen.findByRole('heading', { name: 'Sem conferir · 3' })).toBeInTheDocument()
+  })
+
+  it('puts the mark back and says so when the server refuses', async () => {
+    const user = userEvent.setup()
+    openAs(STAFF, { ...list(), [patch('r4')]: () => apiError(500, 'internal_error', 'x') })
+    renderRoute(page)
+
+    await user.click(await screen.findByRole('button', { name: 'Faltou Caio M.' }))
+
+    expect(await screen.findByText(/A marca voltou como estava/)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Sem conferir · 2' })).toBeInTheDocument()
+    expect(screen.getByText('1 veio · 1 faltou')).toBeInTheDocument()
+  })
+
+  it('finds a person by the whole name, ignoring case and accents', async () => {
+    const user = userEvent.setup()
+    openAs(STAFF, list())
+    renderRoute(page)
+    await screen.findByText('Ana S.', name)
+
+    await user.type(screen.getByLabelText('Buscar pelo nome'), 'alvaro lima')
+
+    expect(screen.getByText('Álvaro L.', name)).toBeInTheDocument()
+    expect(screen.queryByText('Ana S.', name)).not.toBeInTheDocument()
+    await user.clear(screen.getByLabelText('Buscar pelo nome'))
+    await user.type(screen.getByLabelText('Buscar pelo nome'), 'zzz')
+    expect(screen.getByText('Ninguém com esse nome')).toBeInTheDocument()
+  })
+
+  it('goes back to the registrants, and says it with an empty list or an unknown event', async () => {
+    openAs(STAFF, list([]))
+    renderRoute(page)
+    expect(await screen.findByText('Ninguém se inscreveu ainda')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Voltar para Inscritos/ })).toHaveAttribute('href', `/admin/eventos/${live.id}/inscritos`)
+    mock.restore()
+
+    openAs(STAFF, { [route]: () => apiError(404, 'event_not_found', 'x') })
+    renderRoute(page)
+    expect(await screen.findAllByRole('heading', { name: 'Página não encontrada' })).not.toHaveLength(0)
+  })
+})

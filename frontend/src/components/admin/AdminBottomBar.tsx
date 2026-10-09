@@ -19,7 +19,7 @@ export function AdminBottomBar({ openMenu, menuOpen, onCloseMenu }: AdminBottomB
   const { pathname } = useLocation()
 
   return (
-    <nav aria-label="Atalhos do painel" className="safe-area-bottom fixed inset-x-0 bottom-0 z-30 border-t-[1.5px] border-brown bg-card px-1.5 desktop:hidden">
+    <nav aria-label="Atalhos do painel" className="safe-area-bottom fixed inset-x-0 bottom-0 z-30 border-t-[1.5px] border-brown bg-card px-1.5 desktop:hidden print:hidden">
       <ul className="m-0 grid list-none grid-cols-3 p-0">
         {ADMIN_BOTTOM_BAR.map((destination) => {
           const active = !menuOpen && isActiveAdminRoute(destination.to, pathname)

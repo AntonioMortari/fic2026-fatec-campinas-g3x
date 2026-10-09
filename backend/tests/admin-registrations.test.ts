@@ -24,6 +24,7 @@ function row(overrides: Record<string, unknown> = {}) {
     guardianPhone: null,
     imageAuthorized: true,
     originHash: 'a'.repeat(64),
+    attended: null,
     consentedAt: new Date('2026-10-09T12:00:00Z'),
     createdAt: new Date('2026-10-09T15:30:00Z'),
     ...overrides,
@@ -98,6 +99,7 @@ describe('GET /api/admin/events/:id/registrations', () => {
       guardianPhone: '11953968344',
       imageAuthorized: false,
       hasAccount: true,
+      attended: null,
       createdAt: '2026-10-09T15:30:00.000Z',
     });
   });
@@ -191,7 +193,16 @@ describe('GET /api/admin/events/:id/registrations.csv', () => {
 
     expect(cells).toContain('(11) 95396-8344');
     expect(cells).toContain('529.982.247-25');
-    expect(cells.at(-1)).toBe('09/10/2026 22:30');
+    expect(cells.at(-2)).toBe('09/10/2026 22:30');
+  });
+
+  it('writes the three attendance states in words, and "not checked" is the default', async () => {
+    setup([row({ attended: true }), row({ id: 'r2', attended: false }), row({ id: 'r3', attended: null })]);
+
+    const lines = (await request(app).get(`${URL}.csv`).set(auth)).text.replace('﻿', '').trim().split('\r\n');
+
+    expect(lines[0]?.split(';').at(-1)).toBe('Presença');
+    expect(lines.slice(1).map((line) => line.split(';').at(-1))).toEqual(['Veio', 'Faltou', 'Não conferido']);
   });
 
   it('neutralizes a name that would run as a formula in the spreadsheet', async () => {
