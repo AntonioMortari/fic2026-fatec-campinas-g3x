@@ -404,7 +404,7 @@ describe('RF17: the attendance list', () => {
     const { body } = await request(app).get(`/api/admin/events/${event.id}/attendance`).set(header);
 
     expect(body.data.map((entry: { name: string }) => entry.name)).toEqual(['Álvaro', 'ana', 'Bia', 'Zélia']);
-    expect(Object.keys(body.data[0]).sort()).toEqual(['attended', 'id', 'isMinor', 'name']);
+    expect(Object.keys(body.data[0]).sort()).toEqual(['attended', 'guardianPhoneHint', 'id', 'isMinor', 'name']);
   });
 
   it('marks came, did not come, and back to not checked, each persisted', async () => {

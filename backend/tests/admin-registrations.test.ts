@@ -202,7 +202,7 @@ describe('GET /api/admin/events/:id/registrations.csv', () => {
     const lines = (await request(app).get(`${URL}.csv`).set(auth)).text.replace('﻿', '').trim().split('\r\n');
 
     expect(lines[0]?.split(';').at(-1)).toBe('Presença');
-    expect(lines.slice(1).map((line) => line.split(';').at(-1))).toEqual(['Veio', 'Não veio', 'Não conferido']);
+    expect(lines.slice(1).map((line) => line.split(';').at(-1))).toEqual(['Veio', 'Faltou', 'Não conferido']);
   });
 
   it('neutralizes a name that would run as a formula in the spreadsheet', async () => {

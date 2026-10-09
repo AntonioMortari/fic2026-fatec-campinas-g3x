@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { createApp } from '../src/app';
 import { Event, Registration, User } from '../src/models';
+import { maskPhone } from '../src/services/attendance.service';
 import { signToken } from '../src/utils/token';
 
 const app = createApp();
@@ -67,24 +68,31 @@ describe('GET /api/admin/events/:id/attendance', () => {
     expect(response.headers['cache-control']).toBe('no-store');
     expect(response.body.event.title).toBe('Cafú e o Café');
     expect(response.body.data).toEqual([
-      { id: REGISTRATION_ID, name: 'Ana Souza', isMinor: false, attended: true },
-      { id: 'r2', name: 'Pedro', isMinor: true, attended: null },
+      { id: REGISTRATION_ID, name: 'Ana Souza', isMinor: false, guardianPhoneHint: null, attended: true },
+      { id: 'r2', name: 'Pedro', isMinor: true, guardianPhoneHint: null, attended: null },
     ]);
     const listing = findAll.mock.calls.map(([options]) => options).find((options) => !options?.group)!;
     expect(listing.where).toEqual({ eventId: EVENT_ID });
-    expect(listing.attributes).toEqual(['id', 'name', 'isMinor', 'attended']);
+    expect(listing.attributes).toEqual(['id', 'name', 'isMinor', 'guardianPhone', 'attended']);
     expect(listing.order).toEqual([['name', 'ASC'], ['createdAt', 'ASC']]);
   });
 
-  it('never sends e-mail, phone, CPF, guardian or origin', async () => {
+  it('never sends e-mail, phone, CPF, the whole guardian number or origin; a minor carries the number masked', async () => {
     asStaff();
     jest.spyOn(Registration, 'findAll').mockImplementation((async (options?: { group?: unknown }) =>
-      options?.group ? [] : [row({ email: 'ana@exemplo.com', phone: '11953968344', cpf: '52998224725', guardianPhone: '1', originHash: 'x' })]) as never);
+      options?.group
+        ? []
+        : [
+            row({ email: 'ana@exemplo.com', phone: '11953968344', cpf: '52998224725', guardianName: 'Maria', guardianPhone: '11912345678', originHash: 'x', isMinor: true }),
+            row({ id: 'r2', guardianPhone: '11912345678', isMinor: false }),
+          ]) as never);
 
     const { body } = await request(app).get(LIST).set(auth);
 
-    expect(Object.keys(body.data[0]).sort()).toEqual(['attended', 'id', 'isMinor', 'name']);
-    expect(JSON.stringify(body)).not.toMatch(/ana@|95396|52998|originHash/);
+    expect(Object.keys(body.data[0]).sort()).toEqual(['attended', 'guardianPhoneHint', 'id', 'isMinor', 'name']);
+    expect(body.data[0].guardianPhoneHint).toBe('(11) 9····-5678');
+    expect(body.data[1].guardianPhoneHint).toBeNull();
+    expect(JSON.stringify(body)).not.toMatch(/ana@|95396|52998|originHash|Maria|91234/);
   });
 
   it('answers 404 for an event that does not exist, and 400 for an identifier that is not a UUID', async () => {
@@ -104,7 +112,7 @@ describe('PATCH /api/admin/events/:id/attendance/:registrationId', () => {
     const response = await request(app).patch(MARK).set(auth).send({ attended });
 
     expect(response.status).toBe(200);
-    expect(response.body.registration).toEqual({ id: REGISTRATION_ID, name: 'Ana Souza', isMinor: false, attended });
+    expect(response.body.registration).toEqual({ id: REGISTRATION_ID, name: 'Ana Souza', isMinor: false, guardianPhoneHint: null, attended });
     expect(registration.update).toHaveBeenCalledWith({ attended });
   });
 
@@ -137,5 +145,16 @@ describe('PATCH /api/admin/events/:id/attendance/:registrationId', () => {
     await request(app).patch(MARK).set(auth).send({ attended: true, name: 'Outro', imageAuthorized: true, userId: STAFF_ID, eventId: 'x' });
 
     expect(registration.update).toHaveBeenCalledWith({ attended: true });
+  });
+});
+
+describe('maskPhone', () => {
+  it('keeps the area code, the first digit and the last four', () => {
+    expect(maskPhone('11912345678')).toBe('(11) 9····-5678');
+    expect(maskPhone('1133334444')).toBe('(11) 3····-4444');
+  });
+
+  it.each([null, '', '123', '119123456789'])('gives nothing for %j', (value) => {
+    expect(maskPhone(value)).toBeNull();
   });
 });
