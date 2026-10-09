@@ -32,7 +32,7 @@ const serve = (detail: EventDetail = event, extra: Handlers = {}) => {
   mock = mockApi({ [`GET /events/${ID}`]: () => ({ status: 200, data: { event: detail } }), ...extra })
 }
 
-const CREATED = { status: 201, data: { registration: { id: 'r1', name: 'Ana Souza' }, event: { ...event, spotsLeft: 10 } } }
+const CREATED = { status: 201, data: { registration: { id: 'r1', name: 'Ana Souza', cancelCode: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc' }, event: { ...event, spotsLeft: 10 } } }
 const calls = (key: string) => mock.requests.filter((request) => `${request.method} ${request.url}` === key)
 const field = (label: RegExp) => screen.getByLabelText(label)
 
@@ -97,6 +97,18 @@ describe('the registration screen (design 3d)', () => {
 })
 
 describe('signing up without an account', () => {
+  it('offers the personal link to cancel, right on the confirmation, for someone without an account', async () => {
+    const user = userEvent.setup()
+    serve(event, { [`POST /events/${ID}/registrations`]: () => CREATED })
+    renderRoute(PATH)
+    await fillValid(user)
+    await submit(user)
+
+    await screen.findByRole('heading', { name: 'Inscrição registrada' })
+
+    expect(screen.getByRole('link', { name: /Cancelar esta inscrição/ })).toHaveAttribute('href', '/inscricao/cancelar?c=cccccccc-cccc-4ccc-8ccc-cccccccccccc')
+  })
+
   it('sends the form, shows what was saved and never promises an e-mail', async () => {
     const user = userEvent.setup()
     serve(event, { [`POST /events/${ID}/registrations`]: () => CREATED })

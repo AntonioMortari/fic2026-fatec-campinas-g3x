@@ -21,7 +21,7 @@ export interface AdminRegistration {
 
 export async function listRegistrations(eventId: string): Promise<{ event: AdminEvent; registrations: AdminRegistration[] }> {
   const event = await getAdminEvent(eventId);
-  const rows = await Registration.findAll({ where: { eventId }, order: [['createdAt', 'ASC'], ['name', 'ASC']] });
+  const rows = await Registration.findAll({ where: { eventId, cancelledAt: null }, order: [['createdAt', 'ASC'], ['name', 'ASC']] });
   return {
     event,
     registrations: rows.map((row) => ({

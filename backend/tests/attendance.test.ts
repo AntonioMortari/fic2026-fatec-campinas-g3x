@@ -72,7 +72,7 @@ describe('GET /api/admin/events/:id/attendance', () => {
       { id: 'r2', name: 'Pedro', isMinor: true, guardianPhoneHint: null, attended: null },
     ]);
     const listing = findAll.mock.calls.map(([options]) => options).find((options) => !options?.group)!;
-    expect(listing.where).toEqual({ eventId: EVENT_ID });
+    expect(listing.where).toEqual({ eventId: EVENT_ID, cancelledAt: null });
     expect(listing.attributes).toEqual(['id', 'name', 'isMinor', 'guardianPhone', 'attended']);
     expect(listing.order).toEqual([['name', 'ASC'], ['createdAt', 'ASC']]);
   });
@@ -124,7 +124,7 @@ describe('PATCH /api/admin/events/:id/attendance/:registrationId', () => {
 
     expect(response.status).toBe(404);
     expect(response.body.error.code).toBe('registration_not_found');
-    expect(findOne.mock.calls[0]![0]!.where).toEqual({ id: REGISTRATION_ID, eventId: EVENT_ID });
+    expect(findOne.mock.calls[0]![0]!.where).toEqual({ id: REGISTRATION_ID, eventId: EVENT_ID, cancelledAt: null });
   });
 
   it.each([{}, { attended: 'yes' }, { attended: 1 }, { attended: undefined }])('rejects the body %j with 400 and writes nothing', async (body) => {

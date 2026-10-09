@@ -23,6 +23,7 @@ const registration = (overrides: Partial<MyRegistration>): MyRegistration => ({
   name: 'Maria da Silva',
   registeredAt: '2030-10-01T12:00:00.000Z',
   attendanceRecorded: false,
+  cancelCode: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
   event: event({}),
   ...overrides,
 })
@@ -88,6 +89,24 @@ describe('my registrations, in the account page (RF11)', () => {
     await user.click(await screen.findByRole('button', { name: 'Tentar de novo' }))
 
     expect(await screen.findByRole('heading', { name: 'Oficina de turbantes' })).toBeInTheDocument()
+  })
+
+  it('offers "Cancelar inscrição" only on the ones that still come, with the personal link', async () => {
+    open(() => ({
+      status: 200,
+      data: {
+        data: [
+          registration({ id: 'r0', event: event({ id: 'e0', title: 'Contação antiga', isOver: true }) }),
+          registration({ id: 'r1', cancelCode: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd' }),
+        ],
+      },
+    }))
+    renderRoute('/minha-conta')
+    await screen.findByRole('heading', { name: 'Oficina de turbantes' })
+
+    const links = screen.getAllByRole('link', { name: /Cancelar inscrição/ })
+    expect(links).toHaveLength(1)
+    expect(links[0]).toHaveAttribute('href', '/inscricao/cancelar?c=dddddddd-dddd-4ddd-8ddd-dddddddddddd')
   })
 
   it('shows no contact data of the registration', async () => {

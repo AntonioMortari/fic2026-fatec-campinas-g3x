@@ -39,7 +39,7 @@ export async function countRegistrations(eventIds: string[], transaction?: Trans
   if (eventIds.length === 0) return new Map();
   const rows = (await Registration.findAll({
     attributes: ['eventId', [fn('COUNT', col('id')), 'total']],
-    where: { eventId: { [Op.in]: eventIds } },
+    where: { eventId: { [Op.in]: eventIds }, cancelledAt: null },
     group: ['eventId'],
     raw: true,
     transaction,

@@ -506,3 +506,158 @@ describe('RF11: my registrations', () => {
     expect((await request(app).get('/api/me/registrations')).status).toBe(401);
   });
 });
+
+describe('cancelling a sign-up (RF15, design 7c/7d)', () => {
+  const cancelCodeOf = async (eventId: string) => (await Registration.findOne({ where: { eventId } }))!.cancelCode;
+
+  it('gives every sign-up its own personal link, and hands it back when signing up', async () => {
+    const event = await makeEvent();
+
+    const first = await signUp(event.id, person(1));
+    const second = await signUp(event.id, person(2));
+
+    const codes = (await Registration.findAll({ where: { eventId: event.id } })).map((row) => row.cancelCode);
+    expect(new Set(codes).size).toBe(2);
+    expect(codes).toContain(first.body.registration.cancelCode);
+    expect(codes).toContain(second.body.registration.cancelCode);
+  });
+
+  it('previews with the short name and nothing else, then cancels without any session', async () => {
+    const event = await makeEvent({ title: 'Cafú e o Café' });
+    await signUp(event.id, person(1, { name: 'Ana Paula Souza', phone: '(11) 95396-8344' }));
+    const code = await cancelCodeOf(event.id);
+
+    const preview = await request(app).get(`/api/registrations/cancel/${code}`);
+    const done = await request(app).post(`/api/registrations/cancel/${code}`);
+
+    expect(preview.body.registration).toMatchObject({ state: 'active', name: 'Ana S.', event: { title: 'Cafú e o Café' } });
+    expect(JSON.stringify(preview.body)).not.toMatch(/pessoa1@|95396|Paula/);
+    expect(done.status).toBe(200);
+    expect(done.body.registration.state).toBe('cancelled');
+    expect((await Registration.findOne({ where: { eventId: event.id } }))?.cancelledAt).toBeInstanceOf(Date);
+  });
+
+  it('frees the spot at once, so the next person gets in', async () => {
+    const event = await makeEvent({ capacity: 1 });
+    await signUp(event.id, person(1));
+    expect((await signUp(event.id, person(2))).status).toBe(409);
+
+    await request(app).post(`/api/registrations/cancel/${await cancelCodeOf(event.id)}`);
+
+    expect((await request(app).get(`/api/events/${event.id}`)).body.event.spotsLeft).toBe(1);
+    expect((await signUp(event.id, person(2))).status).toBe(201);
+    expect((await request(app).get(`/api/events/${event.id}`)).body.event).toMatchObject({ spotsLeft: 0, registrationsOpen: false });
+  });
+
+  it('lets the same person sign up again after cancelling, and still refuses a real duplicate', async () => {
+    const event = await makeEvent();
+    await signUp(event.id, person(1));
+    await request(app).post(`/api/registrations/cancel/${await cancelCodeOf(event.id)}`);
+
+    const again = await signUp(event.id, person(1));
+    const duplicate = await signUp(event.id, person(1));
+
+    expect(again.status).toBe(201);
+    expect(duplicate.status).toBe(409);
+    expect(duplicate.body.error.code).toBe('already_registered');
+    expect(await Registration.count({ where: { eventId: event.id } })).toBe(2);
+  });
+
+  it('can cancel the same person more than once over time, with the old rows kept as a record', async () => {
+    const event = await makeEvent();
+    for (let round = 0; round < 3; round += 1) {
+      const response = await signUp(event.id, person(1));
+      expect(response.status).toBe(201);
+      await request(app).post(`/api/registrations/cancel/${response.body.registration.cancelCode}`);
+    }
+
+    expect(await Registration.count({ where: { eventId: event.id } })).toBe(3);
+    expect(await Registration.count({ where: { eventId: event.id, cancelledAt: null } })).toBe(0);
+  });
+
+  it('answers 409 already_cancelled the second time, and 404 for a code nobody has', async () => {
+    const event = await makeEvent();
+    await signUp(event.id, person(1));
+    const code = await cancelCodeOf(event.id);
+
+    await request(app).post(`/api/registrations/cancel/${code}`);
+    const second = await request(app).post(`/api/registrations/cancel/${code}`);
+    const preview = await request(app).get(`/api/registrations/cancel/${code}`);
+    const unknown = await request(app).post('/api/registrations/cancel/3b3a6c52-6b0e-4d0b-9c58-1d2a5f1c9a10');
+
+    expect(second.status).toBe(409);
+    expect(second.body.error.code).toBe('already_cancelled');
+    expect(preview.body.registration.state).toBe('cancelled');
+    expect(unknown.status).toBe(404);
+  });
+
+  it('refuses to cancel after the event, and keeps the sign-up', async () => {
+    const event = await makeEvent({ startsAt: new Date(Date.now() + 1000) });
+    await signUp(event.id, person(1));
+    await Event.update({ startsAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) }, { where: { id: event.id } });
+    const code = await cancelCodeOf(event.id);
+
+    const response = await request(app).post(`/api/registrations/cancel/${code}`);
+
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe('registrations_closed');
+    expect((await request(app).get(`/api/registrations/cancel/${code}`)).body.registration.state).toBe('over');
+    expect((await Registration.findOne({ where: { eventId: event.id } }))?.cancelledAt).toBeNull();
+  });
+
+  it('lets two simultaneous taps cancel exactly once', async () => {
+    const event = await makeEvent();
+    await signUp(event.id, person(1));
+    const code = await cancelCodeOf(event.id);
+
+    const responses = await Promise.all([1, 2, 3].map(() => request(app).post(`/api/registrations/cancel/${code}`)));
+
+    expect(responses.map((response) => response.status).sort()).toEqual([200, 409, 409]);
+  });
+
+  it('drops the cancelled person from the staff list, the attendance list, the spreadsheet, the count and "my registrations"', async () => {
+    const event = await makeEvent();
+    const ana = await account('ana@exemplo.com');
+    await signUp(event.id, person(1, { name: 'Ana Souza' }), ana.token);
+    await signUp(event.id, person(2, { name: 'Bia Lima' }));
+    const staff = await account('equipe@exemplo.com');
+    await User.update({ isStaff: true }, { where: { id: staff.id } });
+    const header = { Authorization: `Bearer ${staff.token}` };
+    const anaRow = (await Registration.findOne({ where: { eventId: event.id, name: 'Ana Souza' } }))!;
+
+    await request(app).post(`/api/registrations/cancel/${anaRow.cancelCode}`);
+
+    const list = await request(app).get(`/api/admin/events/${event.id}/registrations`).set(header);
+    const attendance = await request(app).get(`/api/admin/events/${event.id}/attendance`).set(header);
+    const csv = await request(app).get(`/api/admin/events/${event.id}/registrations.csv`).set(header);
+    const events = await request(app).get('/api/admin/events').set(header);
+    const mine = await request(app).get('/api/me/registrations').set('Authorization', `Bearer ${ana.token}`);
+    const mark = await request(app).patch(`/api/admin/events/${event.id}/attendance/${anaRow.id}`).set(header).send({ attended: true });
+
+    expect(list.body.data.map((entry: { name: string }) => entry.name)).toEqual(['Bia Lima']);
+    expect(attendance.body.data.map((entry: { name: string }) => entry.name)).toEqual(['Bia Lima']);
+    expect(csv.text).not.toContain('Ana Souza');
+    expect(events.body.data[0].registrationCount).toBe(1);
+    expect(mine.body.data).toEqual([]);
+    expect(mark.status).toBe(404);
+  });
+
+  it('frees the e-mail limit, but the connection limit still counts the cancelled ones', async () => {
+    const event = await makeEvent();
+    const statuses: number[] = [];
+    for (let n = 1; n <= 5; n += 1) statuses.push((await signUp(event.id, person(n, { email: 'familia@exemplo.com' }))).status);
+    expect((await signUp(event.id, person(6, { email: 'familia@exemplo.com' }))).status).toBe(429);
+
+    await request(app).post(`/api/registrations/cancel/${(await Registration.findOne({ where: { eventId: event.id, name: 'Pessoa 1' } }))!.cancelCode}`);
+
+    expect(statuses).toEqual([201, 201, 201, 201, 201]);
+    expect((await signUp(event.id, person(6, { email: 'familia@exemplo.com' }))).status).toBe(201);
+
+    const origin = await makeEvent({ title: 'Origem' });
+    for (let n = 1; n <= 30; n += 1) {
+      const response = await signUp(origin.id, person(n), undefined, '203.0.113.99');
+      await request(app).post(`/api/registrations/cancel/${response.body.registration.cancelCode}`);
+    }
+    expect((await signUp(origin.id, person(31), undefined, '203.0.113.99')).status).toBe(429);
+  });
+});

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { dateParts } from '../../lib/dates'
 import { formatTimeRange } from '../../lib/events'
 import { useMyRegistrations } from '../../services/events'
@@ -5,7 +6,7 @@ import type { MyRegistration } from '../../types/my-registration'
 import { Button, Card, EmptyState } from '../ui'
 
 function RegistrationItem({ registration }: { registration: MyRegistration }) {
-  const { event, name, attendanceRecorded } = registration
+  const { event, name, attendanceRecorded, cancelCode } = registration
   const when = `${dateParts(new Date(event.startsAt)).spoken} · ${formatTimeRange(event)}`
 
   return (
@@ -20,6 +21,11 @@ function RegistrationItem({ registration }: { registration: MyRegistration }) {
         {' · '}
         {event.isOver ? (attendanceRecorded ? 'Presença registrada' : 'Atividade encerrada') : 'Inscrição registrada'}
       </p>
+      {!event.isOver && (
+        <Link to={`/inscricao/cancelar?c=${cancelCode}`} className="inline-flex min-h-11 items-center self-start text-small font-semibold">
+          Cancelar inscrição <span className="sr-only">de {name} em {event.title}</span>
+        </Link>
+      )}
     </Card>
   )
 }

@@ -249,3 +249,15 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   Biblioteca, Relatório, Configurações) não aparecem até a tela existir.
 - **Combinado de processo:** tela sem desenho não se inventa; para-se e avisa-se quem desenha (CLAUDE.md).
 - **PR:** branch `feat/panel-desktop-attendance`
+
+## 2026-10-09 — Cancelar inscrição (desenhos 7c e 7d)
+- **Artefato:** Requisitos (RF15) · Arquitetura
+- **Antes:** quem se inscrevia não tinha como desistir; a vaga só voltava com a equipe mexendo no banco.
+- **Depois:** cada inscrição tem um link pessoal que abre uma tela de confirmação e cancela, **sem exigir conta**
+  (a inscrição funciona sem conta, então desistir também). A vaga volta para a agenda na hora e a pessoa pode se
+  inscrever de novo. A inscrição cancelada fica como registro no banco e deixa de contar nas vagas, nas listas
+  da equipe, na presença, na planilha e em "Minhas inscrições". Não cancela depois da atividade.
+- **O que o desenho não cobria e foi decidido aqui:** de onde sai o link enquanto não há e-mail (RF18): da tela
+  "Inscrição registrada" e de "Minhas inscrições", dois pontos de entrada que não estão nos desenhos; o limite
+  por conexão continua contando as inscrições canceladas (foram envios).
+- **PR:** branch `feat/cancel-registration`

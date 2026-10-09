@@ -14,7 +14,7 @@ const event = (id: string, startsAt: string, overrides: Record<string, unknown> 
   ({ id, title: `Evento ${id}`, startsAt: new Date(startsAt), endsAt: null, location: 'Casa Verde', ...overrides }) as unknown as Event;
 
 const registration = (id: string, eventId: string, overrides: Record<string, unknown> = {}) =>
-  ({ id, eventId, name: 'Ana Souza', attended: null, createdAt: new Date('2026-10-01T10:00:00Z'), ...overrides }) as unknown as Registration;
+  ({ id, eventId, name: 'Ana Souza', attended: null, cancelCode: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', createdAt: new Date('2026-10-01T10:00:00Z'), ...overrides }) as unknown as Registration;
 
 afterEach(() => jest.restoreAllMocks());
 
@@ -36,7 +36,7 @@ describe('GET /api/me/registrations', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ data: [] });
     expect(response.headers['cache-control']).toBe('no-store');
-    expect(findAll.mock.calls[0]![0]!.where).toEqual({ userId: USER_ID });
+    expect(findAll.mock.calls[0]![0]!.where).toEqual({ userId: USER_ID, cancelledAt: null });
   });
 
   it('ignores a user id sent in the query or the headers', async () => {
@@ -44,7 +44,7 @@ describe('GET /api/me/registrations', () => {
 
     await request(app).get('/api/me/registrations?userId=99999999-9999-4999-8999-999999999999').set(auth).set('X-User-Id', 'x');
 
-    expect(findAll.mock.calls[0]![0]!.where).toEqual({ userId: USER_ID });
+    expect(findAll.mock.calls[0]![0]!.where).toEqual({ userId: USER_ID, cancelledAt: null });
   });
 
   it('lists each sign-up with its event, soonest first, and says which events are over', async () => {
@@ -80,7 +80,7 @@ describe('GET /api/me/registrations', () => {
 
     const { body } = await request(app).get('/api/me/registrations').set(auth);
 
-    expect(Object.keys(body.data[0]).sort()).toEqual(['attendanceRecorded', 'event', 'id', 'name', 'registeredAt']);
+    expect(Object.keys(body.data[0]).sort()).toEqual(['attendanceRecorded', 'cancelCode', 'event', 'id', 'name', 'registeredAt']);
     expect(Object.keys(body.data[0].event).sort()).toEqual(['endsAt', 'id', 'isOver', 'location', 'startsAt', 'title']);
     expect(JSON.stringify(body)).not.toMatch(/exemplo|95396|52998|originHash|guardian/);
   });

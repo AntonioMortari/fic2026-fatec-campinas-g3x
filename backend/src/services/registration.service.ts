@@ -23,7 +23,7 @@ export interface RegistrationInput {
 }
 
 export interface RegistrationResult {
-  registration: { id: string; name: string; createdAt: string };
+  registration: { id: string; name: string; createdAt: string; cancelCode: string };
   event: PublicEvent;
 }
 
@@ -55,7 +55,7 @@ export async function registerForEvent(
       cpf = input.cpf;
     }
 
-    const alreadyIn = await Registration.findOne({ where: { eventId, email: input.email, name: input.name }, transaction });
+    const alreadyIn = await Registration.findOne({ where: { eventId, email: input.email, name: input.name, cancelledAt: null }, transaction });
     if (alreadyIn) throw new ApiError(409, 'already_registered', 'Essa pessoa já está inscrita nesta atividade.');
 
     const registered = (await countRegistrations([eventId], transaction)).get(eventId) ?? 0;
@@ -63,7 +63,7 @@ export async function registerForEvent(
       throw new ApiError(409, 'event_full', 'As vagas desta atividade acabaram.');
     }
 
-    if ((await Registration.count({ where: { eventId, email: input.email }, transaction })) >= MAX_PER_EMAIL) {
+    if ((await Registration.count({ where: { eventId, email: input.email, cancelledAt: null }, transaction })) >= MAX_PER_EMAIL) {
       throw new ApiError(429, 'too_many_registrations', `Cada e-mail pode inscrever até ${MAX_PER_EMAIL} pessoas na mesma atividade.`);
     }
 
@@ -94,7 +94,7 @@ export async function registerForEvent(
         { transaction },
       );
       return {
-        registration: { id: registration.id, name: registration.name, createdAt: registration.createdAt.toISOString() },
+        registration: { id: registration.id, name: registration.name, createdAt: registration.createdAt.toISOString(), cancelCode: registration.cancelCode },
         event: toPublicEvent(event, registered + 1),
       };
     } catch (error) {

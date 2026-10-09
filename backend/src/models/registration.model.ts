@@ -16,6 +16,8 @@ export class Registration extends Model<InferAttributes<Registration>, InferCrea
   declare consentedAt: Date;
   declare originHash: string | null;
   declare attended: boolean | null;
+  declare cancelledAt: Date | null;
+  declare cancelCode: CreationOptional<string>;
   declare createdAt: CreationOptional<Date>;
 }
 
@@ -35,6 +37,8 @@ Registration.init(
     consentedAt: { type: DataTypes.DATE, allowNull: false },
     originHash: { type: DataTypes.CHAR(64), allowNull: true },
     attended: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: null },
+    cancelledAt: { type: DataTypes.DATE, allowNull: true, defaultValue: null },
+    cancelCode: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, allowNull: false },
     createdAt: DataTypes.DATE,
   },
   { sequelize, tableName: 'registrations', updatedAt: false },

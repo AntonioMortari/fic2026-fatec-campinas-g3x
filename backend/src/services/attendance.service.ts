@@ -28,7 +28,7 @@ const toEntry = (row: Registration): AttendanceEntry => ({
 export async function listAttendance(eventId: string): Promise<{ event: AdminEvent; entries: AttendanceEntry[] }> {
   const event = await getAdminEvent(eventId);
   const rows = await Registration.findAll({
-    where: { eventId },
+    where: { eventId, cancelledAt: null },
     attributes: ['id', 'name', 'isMinor', 'guardianPhone', 'attended'],
     order: [['name', 'ASC'], ['createdAt', 'ASC']],
   });
@@ -37,7 +37,7 @@ export async function listAttendance(eventId: string): Promise<{ event: AdminEve
 
 // The registration must belong to the event in the URL: an id from another event is "not found", not an update.
 export async function setAttendance(eventId: string, registrationId: string, attended: boolean | null): Promise<AttendanceEntry> {
-  const row = await Registration.findOne({ where: { id: registrationId, eventId } });
+  const row = await Registration.findOne({ where: { id: registrationId, eventId, cancelledAt: null } });
   if (!row) throw new ApiError(404, 'registration_not_found', 'Não encontramos essa inscrição neste evento.');
   await row.update({ attended });
   return toEntry(row);
