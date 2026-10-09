@@ -1,5 +1,5 @@
 import { migrator } from '../../src/database/migrate';
-import { Event, sequelize } from '../../src/models';
+import { Event, Registration, sequelize } from '../../src/models';
 import { listPublishedEvents } from '../../src/services/events.service';
 
 const NOW = new Date('2026-10-10T15:00:00Z');
@@ -24,7 +24,8 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await Event.destroy({ where: {}, truncate: true });
+  await Registration.destroy({ where: {} });
+  await Event.destroy({ where: {} });
 });
 
 afterAll(async () => {

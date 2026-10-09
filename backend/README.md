@@ -94,6 +94,8 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 |---|---|
 | `GET /api/health` | API e banco respondendo |
 | `GET /api/events?period=upcoming\|past&limit=` | eventos **publicados**; `upcoming` do mais próximo ao mais distante, `past` do mais recente ao mais antigo |
+| `GET /api/events/:id` | um evento publicado, com `requiresCpf`, `spotsLeft` e `registrationsOpen` (o que o formulário de inscrição precisa) |
+| `POST /api/events/:id/registrations` | inscreve alguém, **com ou sem conta** (RF15). Com token, liga a inscrição à conta; token ruim dá 401. Vaga conferida no banco com a linha do evento travada; CPF só se o evento pede; responsável obrigatório para menor; 409 `event_full`/`registrations_closed`/`already_registered`; 429 acima de 5 pessoas por e-mail |
 | `GET /api/events/:id/calendar.ics` | o evento como arquivo de calendário; 404 se não existe ou não está publicado |
 | `POST /api/auth/register` | cria a conta e já devolve `{ token, user }` (201). 400 sem maioridade (RN01), sem consentimento ou sem ao menos uma forma de participar; 409 `email_taken` se o e-mail já existe |
 | `POST /api/auth/login` | `{ token, user }`; 401 `invalid_credentials` com a mesma frase para e-mail inexistente e senha errada |
