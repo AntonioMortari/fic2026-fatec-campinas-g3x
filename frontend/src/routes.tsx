@@ -12,6 +12,7 @@ import { AdminRegistrants } from './pages/admin/AdminRegistrants'
 import { Auth } from './pages/Auth'
 import { EventRegistration } from './pages/EventRegistration'
 import { ComponentCatalog } from './pages/ComponentCatalog'
+import { CancelRegistration } from './pages/CancelRegistration'
 import { Agenda } from './pages/Agenda'
 import { HomeContainer } from './pages/HomeContainer'
 import { NotFound } from './pages/NotFound'
@@ -45,6 +46,7 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/entrar', element: <Auth /> },
       { path: '/agenda/:id/inscricao', element: <EventRegistration />, handle: { backTo: '/agenda' } },
+      { path: '/inscricao/cancelar', element: <CancelRegistration />, handle: { backTo: '/agenda' } },
     ],
   },
 ]

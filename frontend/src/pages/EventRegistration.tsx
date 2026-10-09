@@ -13,7 +13,7 @@ export function EventRegistration() {
   const { id } = useParams()
   const { user, status } = useAuth()
   const event = useEvent(id)
-  const [done, setDone] = useState<string | null>(null)
+  const [done, setDone] = useState<{ name: string; cancelCode: string } | null>(null)
   const [round, setRound] = useState(0)
 
   if (status === 'loading' || event.isPending) return <LoadingSession />
@@ -40,7 +40,8 @@ export function EventRegistration() {
     return (
       <RegistrationDone
         event={detail}
-        name={done}
+        name={done.name}
+        cancelCode={done.cancelCode}
         onAnother={() => {
           setRound((current) => current + 1)
           setDone(null)
