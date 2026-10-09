@@ -115,6 +115,17 @@ export function Menu({ open, section, onClose, bottomBar }: MenuProps) {
                     Minha conta
                   </Link>
                 </li>
+                {user.isStaff && (
+                  <li className="border-b border-line">
+                    <Link
+                      to="/admin"
+                      onClick={onClose}
+                      className="flex min-h-13 items-center text-item font-semibold text-brown no-underline hover:text-brown"
+                    >
+                      Painel da equipe
+                    </Link>
+                  </li>
+                )}
                 <li className="border-b border-line">
                   <button
                     type="button"
