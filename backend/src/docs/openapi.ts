@@ -87,6 +87,36 @@ export const openApiDocument = {
           capacity: { type: ['integer', 'null'], minimum: 1 },
         },
       },
+      AdminEvent: {
+        allOf: [
+          { $ref: '#/components/schemas/Event' },
+          {
+            type: 'object',
+            required: ['published', 'requiresCpf'],
+            properties: {
+              published: { type: 'boolean', description: 'Só muda por PATCH /admin/events/{id}/publication.' },
+              requiresCpf: { type: 'boolean', description: 'Se a inscrição pede CPF (RN06).' },
+              updatedAt: { type: 'string', format: 'date-time' },
+            },
+          },
+        ],
+      },
+      EventInput: {
+        type: 'object',
+        required: ['title', 'startsAt'],
+        description: 'Não há campo `published`: salvar nunca publica. Campos de texto em branco viram null.',
+        properties: {
+          title: { type: 'string', maxLength: 200 },
+          description: { type: ['string', 'null'], maxLength: 5000 },
+          category: { type: ['string', 'null'], maxLength: 80 },
+          startsAt: { type: 'string', example: '2026-11-20T15:00', description: 'Horário de parede de São Paulo, sem fuso: AAAA-MM-DDTHH:mm.' },
+          endsAt: { type: ['string', 'null'], example: '2026-11-20T17:00', description: 'Mesmo formato; precisa ser depois do início.' },
+          location: { type: ['string', 'null'], maxLength: 200 },
+          ageRange: { type: ['string', 'null'], maxLength: 80 },
+          capacity: { type: ['integer', 'null'], minimum: 1, description: 'Em branco = sem limite.' },
+          requiresCpf: { type: 'boolean', default: false },
+        },
+      },
       Health: {
         type: 'object',
         required: ['status', 'database', 'checkedAt'],
@@ -166,6 +196,74 @@ export const openApiDocument = {
             },
           },
           '401': { description: 'Sem token, token inválido ou expirado, ou conta que não existe mais', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/events': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Lista todos os eventos, rascunhos incluídos (equipe)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Do mais recente ao mais antigo',
+            content: { 'application/json': { schema: { type: 'object', properties: { data: { type: 'array', items: { $ref: '#/components/schemas/AdminEvent' } } } } } },
+          },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Conta que não é da equipe (lido do banco a cada requisição)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      post: {
+        tags: ['Admin'],
+        summary: 'Cadastra um evento como rascunho (equipe)',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/EventInput' } } } },
+        responses: {
+          '201': { description: 'Rascunho criado', content: { 'application/json': { schema: { type: 'object', properties: { event: { $ref: '#/components/schemas/AdminEvent' } } } } } },
+          '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/events/{id}': {
+      parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+      get: {
+        tags: ['Admin'],
+        summary: 'Um evento, publicado ou não (equipe)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'O evento', content: { 'application/json': { schema: { type: 'object', properties: { event: { $ref: '#/components/schemas/AdminEvent' } } } } } },
+          '404': { description: 'Não existe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      put: {
+        tags: ['Admin'],
+        summary: 'Corrige um evento sem mudar se está publicado (equipe)',
+        description: 'Não existe DELETE: apagar um evento levaria junto a lista de inscritos (RF13).',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/EventInput' } } } },
+        responses: {
+          '200': { description: 'O evento corrigido', content: { 'application/json': { schema: { type: 'object', properties: { event: { $ref: '#/components/schemas/AdminEvent' } } } } } },
+          '400': { description: 'Dados inválidos', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Não existe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/events/{id}/publication': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Publica ou tira do ar (equipe)',
+        description: 'O único caminho que muda `published`. O corpo aceita só esse campo.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { type: 'object', required: ['published'], properties: { published: { type: 'boolean' } } } } },
+        },
+        responses: {
+          '200': { description: 'O evento', content: { 'application/json': { schema: { type: 'object', properties: { event: { $ref: '#/components/schemas/AdminEvent' } } } } } },
+          '400': { description: '`published` precisa ser true ou false', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Não existe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },

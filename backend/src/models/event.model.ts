@@ -11,6 +11,7 @@ export class Event extends Model<InferAttributes<Event>, InferCreationAttributes
   declare location: string | null;
   declare ageRange: string | null;
   declare capacity: number | null;
+  declare requiresCpf: CreationOptional<boolean>;
   declare published: CreationOptional<boolean>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
@@ -27,6 +28,7 @@ Event.init(
     location: { type: DataTypes.STRING(200), allowNull: true },
     ageRange: { type: DataTypes.STRING(80), allowNull: true },
     capacity: { type: DataTypes.INTEGER, allowNull: true },
+    requiresCpf: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     published: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,
