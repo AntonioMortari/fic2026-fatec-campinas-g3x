@@ -43,6 +43,7 @@ export function Account() {
         {me.isPending && <p role="status" className="m-0">Carregando seus dados…</p>}
         {me.isError && (
           <EmptyState
+            tone="error"
             title="Não conseguimos carregar seus dados"
             text="Tente de novo em alguns minutos."
             actions={

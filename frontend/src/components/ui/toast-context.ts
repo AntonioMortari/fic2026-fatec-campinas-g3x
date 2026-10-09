@@ -2,6 +2,7 @@ import { createContext } from 'react'
 
 export interface ToastOptions {
   action?: { label: string; onClick: () => void }
+  tone?: 'error'
 }
 
 export type ShowToast = (message: string, options?: ToastOptions) => void

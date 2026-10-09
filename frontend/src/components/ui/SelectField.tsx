@@ -1,7 +1,7 @@
 import type { ReactNode, SelectHTMLAttributes } from 'react'
 import { cn } from '../../lib/cn'
 import { FieldMessages } from './FieldMessages'
-import { FIELD_BOX } from './TextField'
+import { fieldBox } from './field-styles'
 import { useFieldIds } from './use-field-ids'
 
 export interface SelectOption {
@@ -25,7 +25,7 @@ export function SelectField({ label, options, hint, error, id, className, ...sel
         {label}
         {select.required && <span aria-hidden="true"> *</span>}
       </label>
-      <div className={cn(FIELD_BOX, error && 'border-2 border-brown')}>
+      <div className={fieldBox(Boolean(error))}>
         <select
           id={fieldId}
           aria-invalid={error ? true : undefined}

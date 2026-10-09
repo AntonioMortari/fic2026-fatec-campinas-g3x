@@ -28,6 +28,8 @@
   --color-brown-600: #4a3a2a;
   --color-brown-400: #6e5b45;
   --color-brown-300: #8a7862;
+  --color-error: #a52a1e;
+  --color-error-tint: #fbe9e4;
   --color-cream: #f9f4ea;
   --color-cream-dark: #efe6d6;
   --color-cream-dim: #d8cbb8;
@@ -148,6 +150,8 @@ html[data-contrast="high"] {
   --color-brown-400: #000000;
   --color-brown-300: #000000;
   --color-ochre-deep: #000000;
+  --color-error: #8a0000;
+  --color-error-tint: #ffffff;
   --color-blue-deep: #00336b;
   --color-cream-dim: #ffffff;
   --color-line: #000000;

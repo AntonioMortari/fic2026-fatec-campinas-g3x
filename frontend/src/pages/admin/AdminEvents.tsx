@@ -37,7 +37,7 @@ export function AdminEvents() {
           toast(published ? 'Publicado. Já aparece na agenda.' : 'Tirado do ar. Não aparece mais na agenda.', {
             action: { label: 'Desfazer', onClick: () => change(event, !published) },
           }),
-        onError: () => toast('Não foi possível mudar agora. Tente de novo.'),
+        onError: () => toast('Não foi possível mudar agora. Tente de novo.', { tone: 'error' }),
       },
     )
   }
@@ -66,6 +66,7 @@ export function AdminEvents() {
         {isPending && <p role="status" className="m-0">Carregando os eventos…</p>}
         {isError && (
           <EmptyState
+            tone="error"
             title="Não conseguimos carregar os eventos"
             text="Tente de novo em alguns minutos."
             actions={

@@ -20,7 +20,7 @@ export function Checkbox({ label, hint, error, id, className, ...input }: Checkb
           type="checkbox"
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className="mt-0.5 size-6 shrink-0 cursor-pointer accent-brown"
+          className="mt-0.5 size-6 shrink-0 cursor-pointer accent-brown aria-[invalid=true]:outline-2 aria-[invalid=true]:outline-offset-2 aria-[invalid=true]:outline-error"
           {...input}
         />
         <span>{label}</span>

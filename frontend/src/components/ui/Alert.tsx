@@ -1,5 +1,6 @@
 import { forwardRef, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import { ErrorIcon } from './ErrorIcon'
 
 interface AlertProps {
   tone: 'error' | 'info'
@@ -14,12 +15,13 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert({ ton
       role={tone === 'error' ? 'alert' : 'status'}
       tabIndex={-1}
       className={cn(
-        'border-[1.5px] border-brown px-4 py-3 text-[0.9375rem] outline-none focus-visible:shadow-focus',
-        tone === 'error' ? 'bg-card font-bold' : 'bg-cream-dark',
+        'border-[1.5px] px-4 py-3 text-[0.9375rem] outline-none focus-visible:shadow-focus',
+        tone === 'error' ? 'flex items-start gap-2.5 border-error bg-error-tint font-bold text-brown' : 'border-brown bg-cream-dark',
         className,
       )}
     >
-      {children}
+      {tone === 'error' && <ErrorIcon className="mt-[0.2em] shrink-0 text-error" />}
+      {tone === 'error' ? <span>{children}</span> : children}
     </div>
   )
 })
