@@ -4,6 +4,7 @@ import { RequireAuth } from './components/auth/RequireAuth'
 import { FocusedLayout } from './components/layout/FocusedLayout'
 import { Layout } from './components/layout/Layout'
 import { Account } from './pages/Account'
+import { AccountEdit } from './pages/AccountEdit'
 import { AdminAttendance } from './pages/admin/AdminAttendance'
 import { AdminEventForm } from './pages/admin/AdminEventForm'
 import { AdminEvents } from './pages/admin/AdminEvents'
@@ -45,6 +46,7 @@ export const routes: RouteObject[] = [
     element: <FocusedLayout />,
     children: [
       { path: '/entrar', element: <Auth /> },
+      { element: <RequireAuth />, children: [{ path: '/minha-conta/dados', element: <AccountEdit />, handle: { backTo: '/minha-conta' } }] },
       { path: '/agenda/:id/inscricao', element: <EventRegistration />, handle: { backTo: '/agenda' } },
       { path: '/inscricao/cancelar', element: <CancelRegistration />, handle: { backTo: '/agenda' } },
     ],

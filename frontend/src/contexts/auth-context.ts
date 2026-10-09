@@ -7,6 +7,7 @@ export interface AuthContextValue {
   sessionExpired: boolean
   signIn: (result: AuthResult) => void
   signOut: () => void
+  updateUser: (user: AuthUser) => void
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

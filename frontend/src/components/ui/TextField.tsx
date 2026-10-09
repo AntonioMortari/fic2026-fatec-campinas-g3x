@@ -6,18 +6,20 @@ import { useFieldIds } from './use-field-ids'
 
 export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string
+  labelNote?: string
   hint?: ReactNode
   error?: string
   addon?: ReactNode
 }
 
-export function TextField({ label, hint, error, addon, id, className, ...input }: TextFieldProps) {
+export function TextField({ label, labelNote, hint, error, addon, id, className, ...input }: TextFieldProps) {
   const { fieldId, hintId, errorId, describedBy } = useFieldIds(id, Boolean(hint), Boolean(error))
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
       <label htmlFor={fieldId} className="text-[0.9375rem] font-semibold">
         {label}
+        {labelNote && <span className="font-normal text-brown-400"> {labelNote}</span>}
         {input.required && <span aria-hidden="true"> *</span>}
       </label>
       <div className={fieldBox(Boolean(error))}>
