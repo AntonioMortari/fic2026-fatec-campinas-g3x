@@ -150,3 +150,18 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   back-end.
 - **PR:** branch `feat/events-admin`
 
+## 2026-10-09 — Painel da equipe: moldura da tela 2c, sem as pendências que ainda não existem
+- **Artefato:** Protótipos (tela 2c, "Painel da equipe")
+- **Antes:** o painel (RF13) vivia dentro do cabeçalho, da barra inferior e do rodapé do site público,
+  com uma home que era só uma lista de uma linha.
+- **Depois:** moldura própria como na 2c — cabeçalho escuro "Painel · Ateliê Afro" com "Ver o site",
+  barra inferior do painel e home com "Ações rápidas" e "Todas as telas". "Mais" abre o menu em folha com
+  "Sua conta" primeiro.
+- **O que o desenho tem e a entrega não tem:** a seção "O que está esperando você" (contagens de
+  mensagens, voluntários e doações) e o destino "Mensagens" da barra inferior. Os três recursos
+  (RF29, RF26, RF19–RF22) ainda não existem, e um número inventado é pior que nenhum número. Entram
+  junto com cada recurso.
+- **Por quê:** a conferência lado a lado com o desenho mostrou que a primeira entrega do painel só
+  seguia os tokens e as regras de layout, e não a tela.
+- **PR:** branch `feat/admin-shell`
+
