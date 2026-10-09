@@ -41,6 +41,9 @@ npm run db:migrate          # aplica as migrations pendentes
 npm run dev                 # http://localhost:3333/api
 ```
 
+Sem rodar `db:migrate` antes, a API sobe mas toda rota que lê uma tabela responde 500
+(`Table '…' doesn't exist` no log). No Docker Compose isso é feito sozinho a cada subida.
+
 | Comando | O que faz |
 |---|---|
 | `npm run dev` | servidor com recarga automática |
