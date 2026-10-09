@@ -50,3 +50,4 @@ arquitetura, comandos, status — está em `CLAUDE.md`.
 11. **Rodar os testes antes de propor o PR**: `npm test` e `npm run typecheck` em `backend/` e em
     `frontend/`.
 | 09/10/2026 | Claude Code (Anthropic) | Cadastro e login (RF08, RF10, RF12): migration, model, service e rotas de autenticação com testes unitários e de integração; sessão com token de acesso em memória e renovação por cookie httpOnly, formulários, rota protegida, cabeçalho e menu no front-end; ajuste no `docker-compose.yml` para aplicar as migrations ao subir | `feat/auth` | _a preencher_ |
+| 09/10/2026 | Claude Code (Anthropic) | Cadastro e edição de eventos pela equipe (RF13): coluna `requires_cpf`, leitura de data e hora no fuso de São Paulo, middleware que consulta o banco para exigir equipe, rotas `/api/admin/events`; painel (`/admin`, lista, formulário) no front-end; correção do cabeçalho a 320px com A+ | `feat/events-admin` | _a preencher_ |

@@ -70,7 +70,7 @@ export function Header({ openMenu }: { openMenu: OpenMenu }) {
               <Link
                 to="/minha-conta"
                 aria-label={`Minha conta, ${user.name}`}
-                className={cn(CONTROL, 'inline-flex max-w-32 px-3.5 text-small desktop:max-w-48 desktop:px-4 desktop:text-[0.9375rem]')}
+                className={cn(CONTROL, 'inline-flex max-w-24 px-3 text-small desktop:max-w-48 desktop:px-4 desktop:text-[0.9375rem]')}
               >
                 <span className="truncate">{user.name.split(' ')[0]}</span>
               </Link>

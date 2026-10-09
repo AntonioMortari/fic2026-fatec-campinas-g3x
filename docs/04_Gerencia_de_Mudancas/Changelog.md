@@ -131,3 +131,22 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   comportamentos de graça.
 - **PR:** branch `feat/auth`
 
+## 2026-10-09 — RF13 (Cadastro e edição de eventos): a coluna de documento e a regra de fuso
+- **Artefato:** Requisitos (RF13) · Arquitetura
+- **Antes:** o critério diz que o evento aceita "limite de vagas e a exigência de documento, os dois
+  opcionais" e que "data e hora são interpretadas no fuso da organização"; a tabela `events` só tinha
+  o limite de vagas.
+- **Depois:** nova coluna `events.requires_cpf` (booleana, padrão `false`). Data e hora chegam do
+  formulário como horário de parede, sem fuso (`2026-11-20T15:00`), e **o servidor** as interpreta no
+  fuso de São Paulo pelas regras do `Intl`, nunca pelo fuso do aparelho. As rotas de equipe ficam em
+  `/api/admin/events`, atrás de uma checagem que consulta o banco a cada requisição. Salvar não publica
+  (o campo `published` não existe nos esquemas de criação e edição) e não há rota para apagar.
+- **O que continua igual ao critério:** publicar é um botão separado; a tela não apaga evento.
+- **O que o critério não cobria e foi decidido aqui:** o painel responde **404** na tela a quem não é
+  equipe (a API responde 403); o "Desfazer" no aviso de publicar/tirar do ar substitui uma tela de
+  confirmação, porque os dois gestos se desfazem sozinhos.
+- **Fora desta entrega:** foto do evento e lista fechada de tipos (hoje texto livre).
+- **Por quê:** o projeto de origem guardava essas travas na RLS do banco; no MySQL elas moram no
+  back-end.
+- **PR:** branch `feat/events-admin`
+
