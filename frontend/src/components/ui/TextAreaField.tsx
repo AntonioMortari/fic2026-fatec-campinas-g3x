@@ -1,7 +1,7 @@
 import type { ReactNode, TextareaHTMLAttributes } from 'react'
 import { cn } from '../../lib/cn'
 import { FieldMessages } from './FieldMessages'
-import { FIELD_BOX } from './TextField'
+import { fieldBox } from './field-styles'
 import { useFieldIds } from './use-field-ids'
 
 interface TextAreaFieldProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -19,7 +19,7 @@ export function TextAreaField({ label, hint, error, id, className, rows = 5, ...
         {label}
         {textarea.required && <span aria-hidden="true"> *</span>}
       </label>
-      <div className={cn(FIELD_BOX, 'items-stretch', error && 'border-2 border-brown')}>
+      <div className={fieldBox(Boolean(error), 'items-stretch')}>
         <textarea
           id={fieldId}
           rows={rows}

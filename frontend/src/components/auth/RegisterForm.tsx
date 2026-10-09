@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { PERSON_TYPE_LABELS } from '../../lib/person-type'
 import { useRegister, type AuthResult, type PersonType, type RegisterInput } from '../../services/auth'
-import { Alert, Button, Checkbox, PasswordField, SelectField, TextField } from '../ui'
+import { Alert, Button, Checkbox, FieldMessages, PasswordField, SelectField, TextField } from '../ui'
 import { useFormFeedback } from './use-form-feedback'
 
 const PERSON_TYPE_OPTIONS = (Object.keys(PERSON_TYPE_LABELS) as PersonType[]).map((value) => ({
@@ -112,11 +112,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: (result: AuthResult) =>
           checked={values.wantsToDonate}
           onChange={(event) => set('wantsToDonate', event.target.checked)}
         />
-        {feedback.fields.participation && (
-          <p id="participation-error" role="presentation" className="m-0 text-small font-bold">
-            {feedback.fields.participation}
-          </p>
-        )}
+        <FieldMessages error={feedback.fields.participation} errorId="participation-error" />
       </fieldset>
 
       <Checkbox
