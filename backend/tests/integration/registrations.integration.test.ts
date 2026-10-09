@@ -363,7 +363,7 @@ describe('RF16: the list and the spreadsheet of registrants', () => {
     expect([...bytes.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
     const text = bytes.toString('utf8').slice(1);
     const lines = text.split('\r\n');
-    expect(lines[0]).toBe('Nome;Autorizou imagem;Menor de idade;Responsável;Telefone do responsável;E-mail;Telefone;CPF;Tem conta;Inscrito em');
+    expect(lines[0]).toBe('Nome;Autorizou imagem;Menor de idade;Responsável;Telefone do responsável;E-mail;Telefone;CPF;Tem conta;Inscrito em;Presença');
     expect(lines[1]).toMatch(/^"'=HYPERLINK\(""http:\/\/x""\)";Sim;Não;/);
     expect(lines[2]).toMatch(/^"José; ""Zé"" Conceição";Não;/);
   });
@@ -376,5 +376,133 @@ describe('RF16: the list and the spreadsheet of registrants', () => {
       const response = await request(app)[method](`/api/admin/events/${event.id}/registrations`).set(header);
       expect(response.status).toBe(404);
     }
+  });
+});
+
+describe('RF17: the attendance list', () => {
+  async function staffHeader() {
+    const staff = await account('equipe@exemplo.com');
+    await User.update({ isStaff: true }, { where: { id: staff.id } });
+    return { Authorization: `Bearer ${staff.token}` };
+  }
+
+  it('starts every registration as "not checked", not as absent', async () => {
+    const event = await makeEvent();
+    await signUp(event.id, person(1));
+
+    expect((await Registration.findOne({ where: { eventId: event.id } }))?.attended).toBeNull();
+    const header = await staffHeader();
+    const list = await request(app).get(`/api/admin/events/${event.id}/attendance`).set(header);
+    expect(list.body.data[0].attended).toBeNull();
+  });
+
+  it('lists by name, ignoring case and accents, with only what the door needs', async () => {
+    const event = await makeEvent();
+    for (const name of ['Zélia', 'ana', 'Álvaro', 'Bia']) await signUp(event.id, person(Math.random() * 1e6 | 0, { name }));
+    const header = await staffHeader();
+
+    const { body } = await request(app).get(`/api/admin/events/${event.id}/attendance`).set(header);
+
+    expect(body.data.map((entry: { name: string }) => entry.name)).toEqual(['Álvaro', 'ana', 'Bia', 'Zélia']);
+    expect(Object.keys(body.data[0]).sort()).toEqual(['attended', 'id', 'isMinor', 'name']);
+  });
+
+  it('marks came, did not come, and back to not checked, each persisted', async () => {
+    const event = await makeEvent();
+    await signUp(event.id, person(1));
+    const header = await staffHeader();
+    const { id } = (await Registration.findOne({ where: { eventId: event.id } }))!;
+    const mark = (attended: boolean | null) =>
+      request(app).patch(`/api/admin/events/${event.id}/attendance/${id}`).set(header).send({ attended });
+
+    expect((await mark(true)).body.registration.attended).toBe(true);
+    expect((await Registration.findByPk(id))?.attended).toBe(true);
+    expect((await mark(false)).body.registration.attended).toBe(false);
+    expect((await Registration.findByPk(id))?.attended).toBe(false);
+    expect((await mark(null)).body.registration.attended).toBeNull();
+    expect((await Registration.findByPk(id))?.attended).toBeNull();
+  });
+
+  it('does not let a registration of one event be marked through another event', async () => {
+    const first = await makeEvent();
+    const second = await makeEvent({ title: 'Outro' });
+    await signUp(first.id, person(1));
+    const { id } = (await Registration.findOne({ where: { eventId: first.id } }))!;
+    const header = await staffHeader();
+
+    const response = await request(app).patch(`/api/admin/events/${second.id}/attendance/${id}`).set(header).send({ attended: true });
+
+    expect(response.status).toBe(404);
+    expect((await Registration.findByPk(id))?.attended).toBeNull();
+  });
+
+  it('refuses a common account and an anonymous caller, and writes nothing', async () => {
+    const event = await makeEvent();
+    await signUp(event.id, person(1));
+    const { id } = (await Registration.findOne({ where: { eventId: event.id } }))!;
+    const common = await account('comum@exemplo.com');
+    const url = `/api/admin/events/${event.id}/attendance/${id}`;
+
+    expect((await request(app).patch(url).send({ attended: true })).status).toBe(401);
+    expect((await request(app).patch(url).set('Authorization', `Bearer ${common.token}`).send({ attended: true })).status).toBe(403);
+    expect((await Registration.findByPk(id))?.attended).toBeNull();
+  });
+
+  it('shows the mark in the spreadsheet', async () => {
+    const event = await makeEvent();
+    await signUp(event.id, person(1));
+    const { id } = (await Registration.findOne({ where: { eventId: event.id } }))!;
+    const header = await staffHeader();
+    await request(app).patch(`/api/admin/events/${event.id}/attendance/${id}`).set(header).send({ attended: true });
+
+    const list = await request(app).get(`/api/admin/events/${event.id}/registrations`).set(header);
+    expect(list.body.data[0].attended).toBe(true);
+    const csv = await request(app).get(`/api/admin/events/${event.id}/registrations.csv`).set(header);
+    expect(csv.text.trim().split('\r\n')[1]?.split(';').at(-1)).toBe('Veio');
+  });
+});
+
+describe('RF11: my registrations', () => {
+  it('lists only the sign-ups tied to the account, never another person\'s', async () => {
+    const event = await makeEvent();
+    const ana = await account('ana@exemplo.com');
+    const bia = await account('bia@exemplo.com');
+    await signUp(event.id, person(1, { name: 'Ana Souza' }), ana.token);
+    await signUp(event.id, person(2, { name: 'Filho da Ana' }), ana.token);
+    await signUp(event.id, person(3, { name: 'Bia Lima' }), bia.token);
+    await signUp(event.id, person(4, { name: 'Sem conta' }));
+
+    const mine = await request(app).get('/api/me/registrations').set('Authorization', `Bearer ${ana.token}`);
+    const hers = await request(app).get('/api/me/registrations').set('Authorization', `Bearer ${bia.token}`);
+
+    expect(mine.status).toBe(200);
+    expect(mine.body.data.map((entry: { name: string }) => entry.name).sort()).toEqual(['Ana Souza', 'Filho da Ana']);
+    expect(hers.body.data.map((entry: { name: string }) => entry.name)).toEqual(['Bia Lima']);
+    expect(JSON.stringify(mine.body)).not.toMatch(/Bia|Sem conta|pessoa\d@/);
+  });
+
+  it('reports whether the event is over and whether attendance was recorded', async () => {
+    const past = await makeEvent({ title: 'Passado', startsAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) });
+    const next = await makeEvent({ title: 'Próximo' });
+    const ana = await account('ana@exemplo.com');
+    await signUp(next.id, person(1), ana.token);
+    await Registration.create({
+      eventId: past.id,
+      userId: ana.id,
+      name: 'Ana Souza',
+      email: 'ana@exemplo.com',
+      consentedAt: new Date(),
+      attended: true,
+    } as never);
+
+    const { body } = await request(app).get('/api/me/registrations').set('Authorization', `Bearer ${ana.token}`);
+
+    expect(body.data.map((entry: { event: { title: string } }) => entry.event.title)).toEqual(['Passado', 'Próximo']);
+    expect(body.data[0]).toMatchObject({ attendanceRecorded: true, event: { isOver: true } });
+    expect(body.data[1]).toMatchObject({ attendanceRecorded: false, event: { isOver: false } });
+  });
+
+  it('answers 401 without a session', async () => {
+    expect((await request(app).get('/api/me/registrations')).status).toBe(401);
   });
 });

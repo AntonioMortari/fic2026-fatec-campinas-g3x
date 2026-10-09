@@ -8,6 +8,7 @@ import {
   updateEvent,
   type EventInput,
 } from '../services/admin-events.service';
+import { listAttendance, setAttendance } from '../services/attendance.service';
 import { listRegistrations, registrationsCsv } from '../services/admin-registrations.service';
 import { slugify } from '../utils/ics';
 import { localToUtc } from '../utils/time-zone';
@@ -68,6 +69,13 @@ export const publicationBody = z.object({ published: z.boolean({ error: 'Informe
 
 export const adminEventParams = z.object({ id: z.uuid('Evento inválido.') });
 
+export const attendanceParams = z.object({ id: z.uuid('Evento inválido.'), registrationId: z.uuid('Inscrição inválida.') });
+
+// null clears the mark: "nobody checked" is a state of its own.
+export const attendanceBody = z.object({
+  attended: z.boolean({ error: 'Informe se a pessoa veio, não veio, ou deixe sem marcar.' }).nullable(),
+});
+
 export async function listEvents(_req: Request, res: Response): Promise<void> {
   res.json({ data: await listAdminEvents() });
 }
@@ -100,4 +108,14 @@ export async function downloadRegistrations(req: Request, res: Response): Promis
     .type('text/csv; charset=utf-8')
     .set('Content-Disposition', `attachment; filename="inscritos-${slugify(event.title) || 'evento'}.csv"`)
     .send(registrationsCsv(registrations));
+}
+
+export async function getAttendance(req: Request, res: Response): Promise<void> {
+  const { event, entries } = await listAttendance(req.params.id as string);
+  res.json({ event, data: entries });
+}
+
+export async function markAttendance(req: Request, res: Response): Promise<void> {
+  const { attended } = req.body as z.output<typeof attendanceBody>;
+  res.json({ registration: await setAttendance(req.params.id as string, req.params.registrationId as string, attended) });
 }

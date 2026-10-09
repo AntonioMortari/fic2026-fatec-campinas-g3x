@@ -106,6 +106,8 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 | `POST /api/admin/events` · `PUT /api/admin/events/:id` | **só equipe**: cria (sempre rascunho) e corrige um evento. Data e hora como `2026-11-20T15:00`, lidas no horário de São Paulo; limite de vagas e `requiresCpf` opcionais. Não aceitam `published` |
 | `PATCH /api/admin/events/:id/publication` | **só equipe**: `{ "published": true \| false }`, o único caminho que publica ou tira do ar. Não existe `DELETE` |
 | `GET /api/admin/events/:id/registrations` · `.csv` | **só equipe** (RF16): inscritos com contato, CPF, responsável e autorização de imagem; a planilha usa `;`, BOM UTF-8 e neutraliza fórmulas. Só leitura, sem cache |
+| `GET /api/admin/events/:id/attendance` · `PATCH …/attendance/:registrationId` | **só equipe** (RF17): lista de presença (nome, menor de idade e a marca, sem contato) e `{ "attended": true \| false \| null }`; `null` desmarca. A planilha ganha a coluna "Presença" |
+| `GET /api/me/registrations` | **conta logada** (RF11): as inscrições ligadas à conta do token, com o evento; `attendanceRecorded` só é verdadeiro quando a equipe marcou presença |
 | `GET /api/auth/me` | a ficha de quem está autenticado; 401 sem token válido, ou se a conta foi apagada |
 
 ### Contratos da API

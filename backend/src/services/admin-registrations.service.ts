@@ -15,6 +15,7 @@ export interface AdminRegistration {
   guardianPhone: string | null;
   imageAuthorized: boolean;
   hasAccount: boolean;
+  attended: boolean | null;
   createdAt: string;
 }
 
@@ -34,6 +35,7 @@ export async function listRegistrations(eventId: string): Promise<{ event: Admin
       guardianPhone: row.guardianPhone,
       imageAuthorized: row.imageAuthorized,
       hasAccount: row.userId !== null,
+      attended: row.attended,
       createdAt: row.createdAt.toISOString(),
     })),
   };
@@ -63,7 +65,7 @@ function formatDateTime(iso: string): string {
 // The image column comes before the contact ones: on a wide sheet, what sits to the right is what nobody scrolls to,
 // and it is the column that decides whether a person may appear in a photo (RN07).
 export function registrationsCsv(registrations: AdminRegistration[]): string {
-  const header = ['Nome', 'Autorizou imagem', 'Menor de idade', 'Responsável', 'Telefone do responsável', 'E-mail', 'Telefone', 'CPF', 'Tem conta', 'Inscrito em'];
+  const header = ['Nome', 'Autorizou imagem', 'Menor de idade', 'Responsável', 'Telefone do responsável', 'E-mail', 'Telefone', 'CPF', 'Tem conta', 'Inscrito em', 'Presença'];
   const rows = registrations.map((registration) => [
     registration.name,
     registration.imageAuthorized ? 'Sim' : 'Não',
@@ -75,6 +77,7 @@ export function registrationsCsv(registrations: AdminRegistration[]): string {
     formatCpf(registration.cpf),
     registration.hasAccount ? 'Sim' : 'Não',
     formatDateTime(registration.createdAt),
+    registration.attended === null ? 'Não conferido' : registration.attended ? 'Veio' : 'Não veio',
   ]);
   return toCsv([header, ...rows]);
 }

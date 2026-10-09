@@ -311,6 +311,7 @@ export const openApiDocument = {
                           guardianPhone: { type: 'string', nullable: true },
                           imageAuthorized: { type: 'boolean', description: 'RN07: se a pessoa autorizou o uso da imagem.' },
                           hasAccount: { type: 'boolean' },
+                          attended: { type: 'boolean', nullable: true, description: 'RF17: true veio, false não veio, null ninguém conferiu.' },
                           createdAt: { type: 'string', format: 'date-time' },
                         },
                       },
@@ -332,7 +333,7 @@ export const openApiDocument = {
         summary: 'Planilha dos inscritos (equipe)',
         description:
           'CSV com `;` e BOM UTF-8, para abrir direto no Excel em português. Células que começariam com `=`, `+`, `-` ou `@` levam um apóstrofo na frente: sem isso viram fórmula. ' +
-          'A coluna "Autorizou imagem" vem antes das de contato.',
+          'A coluna "Autorizou imagem" vem antes das de contato; "Presença" é Veio, Não veio ou Não conferido.',
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
         security: [{ bearerAuth: [] }],
         responses: {
@@ -340,6 +341,80 @@ export const openApiDocument = {
           '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '404': { description: 'Evento inexistente', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/events/{id}/attendance': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Lista de presença: só nome, menor de idade e a marca (equipe, RF17)',
+        description: 'Em ordem alfabética, sem e-mail, telefone nem CPF: é a tela que fica virada para uma fila. Três estados: `true` veio, `false` não veio, `null` ninguém conferiu.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'O evento e quem se inscreveu',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    event: { $ref: '#/components/schemas/AdminEvent' },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', format: 'uuid' },
+                          name: { type: 'string' },
+                          isMinor: { type: 'boolean' },
+                          attended: { type: 'boolean', nullable: true },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Evento inexistente', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/events/{id}/attendance/{registrationId}': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Marca se a pessoa veio (equipe, RF17)',
+        description: 'Grava só a coluna de presença. `null` desmarca. A inscrição precisa ser deste evento, senão 404.',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          { name: 'registrationId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { type: 'object', required: ['attended'], properties: { attended: { type: 'boolean', nullable: true } } } } },
+        },
+        responses: {
+          '200': { description: 'A linha atualizada' },
+          '400': { description: '`attended` precisa ser true, false ou null', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`registration_not_found` ou evento inexistente', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/me/registrations': {
+      get: {
+        tags: ['Account'],
+        summary: 'As inscrições ligadas à minha conta (RF11)',
+        description:
+          'Só as feitas com sessão aberta (as de visitante não têm dono). Do mais próximo ao mais distante. `attendanceRecorded` é verdadeiro só quando a equipe marcou presença: "não veio" e "ninguém conferiu" aparecem iguais, porque a marca de falta é anotação de trabalho da equipe.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Lista (pode ser vazia)' },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },
