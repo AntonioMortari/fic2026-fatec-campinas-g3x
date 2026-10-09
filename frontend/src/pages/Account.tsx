@@ -1,3 +1,4 @@
+import { MyRegistrations } from '../components/account/MyRegistrations'
 import { useSignOut } from '../components/auth/useSignOut'
 import { Button, Card, Container, EmptyState, PageHeader } from '../components/ui'
 import { formatPhone } from '../lib/format-phone'
@@ -54,6 +55,7 @@ export function Account() {
           />
         )}
         {me.data && <Ficha user={me.data} />}
+        {me.data && <MyRegistrations />}
         <Button variant="secondary" onClick={signOut} className="self-start">
           Sair da conta
         </Button>

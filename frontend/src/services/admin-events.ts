@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AdminEvent, EventInput } from '../types/admin-event'
 import type { RegistrationsList } from '../types/admin-registration'
+import type { AttendanceEntry, AttendanceList } from '../types/attendance'
 import { api } from './api'
 
 const KEY = ['admin-events']
@@ -64,4 +65,42 @@ export async function downloadRegistrationsCsv(id: string): Promise<void> {
   link.click()
   link.remove()
   URL.revokeObjectURL(url)
+}
+
+export function useAttendance(id: string | undefined) {
+  return useQuery({
+    queryKey: [...KEY, id, 'attendance'],
+    queryFn: async () => (await api.get<AttendanceList>(`/admin/events/${id}/attendance`)).data,
+    enabled: Boolean(id),
+  })
+}
+
+// The mark shows at once and goes back if the server refuses: at a door, waiting for the network between two touches
+// is what makes people stop using the list.
+export function useMarkAttendance(eventId: string | undefined) {
+  const queryClient = useQueryClient()
+  const key = [...KEY, eventId, 'attendance']
+  return useMutation({
+    mutationFn: async ({ registrationId, attended }: { registrationId: string; attended: boolean | null }) =>
+      (await api.patch<{ registration: AttendanceEntry }>(`/admin/events/${eventId}/attendance/${registrationId}`, { attended })).data.registration,
+    onMutate: async ({ registrationId, attended }) => {
+      await queryClient.cancelQueries({ queryKey: key })
+      const previous = queryClient.getQueryData<AttendanceList>(key)
+      if (previous) {
+        queryClient.setQueryData<AttendanceList>(key, {
+          ...previous,
+          data: previous.data.map((entry) => (entry.id === registrationId ? { ...entry, attended } : entry)),
+        })
+      }
+      return { previous }
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous) queryClient.setQueryData(key, context.previous)
+    },
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: [...KEY, eventId, 'registrations'] }),
+        queryClient.invalidateQueries({ queryKey: ['my-registrations'] }),
+      ]),
+  })
 }
