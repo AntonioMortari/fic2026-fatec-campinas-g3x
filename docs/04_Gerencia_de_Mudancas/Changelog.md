@@ -272,3 +272,19 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   minha senha" não aparecem, porque a funcionalidade por trás de cada um não existe; "Minhas inscrições" fica na
   lista de participações (não está no desenho); "Empresa" é o rótulo só destas duas telas.
 - **PR:** branch `feat/account-edit`
+
+## 2026-10-09 — Relatório do painel (desenhos 7i e 7j)
+- **Artefato:** Requisitos (RF30, RF31, RF32) · Protótipos
+- **Antes:** a equipe não tinha números para a prestação de contas; a presença já era marcada (RF17) mas ninguém a
+  somava.
+- **Depois:** `/admin/relatorio` mostra, por mês, trimestre ou semestre: atividades realizadas, pessoas inscritas,
+  presentes conferidos, crianças e adolescentes presentes, e uma linha por atividade com inscritos, quem veio,
+  quem faltou e quem ninguém conferiu. Baixa em planilha (CSV) e imprime como PDF. Inscrição cancelada não conta.
+  "Sem conferir" nunca vira falta, e contagem que falhou aparece como traço, não como zero.
+- **O que o desenho pedia e não entra:** "novos voluntários", "novos doadores" e "valor recebido". Os módulos de
+  voluntariado e de doações (RF19–RF26) não existem neste repositório, então não há dado para esses números.
+  Entram quando existirem.
+- **O que o desenho não cobria e foi decidido aqui:** a janela do trimestre e do semestre termina no mês atual
+  (como no desenho: "Jul–Set", "Abr–Set"), em vez de seguir o ano civil; a tabela traz as cinco atividades mais
+  recentes e a planilha, todas.
+- **PR:** branch `feat/report`
