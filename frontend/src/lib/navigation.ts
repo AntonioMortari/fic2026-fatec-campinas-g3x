@@ -54,3 +54,8 @@ export function isActiveRoute(target: string, current: string): boolean {
   if (target === '/') return current === '/'
   return current === target || current.startsWith(`${target}/`)
 }
+
+export function labelForRoute(path: string): string | null {
+  const known = [HOME, ...DESKTOP_NAV, ...MENU_GROUPS.flatMap((group) => group.items), SUPPORT, { label: 'Minha conta', to: '/minha-conta' }]
+  return known.find((destination) => destination.to === path)?.label ?? null
+}

@@ -109,3 +109,25 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Por quê:** adoção do novo padrão de página (sobretítulo → título → apoio) e do filtro por tipo
   definidos na Análise UX/UI.
 - **PR:** branch `feat/agenda-page`
+
+## 2026-10-09 — RF08, RF10 e RF12 (cadastro, login e maioridade): o que muda na troca de stack
+- **Artefato:** Requisitos (RF08, RF10, RF12)
+- **Antes:** os critérios diziam que cadastro, entrada, recuperação e "Sair" funcionam **sem
+  JavaScript**, que a sessão é verificada no servidor de autenticação (Supabase) e que ela se renova
+  sozinha.
+- **Depois:** a interface é uma aplicação React (Anexo III) e o back-end é uma API REST com JWT.
+  - "Sem JavaScript" **deixa de valer**: não existe formulário que funcione sem script numa aplicação
+    de página única. A verificação passa a ser que o servidor recusa tudo o que o navegador deixaria
+    passar (maioridade, consentimento, papel de equipe) — testado no back-end com corpo montado à mão.
+  - A sessão tem duas peças: um JWT de acesso de 1 hora **só na memória** da página, e um token de
+    renovação de 7 dias num cookie `httpOnly` (no banco guarda-se só o hash), trocado a cada uso. Recarregar
+    a página mantém a sessão; sair a encerra no servidor. Nenhum token fica em `localStorage`.
+  - O papel de equipe segue sem entrar pelo cadastro; o esquema Zod descarta o campo e a coluna nasce
+    `false` (critério de RF08 mantido, e mais forte: há teste contra o MySQL real).
+  - Maioridade (RN01) e consentimento ficam gravados como **data e hora**, e não como um booleano.
+  - **RF10 fica parcial:** a recuperação de senha não está nesta entrega, porque depende de enviar
+    e-mail e o provedor ainda não foi escolhido.
+- **Por quê:** a troca de stack do regulamento tira o Supabase Auth e o Next.js, que davam esses
+  comportamentos de graça.
+- **PR:** branch `feat/auth`
+

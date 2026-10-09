@@ -41,6 +41,9 @@ npm run db:migrate          # aplica as migrations pendentes
 npm run dev                 # http://localhost:3333/api
 ```
 
+Sem rodar `db:migrate` antes, a API sobe mas toda rota que lê uma tabela responde 500
+(`Table '…' doesn't exist` no log). No Docker Compose isso é feito sozinho a cada subida.
+
 | Comando | O que faz |
 |---|---|
 | `npm run dev` | servidor com recarga automática |
@@ -90,6 +93,11 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 | `GET /api/health` | API e banco respondendo |
 | `GET /api/events?period=upcoming\|past&limit=` | eventos **publicados**; `upcoming` do mais próximo ao mais distante, `past` do mais recente ao mais antigo |
 | `GET /api/events/:id/calendar.ics` | o evento como arquivo de calendário; 404 se não existe ou não está publicado |
+| `POST /api/auth/register` | cria a conta e já devolve `{ token, user }` (201). 400 sem maioridade (RN01), sem consentimento ou sem ao menos uma forma de participar; 409 `email_taken` se o e-mail já existe |
+| `POST /api/auth/login` | `{ token, user }`; 401 `invalid_credentials` com a mesma frase para e-mail inexistente e senha errada |
+| `POST /api/auth/refresh` | troca o cookie `af_refresh` (httpOnly) por `{ token, user }` novos e **gira** o cookie. 401 sem cookie, expirado, já usado (após 10 s de tolerância, apaga todas as sessões da conta) ou conta apagada. Exige `X-Requested-With` |
+| `POST /api/auth/logout` | apaga o cookie de renovação no banco e no navegador; sempre 204. Exige `X-Requested-With` |
+| `GET /api/auth/me` | a ficha de quem está autenticado; 401 sem token válido, ou se a conta foi apagada |
 
 ### Contratos da API
 
@@ -97,5 +105,9 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
   o front-end usa; a `message` é para gente ler, em português.
 - Erro inesperado responde 500 sem mensagem interna nem pilha — essas vão para o log.
 - Rotas protegidas esperam `Authorization: Bearer <token>`.
+- Nenhum campo de papel entra pelo corpo: o cadastro lista as colunas uma a uma e `is_staff` nasce
+  `false`. Quem vira equipe é promovido à mão no banco (`update users set is_staff = true where email = '…'`).
+- As rotas `/auth` respondem com `Cache-Control: no-store`.
+- O CORS aceita credenciais só das origens de `CORS_ORIGINS`. `REFRESH_TOKEN_DAYS` (padrão 7) e `COOKIE_SAMESITE` (`lax`, `strict` ou `none`; `none` força `Secure`) configuram o cookie.
 - Toda rota nova entra em `src/docs/openapi.ts` no mesmo PR.
 - Tabelas nascem por migration, nunca por `sequelize.sync()`.

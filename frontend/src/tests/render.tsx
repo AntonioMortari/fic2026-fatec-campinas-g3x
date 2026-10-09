@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { RouterProvider, createMemoryRouter, type RouteObject } from 'react-router-dom'
+import { AuthProvider } from '../contexts/AuthProvider'
 import { ReadingPreferencesProvider } from '../contexts/ReadingPreferencesProvider'
 import { routes } from '../routes'
 
@@ -11,7 +12,9 @@ export function renderRoute(path: string, routeObjects: RouteObject[] = routes) 
   render(
     <ReadingPreferencesProvider>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
       </QueryClientProvider>
     </ReadingPreferencesProvider>,
   )

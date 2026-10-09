@@ -12,7 +12,7 @@ export function createApp() {
 
   app.disable('x-powered-by');
   app.use(helmet());
-  app.use(cors({ origin: env.CORS_ORIGINS }));
+  app.use(cors({ origin: env.CORS_ORIGINS, credentials: true }));
   app.use(express.json({ limit: '100kb' }));
 
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));

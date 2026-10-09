@@ -1,5 +1,7 @@
-import { useId, type InputHTMLAttributes, type ReactNode } from 'react'
+import type { InputHTMLAttributes, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import { FieldMessages } from './FieldMessages'
+import { useFieldIds } from './use-field-ids'
 
 export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string
@@ -13,11 +15,7 @@ export const FIELD_BOX =
   'focus-within:border-[1.5px] focus-within:border-brown focus-within:shadow-focus'
 
 export function TextField({ label, hint, error, addon, id, className, ...input }: TextFieldProps) {
-  const generatedId = useId()
-  const fieldId = id ?? generatedId
-  const hintId = hint ? `${fieldId}-hint` : undefined
-  const errorId = error ? `${fieldId}-error` : undefined
-  const describedBy = [errorId, hintId].filter(Boolean).join(' ') || undefined
+  const { fieldId, hintId, errorId, describedBy } = useFieldIds(id, Boolean(hint), Boolean(error))
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
@@ -35,16 +33,7 @@ export function TextField({ label, hint, error, addon, id, className, ...input }
         />
         {addon}
       </div>
-      {error && (
-        <p id={errorId} className="m-0 text-small font-bold">
-          {error}
-        </p>
-      )}
-      {hint && (
-        <p id={hintId} className="m-0 text-small text-brown-400">
-          {hint}
-        </p>
-      )}
+      <FieldMessages error={error} errorId={errorId} hint={hint} hintId={hintId} />
     </div>
   )
 }

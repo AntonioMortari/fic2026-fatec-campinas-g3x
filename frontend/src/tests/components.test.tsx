@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
-import { Button, ChipFilter, DateBadge, PasswordField, Tabs, TextField } from '../components/ui'
+import { Button, Checkbox, ChipFilter, DateBadge, PasswordField, SelectField, Tabs, TextField } from '../components/ui'
 import { dateParts } from '../lib/dates'
+import { formatPhone } from '../lib/format-phone'
 import { safeRedirect } from '../lib/safe-redirect'
 import { renderWithRouter } from './render'
 
@@ -23,18 +24,50 @@ describe('Button', () => {
 })
 
 describe('TextField', () => {
-  it('links label, hint and error to the input', () => {
+  it('links the hint to the input', () => {
+    render(<TextField label="Seu WhatsApp" hint="Opcional. Com DDD." />)
+
+    expect(screen.getByLabelText('Seu WhatsApp')).toHaveAccessibleDescription('Opcional. Com DDD.')
+  })
+
+  it('shows the error instead of the hint, so the two never repeat each other', () => {
     render(<TextField label="Seu WhatsApp" hint="Opcional. Com DDD." error="Confira o número." />)
     const field = screen.getByLabelText('Seu WhatsApp')
 
     expect(field).toHaveAttribute('aria-invalid', 'true')
-    expect(field).toHaveAccessibleDescription('Confira o número. Opcional. Com DDD.')
+    expect(field).toHaveAccessibleDescription('Confira o número.')
+    expect(screen.queryByText('Opcional. Com DDD.')).not.toBeInTheDocument()
   })
 
   it('does not set aria-invalid without an error', () => {
     render(<TextField label="E-mail" type="email" />)
 
     expect(screen.getByLabelText('E-mail')).not.toHaveAttribute('aria-invalid')
+  })
+})
+
+describe('SelectField', () => {
+  it('starts on an explicit "choose" option and reports the chosen value', async () => {
+    const user = userEvent.setup()
+    render(<SelectField label="Esta conta é de" options={[{ value: 'a', label: 'Pessoa' }]} defaultValue="" />)
+    const select = screen.getByLabelText('Esta conta é de')
+
+    expect(select).toHaveValue('')
+    await user.selectOptions(select, 'a')
+    expect(select).toHaveValue('a')
+  })
+})
+
+describe('Checkbox', () => {
+  it('toggles from its label and links the error', async () => {
+    const user = userEvent.setup()
+    render(<Checkbox label="Concordo" error="Marque para continuar." />)
+    const box = screen.getByLabelText('Concordo')
+
+    expect(box).toHaveAttribute('aria-invalid', 'true')
+    expect(box).toHaveAccessibleDescription('Marque para continuar.')
+    await user.click(screen.getByText('Concordo'))
+    expect(box).toBeChecked()
   })
 })
 
@@ -137,5 +170,13 @@ describe('safeRedirect', () => {
     null,
   ])('rejects %s and falls back to home', (value) => {
     expect(safeRedirect(value)).toBe('/')
+  })
+})
+
+describe('formatPhone', () => {
+  it('formats mobile and landline numbers and leaves anything else untouched', () => {
+    expect(formatPhone('11953968344')).toBe('(11) 95396-8344')
+    expect(formatPhone('1138968344')).toBe('(11) 3896-8344')
+    expect(formatPhone('123')).toBe('123')
   })
 })

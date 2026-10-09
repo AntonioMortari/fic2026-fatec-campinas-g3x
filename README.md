@@ -45,9 +45,11 @@ Pré-requisitos: **Docker** com Docker Compose, ou **Node.js 22+** e um MySQL 8.
 ### Com Docker (recomendado)
 
 ```bash
-docker compose up --build                       # MySQL, API e front-end
-docker compose exec backend npm run db:migrate  # cria as tabelas
+docker compose up --build    # MySQL, API e front-end; as tabelas são criadas sozinhas
 ```
+
+O backend aplica as migrations pendentes toda vez que sobe. Para desfazer a última:
+`docker compose exec backend npm run db:migrate:undo`.
 
 | Serviço | Endereço |
 |---|---|
