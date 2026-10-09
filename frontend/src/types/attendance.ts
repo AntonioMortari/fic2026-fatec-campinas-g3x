@@ -4,6 +4,7 @@ export interface AttendanceEntry {
   id: string
   name: string
   isMinor: boolean
+  guardianPhoneHint: string | null
   attended: boolean | null
 }
 

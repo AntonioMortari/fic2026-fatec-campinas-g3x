@@ -14,6 +14,7 @@ function openAs(account: typeof fakeUser | null) {
   mock = mockApi({
     'POST /auth/refresh': () => ({ status: 200, data: { token: 'a.b.c', user: account } }),
     'GET /admin/events': () => ({ status: 200, data: { data: [] } }),
+    'GET /admin/events/11111111-1111-4111-8111-111111111111/attendance': () => ({ status: 200, data: { event: { title: 'Roda', startsAt: '2030-11-20T18:00:00.000Z' }, data: [] } }),
   })
 }
 
@@ -93,6 +94,47 @@ describe("the panel's own frame (screen 2c)", () => {
 
     expect(screen.queryByRole('navigation', { name: 'Atalhos do painel' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Salvar' })).toBeInTheDocument()
+  })
+})
+
+describe("the desktop frame of the panel (screen 7j)", () => {
+  it('has the side menu with only the screens that exist, and marks the current one', async () => {
+    openAs(STAFF)
+    renderRoute('/admin/eventos')
+    await screen.findByRole('heading', { name: 'Eventos', level: 1 })
+    const side = screen.getByRole('navigation', { name: 'Seções do painel' })
+
+    expect(within(side).getAllByRole('link').map((link) => link.textContent)).toEqual(['Início', 'Agenda e presença'])
+    expect(within(side).getByRole('link', { name: 'Agenda e presença' })).toHaveAttribute('aria-current', 'page')
+    expect(within(side).getByRole('link', { name: 'Início' })).not.toHaveAttribute('aria-current')
+    for (const missing of ['Atividades', 'Pessoas', 'Conteúdo', 'Biblioteca', 'Configurações']) {
+      expect(within(side).queryByRole('link', { name: missing })).not.toBeInTheDocument()
+    }
+  })
+
+  it('has the header with the badge, the first name of who is signed in and the way back to the site', async () => {
+    openAs(STAFF)
+    renderRoute('/admin')
+    await screen.findByRole('heading', { name: 'Painel da equipe' })
+    const header = screen.getAllByRole('banner')[0]!
+
+    expect(within(header).getByRole('link', { name: 'Minha conta, Maria da Silva' })).toHaveAttribute('href', '/minha-conta')
+    expect(within(header).getByText('Maria')).toBeInTheDocument()
+    expect(within(header).getByRole('link', { name: 'Ver o site' })).toHaveAttribute('href', '/')
+  })
+
+  it('hides the panel header on small screens only on the attendance list, which brings its own', async () => {
+    openAs(STAFF)
+    renderRoute('/admin/eventos/11111111-1111-4111-8111-111111111111/presenca')
+    await screen.findByRole('heading', { name: 'Lista de presença' })
+    expect(screen.getAllByRole('banner')[0]!.className).toContain('max-desktop:hidden')
+  })
+
+  it('keeps the panel header on every other screen', async () => {
+    openAs(STAFF)
+    renderRoute('/admin')
+    await screen.findByRole('heading', { name: 'Painel da equipe' })
+    expect(screen.getAllByRole('banner')[0]!.className).not.toContain('max-desktop:hidden')
   })
 })
 

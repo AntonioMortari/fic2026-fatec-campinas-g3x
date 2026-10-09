@@ -37,7 +37,7 @@ export const routes: RouteObject[] = [
       { path: '/admin/eventos/novo', element: <AdminEventForm />, handle: { hideBottomBar: true } },
       { path: '/admin/eventos/:id/editar', element: <AdminEventForm />, handle: { hideBottomBar: true } },
       { path: '/admin/eventos/:id/inscritos', element: <AdminRegistrants /> },
-      { path: '/admin/eventos/:id/presenca', element: <AdminAttendance /> },
+      { path: '/admin/eventos/:id/presenca', element: <AdminAttendance />, handle: { hideHeaderOnMobile: true } },
     ],
   },
   {
