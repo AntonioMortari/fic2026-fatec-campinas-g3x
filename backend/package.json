@@ -14,7 +14,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "db:migrate": "tsx src/database/migrate.ts up",
-    "db:migrate:undo": "tsx src/database/migrate.ts down"
+    "db:migrate:undo": "tsx src/database/migrate.ts down",
+    "test:db": "DB_TESTS=1 jest tests/integration --runInBand"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

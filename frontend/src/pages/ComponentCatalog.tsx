@@ -175,9 +175,13 @@ export function ComponentCatalog() {
             event={{
               id: 'exemplo',
               title: 'Cafú e o Café',
+              description: null,
               category: 'Contação de história',
               startsAt: '2026-10-17T17:00:00Z',
-              summary: '14h · Sede, Vila Romero · Livre',
+              endsAt: null,
+              location: 'Sede, Vila Romero',
+              ageRange: 'Livre',
+              capacity: null,
             }}
           />
         </div>

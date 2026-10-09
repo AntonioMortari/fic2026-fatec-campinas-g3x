@@ -1,9 +1,15 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
+import { api } from '../services/api'
+
+beforeEach(() => {
+  vi.spyOn(api, 'get').mockResolvedValue({ data: { data: [] } })
+})
 
 afterEach(() => {
   cleanup()
+  vi.restoreAllMocks()
   localStorage.clear()
   document.documentElement.removeAttribute('data-font-scale')
   document.documentElement.removeAttribute('data-contrast')
