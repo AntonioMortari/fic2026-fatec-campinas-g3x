@@ -22,17 +22,17 @@ export const routes: RouteObject[] = [
       { path: '/', element: <HomeContainer /> },
       { path: '/agenda', element: <Agenda /> },
       { element: <RequireAuth />, children: [{ path: '/minha-conta', element: <Account /> }] },
-      {
-        element: <RequireStaff />,
-        children: [
-          { path: '/admin', element: <AdminHome /> },
-          { path: '/admin/eventos', element: <AdminEvents /> },
-          { path: '/admin/eventos/novo', element: <AdminEventForm />, handle: { hideBottomBar: true } },
-          { path: '/admin/eventos/:id/editar', element: <AdminEventForm />, handle: { hideBottomBar: true } },
-        ],
-      },
       ...DEV_ONLY,
       { path: '*', element: <NotFound /> },
+    ],
+  },
+  {
+    element: <RequireStaff />,
+    children: [
+      { path: '/admin', element: <AdminHome /> },
+      { path: '/admin/eventos', element: <AdminEvents /> },
+      { path: '/admin/eventos/novo', element: <AdminEventForm />, handle: { hideBottomBar: true } },
+      { path: '/admin/eventos/:id/editar', element: <AdminEventForm />, handle: { hideBottomBar: true } },
     ],
   },
   { element: <FocusedLayout />, children: [{ path: '/entrar', element: <Auth /> }] },
