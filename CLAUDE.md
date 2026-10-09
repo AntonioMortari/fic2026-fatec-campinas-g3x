@@ -28,8 +28,8 @@ Ao terminar, acrescentar ou modificar uma funcionalidade, atualize a tabela de s
 ## Comandos
 
 ```bash
-docker compose up --build                       # MySQL + API + front-end
-docker compose exec backend npm run db:migrate  # migrations
+docker compose up --build                       # MySQL + API + front-end (o backend aplica as migrations ao subir)
+docker compose exec backend npm run db:migrate:undo  # desfaz a última migration
 
 cd backend  && npm test && npm run typecheck    # Jest + Supertest (sem banco)
 cd backend  && npm run test:db                  # integração contra MySQL real (ver backend/README.md)
