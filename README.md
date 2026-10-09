@@ -51,9 +51,20 @@ docker compose up --build    # MySQL, API e front-end; as tabelas são criadas s
 O backend aplica as migrations pendentes toda vez que sobe. Para desfazer a última:
 `docker compose exec backend npm run db:migrate:undo`.
 
+Ao subir, o backend também cria duas **contas de teste** (a seed de desenvolvimento), para entrar sem
+precisar se cadastrar e promover alguém no banco:
+
+| Conta | E-mail | Senha |
+|---|---|---|
+| Equipe (abre o painel em `/admin`) | `admin@atelie.local` | `senha-dev-123` |
+| Pessoa comum | `usuario@atelie.local` | `senha-dev-123` |
+
+São contas **só do ambiente local**: a seed se recusa a rodar com `NODE_ENV=production` e contra qualquer
+banco que não seja `localhost`, `127.0.0.1` ou o serviço `db`. Rodar de novo não duplica nada e devolve a
+senha e o papel de cada uma ao que está escrito aqui.
+
 | Serviço | Endereço |
 |---|---|
-| Front-end | http://localhost:5173 |
 | API | http://localhost:3333/api |
 | Documentação da API (Swagger) | http://localhost:3333/api-docs |
 | Saúde da API e do banco | http://localhost:3333/api/health |
