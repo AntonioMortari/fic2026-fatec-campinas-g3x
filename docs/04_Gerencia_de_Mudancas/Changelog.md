@@ -216,3 +216,20 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   enquanto os eventos forem de dezenas de pessoas.
 - **Continua adiado:** limite de tentativas de login (pode reaproveitar a mesma origem hasheada).
 - **PR:** branch `feat/registrations-admin`
+
+## 2026-10-09 — RF17 (Lista de presença) e "Minhas inscrições" na área do usuário (RF11)
+- **Artefato:** Requisitos (RF11, RF17) · Arquitetura
+- **Antes:** a equipe lia quem se inscreveu (RF16), mas não registrava quem veio; a área do usuário só
+  mostrava a ficha da conta.
+- **Depois:**
+  - A equipe marca pelo celular se cada pessoa **veio**, **não veio**, ou deixa **sem conferir**. São três
+    estados: quem ninguém conferiu não conta como falta. A lista mostra só o nome e a marca, sem contato.
+  - A planilha de inscritos ganha a coluna "Presença".
+  - `/minha-conta` passa a listar as inscrições feitas com a conta aberta, separando as próximas das que já
+    aconteceram. A pessoa só vê "Presença registrada"; a marca de falta é anotação da equipe e não é mostrada.
+- **O que o critério não cobria e foi decidido aqui:** a lista de presença não tem paginação nem mostra
+  CPF, e-mail ou telefone; inscrição feita sem conta não aparece em "Minhas inscrições" (não tem dono); a área
+  do usuário ainda **não permite editar os próprios dados** nem tem candidaturas e doações, que não existem.
+- **Continua adiado:** relatório contando presentes (RF30–RF32), cancelar a própria inscrição, e-mail de
+  confirmação (RF18).
+- **PR:** branch `feat/attendance-my-registrations`
