@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { cn } from '../../lib/cn'
 import { TOAST_DURATION_MS, ToastContext, type ToastOptions } from './toast-context'
 
 interface Toast extends ToastOptions {
@@ -28,7 +29,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toast && (
           <div
             key={toast.id}
-            className="pointer-events-auto flex w-full max-w-xl animate-rise items-center justify-between gap-3 bg-brown px-3.5 py-3 text-[0.90625rem] text-cream shadow-[4px_4px_0_var(--color-ochre)]"
+            className={cn(
+              'pointer-events-auto flex w-full max-w-xl animate-rise items-center justify-between gap-3 px-3.5 py-3 text-[0.90625rem] text-cream shadow-[4px_4px_0_var(--color-ochre)]',
+              toast.tone === 'error' ? 'bg-error' : 'bg-brown',
+            )}
           >
             <span>{toast.message}</span>
             {toast.action && (

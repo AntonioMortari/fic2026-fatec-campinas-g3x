@@ -5,6 +5,7 @@ import {
   Container,
   Card,
   ChipFilter,
+  Alert,
   DateBadge,
   EmptyState,
   ListItem,
@@ -23,6 +24,8 @@ const COLORS = [
   ['blue-deep', 'bg-blue-deep', 'links e rótulo de categoria'],
   ['brown', 'bg-brown', 'texto e ação principal'],
   ['brown-400', 'bg-brown-400', 'texto secundário'],
+  ['error', 'bg-error', 'mensagens de erro: texto, borda do campo e aviso'],
+  ['error-tint', 'bg-error-tint', 'fundo do aviso de erro'],
   ['cream', 'bg-cream', 'superfície dominante'],
   ['card', 'bg-card', 'cartões e campos'],
 ] as const
@@ -194,6 +197,27 @@ export function ComponentCatalog() {
           <ListItem number="03" tone="brown" title="Ser voluntário" description="Cinco áreas, do pedagógico ao acervo." to="/voluntariado" />
           <ListItem number="04" tone="ochre" title="Apoiar" description="Livros, instrumentos, materiais e recursos." to="/doar" />
         </ul>
+      </Section>
+
+      <Section title="Erros">
+        <p className="m-0 text-small text-brown-400">
+          Vermelho só para erro, sempre com texto e ícone: a cor sozinha não basta. Campo, aviso do formulário, estado de falha e aviso fixo.
+        </p>
+        <TextField label="E-mail" defaultValue="ana@" error="Confira o e-mail: ele precisa ter um endereço completo, como nome@exemplo.com." />
+        <Alert tone="error">Confira os campos destacados abaixo.</Alert>
+        <EmptyState
+          tone="error"
+          title="Não conseguimos carregar os eventos"
+          text="Tente de novo em alguns minutos."
+          actions={
+            <Button variant="secondary" size="compact">
+              Tentar de novo
+            </Button>
+          }
+        />
+        <Button variant="secondary" onClick={() => showToast('Não foi possível mudar agora. Tente de novo.', { tone: 'error' })}>
+          Mostrar aviso de erro
+        </Button>
       </Section>
 
       <Section title="Estado vazio">

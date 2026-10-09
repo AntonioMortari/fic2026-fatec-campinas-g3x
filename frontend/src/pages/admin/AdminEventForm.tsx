@@ -42,6 +42,7 @@ export function AdminEventForm() {
       {id && existing.isPending && <p role="status" className="m-0">Carregando o evento…</p>}
       {id && existing.isError && (
         <EmptyState
+          tone="error"
           title="Não conseguimos carregar o evento"
           text="Tente de novo em alguns minutos."
           actions={

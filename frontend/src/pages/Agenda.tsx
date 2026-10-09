@@ -61,6 +61,7 @@ export function Agenda() {
 
         {isError && (
           <EmptyState
+            tone="error"
             title="Não conseguimos carregar a agenda agora"
             text="A conexão pode ter falhado. Tente de novo em instantes."
             actions={

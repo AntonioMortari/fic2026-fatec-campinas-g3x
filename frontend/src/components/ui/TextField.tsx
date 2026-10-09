@@ -1,5 +1,6 @@
 import type { InputHTMLAttributes, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import { fieldBox } from './field-styles'
 import { FieldMessages } from './FieldMessages'
 import { useFieldIds } from './use-field-ids'
 
@@ -10,10 +11,6 @@ export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   addon?: ReactNode
 }
 
-export const FIELD_BOX =
-  'flex items-center min-h-13 bg-card rounded-control border border-line-strong ' +
-  'focus-within:border-[1.5px] focus-within:border-brown focus-within:shadow-focus'
-
 export function TextField({ label, hint, error, addon, id, className, ...input }: TextFieldProps) {
   const { fieldId, hintId, errorId, describedBy } = useFieldIds(id, Boolean(hint), Boolean(error))
 
@@ -23,7 +20,7 @@ export function TextField({ label, hint, error, addon, id, className, ...input }
         {label}
         {input.required && <span aria-hidden="true"> *</span>}
       </label>
-      <div className={cn(FIELD_BOX, error && 'border-2 border-brown')}>
+      <div className={fieldBox(Boolean(error))}>
         <input
           id={fieldId}
           aria-invalid={error ? true : undefined}
