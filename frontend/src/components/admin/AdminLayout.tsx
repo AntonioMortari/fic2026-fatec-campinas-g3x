@@ -1,18 +1,14 @@
-import { useCallback, useState, type ReactNode } from 'react'
+import { useCallback, useState } from 'react'
 import { Outlet, useLocation, useMatches } from 'react-router-dom'
-import { BottomBar } from './BottomBar'
-import { Footer } from './Footer'
-import { Header } from './Header'
-import { Menu, type MenuSection } from './Menu'
-import { SkipLink } from './SkipLink'
+import { Menu, type MenuSection } from '../layout/Menu'
+import { SkipLink } from '../layout/SkipLink'
+import type { RouteHandle } from '../layout/Layout'
+import { useRouteFocus } from '../layout/useRouteFocus'
 import { ToastProvider } from '../ui/ToastProvider'
-import { useRouteFocus } from './useRouteFocus'
+import { AdminBottomBar } from './AdminBottomBar'
+import { AdminHeader } from './AdminHeader'
 
-export interface RouteHandle {
-  hideBottomBar?: boolean
-}
-
-export function Layout({ children }: { children?: ReactNode }) {
+export function AdminLayout() {
   const [menu, setMenu] = useState<{ open: boolean; section: MenuSection }>({ open: false, section: 'start' })
   const openMenu = useCallback((section: MenuSection) => setMenu({ open: true, section }), [])
   const closeMenu = useCallback(() => setMenu((current) => ({ ...current, open: false })), [])
@@ -24,19 +20,19 @@ export function Layout({ children }: { children?: ReactNode }) {
     <ToastProvider>
       <div className="flex min-h-dvh flex-col pb-[4.5rem] desktop:pb-0">
         <SkipLink />
-        <Header openMenu={openMenu} />
+        <AdminHeader openMenu={openMenu} />
         <main id="content" tabIndex={-1} className="flex-1 outline-none">
           <div key={pathname} className="animate-page">
-            {children ?? <Outlet />}
+            <Outlet />
           </div>
         </main>
-        <Footer />
-        {!hideBottomBar && <BottomBar openMenu={openMenu} menuOpen={menu.open} />}
+        {!hideBottomBar && <AdminBottomBar openMenu={openMenu} menuOpen={menu.open} />}
         <Menu
+          accountFirst
           open={menu.open}
           section={menu.section}
           onClose={closeMenu}
-          bottomBar={<BottomBar openMenu={openMenu} menuOpen onCloseMenu={closeMenu} />}
+          bottomBar={<AdminBottomBar openMenu={openMenu} menuOpen onCloseMenu={closeMenu} />}
         />
       </div>
     </ToastProvider>
