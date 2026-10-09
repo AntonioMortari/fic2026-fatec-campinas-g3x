@@ -9,7 +9,7 @@ export interface RecordedRequest {
   authorization: string | undefined
 }
 
-type Handler = (request: RecordedRequest) => { status: number; data: unknown }
+type Handler = (request: RecordedRequest) => { status: number; data: unknown } | 'network-error'
 
 export function mockApi(handlers: Record<string, Handler>) {
   const requests: RecordedRequest[] = []
@@ -28,7 +28,9 @@ export function mockApi(handlers: Record<string, Handler>) {
     requests.push(request)
     const handler = handlers[`${method} ${url}`]
     if (!handler) throw new Error(`Unexpected request: ${method} ${url}`)
-    const { status, data } = handler(request)
+    const reply = handler(request)
+    if (reply === 'network-error') throw new AxiosError('Network Error', 'ERR_NETWORK', config)
+    const { status, data } = reply
     const response = { data, status, statusText: String(status), headers: {}, config }
     if (status >= 200 && status < 300) return response
     throw new AxiosError(`Request failed with status ${status}`, 'ERR_BAD_REQUEST', config, null, response)

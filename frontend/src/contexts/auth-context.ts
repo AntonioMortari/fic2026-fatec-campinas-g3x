@@ -3,6 +3,7 @@ import type { AuthResult, AuthUser } from '../services/auth'
 
 export interface AuthContextValue {
   user: AuthUser | null
+  status: 'loading' | 'ready'
   sessionExpired: boolean
   signIn: (result: AuthResult) => void
   signOut: () => void

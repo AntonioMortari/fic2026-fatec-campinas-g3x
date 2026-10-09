@@ -115,6 +115,7 @@ describe('protected routes and session end', () => {
     mock = mockApi({
       'POST /auth/login': () => ({ status: 200, data: { token: TOKEN, user: fakeUser } }),
       'GET /auth/me': () => apiError(401, 'unauthenticated', 'Sua sessão terminou.'),
+      'POST /auth/refresh': () => apiError(401, 'session_expired', 'Sua sessão terminou.'),
     })
     const router = renderRoute('/entrar?voltar=%2Fminha-conta')
     await fillLogin(user)

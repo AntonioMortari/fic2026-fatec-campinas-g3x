@@ -12,7 +12,7 @@ const CONTROL =
 
 export function Header({ openMenu }: { openMenu: OpenMenu }) {
   const { pathname } = useLocation()
-  const { user } = useAuth()
+  const { user, status } = useAuth()
   const signOut = useSignOut()
 
   return (
@@ -63,7 +63,9 @@ export function Header({ openMenu }: { openMenu: OpenMenu }) {
           >
             Aa
           </button>
-          {user ? (
+          {status === 'loading' ? (
+            <span aria-hidden="true" className="inline-block h-11 w-20" />
+          ) : user ? (
             <>
               <Link
                 to="/minha-conta"

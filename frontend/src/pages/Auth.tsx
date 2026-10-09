@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
+import { LoadingSession } from '../components/auth/LoadingSession'
 import { LoginForm } from '../components/auth/LoginForm'
 import { RegisterForm } from '../components/auth/RegisterForm'
 import { Alert, Tabs } from '../components/ui'
@@ -9,11 +10,12 @@ import { safeRedirect } from '../lib/safe-redirect'
 
 export function Auth() {
   const [searchParams] = useSearchParams()
-  const { user, sessionExpired, signIn } = useAuth()
+  const { user, status, sessionExpired, signIn } = useAuth()
   const [active, setActive] = useState('login')
   const destination = safeRedirect(searchParams.get('voltar'))
   const destinationLabel = destination === '/' ? null : labelForRoute(destination)
 
+  if (status === 'loading') return <LoadingSession />
   if (user) return <Navigate to={destination} replace />
 
   return (
