@@ -9,6 +9,7 @@ import { AdminAttendance } from './pages/admin/AdminAttendance'
 import { AdminEventForm } from './pages/admin/AdminEventForm'
 import { AdminEvents } from './pages/admin/AdminEvents'
 import { AdminHome } from './pages/admin/AdminHome'
+import { AdminReport } from './pages/admin/AdminReport'
 import { AdminRegistrants } from './pages/admin/AdminRegistrants'
 import { Auth } from './pages/Auth'
 import { EventRegistration } from './pages/EventRegistration'
@@ -39,6 +40,7 @@ export const routes: RouteObject[] = [
       { path: '/admin/eventos/novo', element: <AdminEventForm />, handle: { hideBottomBar: true } },
       { path: '/admin/eventos/:id/editar', element: <AdminEventForm />, handle: { hideBottomBar: true } },
       { path: '/admin/eventos/:id/inscritos', element: <AdminRegistrants /> },
+      { path: '/admin/relatorio', element: <AdminReport />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/eventos/:id/presenca', element: <AdminAttendance />, handle: { hideHeaderOnMobile: true } },
     ],
   },

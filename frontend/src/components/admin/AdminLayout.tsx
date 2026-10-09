@@ -24,7 +24,7 @@ export function AdminLayout() {
       <div className="flex min-h-dvh flex-col pb-[4.5rem] desktop:pb-0">
         <SkipLink />
         <AdminHeader hideOnMobile={hideHeaderOnMobile} />
-        <div className="flex-1 desktop:grid desktop:grid-cols-[15rem_minmax(0,1fr)]">
+        <div className="flex-1 desktop:grid desktop:grid-cols-[15rem_minmax(0,1fr)] print:block!">
           <AdminSidebar />
           <main id="content" tabIndex={-1} className="min-w-0 outline-none">
             <div key={pathname} className="animate-page desktop:px-4">

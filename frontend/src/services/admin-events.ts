@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AdminEvent, EventInput } from '../types/admin-event'
 import type { RegistrationsList } from '../types/admin-registration'
 import type { AttendanceEntry, AttendanceList } from '../types/attendance'
+import { downloadFile } from './download'
 import { api } from './api'
 
 const KEY = ['admin-events']
@@ -54,17 +55,7 @@ export function useAdminRegistrations(id: string | undefined) {
 }
 
 export async function downloadRegistrationsCsv(id: string): Promise<void> {
-  const response = await api.get<Blob>(`/admin/events/${id}/registrations.csv`, { responseType: 'blob' })
-  const disposition = String(response.headers['content-disposition'] ?? '')
-  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? 'inscritos.csv'
-  const url = URL.createObjectURL(response.data)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.append(link)
-  link.click()
-  link.remove()
-  URL.revokeObjectURL(url)
+  await downloadFile(`/admin/events/${id}/registrations.csv`, 'inscritos.csv')
 }
 
 export function useAttendance(id: string | undefined) {
