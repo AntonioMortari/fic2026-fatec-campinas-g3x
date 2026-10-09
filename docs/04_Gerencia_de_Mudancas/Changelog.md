@@ -165,3 +165,15 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   seguia os tokens e as regras de layout, e não a tela.
 - **PR:** branch `feat/admin-shell`
 
+## 2026-10-09 — Cor de erro no design system
+- **Artefato:** Protótipos (tokens de cor do design system)
+- **Antes:** o design system não tinha cor de erro. Mensagens de erro e campos inválidos usavam marrom, a
+  mesma tinta do texto, e só se distinguiam por serem negrito e ter borda mais grossa.
+- **Depois:** dois tokens novos — `error` (tijolo, `#A52A1E`) e `error-tint` (`#FBE9E4`) — com `#8A0000`
+  sobre branco em alto contraste. Aplicados a campo, aviso do formulário, estado de falha e aviso fixo,
+  sempre com ícone e texto.
+- **Por quê:** pedido do grupo, que viu as mensagens de erro sem cor própria. O tom foi escolhido
+  quente, na família da terra e do ocre, e conferido por contraste (6,5:1 sobre o creme).
+- **O que não muda:** a paleta da ONG. O vermelho é só de erro; não substitui ocre, azul nem marrom.
+- **PR:** branch `feat/error-color`
+

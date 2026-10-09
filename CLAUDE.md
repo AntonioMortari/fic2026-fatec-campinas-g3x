@@ -106,6 +106,18 @@ Valem para toda tela nova. Os tokens estão em `frontend/src/styles.css` (bloco 
 - **Creme domina; marrom é texto e ação principal.** Ocre só em "Apoiar", estado ativo, contagem e
   data — e nunca como texto sobre claro (para texto, `ocre-escuro`). Azul para link e rótulo de
   categoria.
+- **Erro é vermelho, e só erro é vermelho** (`--color-error` tijolo `#A52A1E`, `--color-error-tint` `#FBE9E4`;
+  em alto contraste `#8A0000` sobre branco). O vermelho nunca vem sozinho: sempre com **texto e ícone**
+  (`ErrorIcon`), porque a cor não basta. Nenhuma tela escreve a cor de erro à mão — usa o componente:
+  campo com erro = `error="…"` em `TextField`/`SelectField`/`TextAreaField`/`Checkbox` (borda de 2px e
+  mensagem vermelha por `FieldMessages`); aviso do formulário = `<Alert tone="error">`; falha de carga =
+  `<EmptyState tone="error">`; aviso fixo = `toast(msg, { tone: 'error' })`. Mensagem de erro que não é de
+  campo (ex.: "escolha ao menos uma forma de participar") também passa por `FieldMessages`. Um teste
+  confere o contraste (4,5:1 sobre creme, cartão e fundo do aviso, nos dois modos) e que a cor é um
+  vermelho — não ocre, que é luz, data e ação. **Armadilha medida:** a borda do campo não pode ser
+  `FIELD_BOX` + `border-error` por cima — duas utilidades de cor de borda no mesmo elemento são decididas
+  pela ordem em que o Tailwind as emite, e o erro perdia (campo continuava cinza). `fieldBox(invalid)` troca
+  o conjunto inteiro.
 - **Elevação em 3 níveis** (`<Card elevation>`): `flat`, `outline`, `applique`. **No máximo UM aplique por
   tela**: sombra em tudo foi o principal motivo do ar amador do layout v1.
 - **Uma faixa listrada por página**, e quem a desenha é o rodapé. Tela não desenha faixa.
@@ -264,7 +276,7 @@ Atualizado em 09/10/2026.
 | Back-end base: Express, CORS, helmet, erro único, validação, JWT, bcrypt, Swagger | **pronto** — 22 testes Jest; `/api/health` medido contra MySQL 8.4 real (200 com banco, 503 sem) |
 | Migrations (Umzug) | **pronto** — `up`/`down` medidos contra MySQL real; tabelas `events` (com `requires_cpf`), `users` e `refresh_tokens` |
 | Front-end base: Vite, React Router, React Query, Axios, Tailwind | **pronto** |
-| Design system — fundação visual (F1): tokens, Bitter local, escala de tipo, 3 níveis de elevação, Button (com estado "Enviando…"), TextField, PasswordField, PageHeader, ListItem, Card, DateBadge, Tabs, ChipFilter, EmptyState, BackLink, ActionBar, aviso fixo (toast) com ação | **pronto** — 49 testes Vitest; conferido no Chromium a 320, 390 e 1440px, com A+ no máximo e alto contraste: sem rolagem horizontal, nenhum alvo abaixo de 44px |
+| Design system — fundação visual (F1): tokens, Bitter local, escala de tipo, 3 níveis de elevação, Button (com estado "Enviando…"), TextField, PasswordField, PageHeader, ListItem, Card, DateBadge, Tabs, ChipFilter, EmptyState, BackLink, ActionBar, aviso fixo (toast) com ação | **pronto** — 49 testes Vitest, mais a cor e o estilo de erro (ver Regras do layout); conferido no Chromium a 320, 390 e 1440px, com A+ no máximo e alto contraste: sem rolagem horizontal, nenhum alvo abaixo de 44px |
 | Estrutura (F2): cabeçalho, barra inferior, menu em folha (com a barra visível por baixo, como na 3a), rodapé, layout focado, link de pular, foco e fade de 150ms na troca de rota | **pronto** — Esc, retorno do foco e trava de rolagem medidos no Chromium. Uma rota pode trocar a barra inferior pela barra de ação com `handle: { hideBottomBar: true }` (usado pelo formulário de evento) |
 | Home (RF01, tarefa 4.1) | **pronta**: herói, "Por onde começar", "O que fazemos" e escolas conferidos lado a lado com as telas 2a e 6a, e "Próxima atividade" ligada à API de eventos (conferida no navegador com evento real; sem evento publicado ou com a API fora do ar, o bloco não aparece) |
 | Agenda (RF14, tarefa 4.2) | **pronta, com 4 diferenças do desenho listadas abaixo**: `/agenda` com abas Em breve / Já aconteceu, filtro por tipo (chips no celular, coluna no desktop), próximo evento em destaque, "+ Agenda" (`.ics`) e estados vazio, carregando e falha. Conferida no Chromium contra o backend e o MySQL reais, a 320, 390, 1024 e 1440px, com A+ no máximo e alto contraste. Backend: `GET /api/events` e `GET /api/events/:id/calendar.ics`, 39 testes unitários + 7 de integração |
