@@ -38,6 +38,7 @@ alguma obrigatória faltar ou for inválida — o erro diz qual.
 npm install
 cp .env.example .env        # e preencha
 npm run db:migrate          # aplica as migrations pendentes
+npm run db:seed             # cria as contas de teste (admin@atelie.local e usuario@atelie.local, senha senha-dev-123)
 npm run dev                 # http://localhost:3333/api
 ```
 
@@ -52,6 +53,7 @@ Sem rodar `db:migrate` antes, a API sobe mas toda rota que lê uma tabela respon
 | `npm run test:db` | testes de integração contra um MySQL de verdade (ver abaixo) |
 | `npm run typecheck` | confere os tipos |
 | `npm run db:migrate` / `db:migrate:undo` | aplica as pendentes / desfaz a última |
+| `npm run db:seed` | cria (ou restaura) as duas contas de teste; só roda em banco local e fora de produção |
 
 ### Testes de integração
 

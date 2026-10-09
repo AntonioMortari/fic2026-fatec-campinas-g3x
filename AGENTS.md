@@ -53,4 +53,5 @@ arquitetura, comandos, status — está em `CLAUDE.md`.
 | 09/10/2026 | Claude Code (Anthropic) | Cadastro e edição de eventos pela equipe (RF13): coluna `requires_cpf`, leitura de data e hora no fuso de São Paulo, middleware que consulta o banco para exigir equipe, rotas `/api/admin/events`; painel (`/admin`, lista, formulário) no front-end; correção do cabeçalho a 320px com A+ | `feat/events-admin` | _a preencher_ |
 | 09/10/2026 | Claude Code (Anthropic) | Moldura própria do painel da equipe conforme a tela 2c: cabeçalho escuro, barra inferior do painel, home com ações rápidas, menu "Mais" com a conta primeiro; 404 do painel dentro da moldura pública | `feat/admin-shell` | _a preencher_ |
 | 09/10/2026 | Claude Code (Anthropic) | Cor de erro do design system (tokens, ícone, campo, aviso, estado de falha e aviso fixo) como padrão para os próximos formulários | `feat/error-color` | _a preencher_ |
+| 09/10/2026 | Claude Code (Anthropic) | Seed de desenvolvimento com uma conta de equipe e uma comum, travada contra produção e contra banco remoto; ligada ao `docker compose up` | `feat/dev-seed` | _a preencher_ |
 
