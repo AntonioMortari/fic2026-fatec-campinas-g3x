@@ -23,7 +23,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await User.destroy({ where: {}, truncate: true });
+  await User.destroy({ where: {} });
 });
 
 afterAll(async () => {

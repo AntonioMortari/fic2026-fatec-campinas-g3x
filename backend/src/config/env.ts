@@ -20,6 +20,8 @@ const schema = z.object({
   DB_PASSWORD: z.string(),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET precisa de pelo menos 32 caracteres'),
   JWT_EXPIRES_IN: z.string().default('1h'),
+  REFRESH_TOKEN_DAYS: z.coerce.number().int().min(1).max(90).default(7),
+  COOKIE_SAMESITE: z.enum(['lax', 'strict', 'none']).default('lax'),
 });
 
 export type Env = z.infer<typeof schema>;

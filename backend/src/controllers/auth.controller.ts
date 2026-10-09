@@ -1,7 +1,9 @@
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { getProfile, loginUser, registerUser } from '../services/auth.service';
+import { issueRefreshToken, refreshSession, revokeRefreshToken } from '../services/session.service';
 import { ApiError } from '../utils/api-error';
+import { clearRefreshCookie, readRefreshCookie, setRefreshCookie } from '../utils/refresh-cookie';
 
 const MAX_PASSWORD_BYTES = 72;
 const EMAIL_MESSAGE = 'Confira o e-mail: ele precisa ter um endereço completo, como nome@exemplo.com.';
@@ -66,11 +68,35 @@ export const loginBody = z.object({
 
 export async function register(req: Request, res: Response): Promise<void> {
   const result = await registerUser(req.body as z.output<typeof registerBody>);
+  setRefreshCookie(res, await issueRefreshToken(result.user.id));
   res.status(201).json(result);
 }
 
 export async function login(req: Request, res: Response): Promise<void> {
-  res.json(await loginUser(req.body as z.output<typeof loginBody>));
+  const result = await loginUser(req.body as z.output<typeof loginBody>);
+  setRefreshCookie(res, await issueRefreshToken(result.user.id));
+  res.json(result);
+}
+
+export async function refresh(req: Request, res: Response): Promise<void> {
+  const token = readRefreshCookie(req);
+  if (!token) throw new ApiError(401, 'session_expired', 'Sua sessão terminou. Entre de novo para continuar.');
+
+  try {
+    const { refreshToken, ...result } = await refreshSession(token);
+    setRefreshCookie(res, refreshToken);
+    res.json(result);
+  } catch (error) {
+    clearRefreshCookie(res);
+    throw error;
+  }
+}
+
+export async function logout(req: Request, res: Response): Promise<void> {
+  const token = readRefreshCookie(req);
+  if (token) await revokeRefreshToken(token);
+  clearRefreshCookie(res);
+  res.status(204).end();
 }
 
 export async function me(req: Request, res: Response): Promise<void> {

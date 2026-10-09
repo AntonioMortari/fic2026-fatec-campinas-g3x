@@ -1,7 +1,7 @@
 import { UniqueConstraintError } from 'sequelize';
 import request from 'supertest';
 import { createApp } from '../src/app';
-import { User } from '../src/models';
+import { RefreshToken, User } from '../src/models';
 import { signToken, verifyToken } from '../src/utils/token';
 
 jest.mock('../src/utils/password', () => ({
@@ -41,6 +41,11 @@ function storedUser(overrides: Partial<Record<string, unknown>> = {}) {
 function fieldsOf(body: { error: { details: { field: string }[] } }) {
   return body.error.details.map((detail) => detail.field).sort();
 }
+
+beforeEach(() => {
+  jest.spyOn(RefreshToken, 'create').mockResolvedValue({} as RefreshToken);
+  jest.spyOn(RefreshToken, 'destroy').mockResolvedValue(0);
+});
 
 afterEach(() => jest.restoreAllMocks());
 

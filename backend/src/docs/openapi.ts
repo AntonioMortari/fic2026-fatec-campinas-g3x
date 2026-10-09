@@ -124,6 +124,33 @@ export const openApiDocument = {
         },
       },
     },
+    '/auth/refresh': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Troca o cookie de renovação por um token de acesso novo',
+        description:
+          'Lê o cookie httpOnly `af_refresh` (path `/api/auth`), que o cadastro e o login gravam. A cada uso o cookie é trocado por outro (rotação). ' +
+          'Usar de novo, depois de 10 segundos, um cookie já trocado encerra todas as sessões da conta. Exige o cabeçalho `X-Requested-With`.',
+        parameters: [{ name: 'X-Requested-With', in: 'header', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Sessão renovada', content: { 'application/json': { schema: { $ref: '#/components/schemas/AuthResult' } } } },
+          '401': { description: 'Sem cookie, expirado, já usado ou conta apagada. O cookie é apagado.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Falta o cabeçalho `X-Requested-With`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/auth/logout': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Encerra a sessão: revoga o cookie de renovação e o apaga',
+        description: 'Sempre 204, tenha ou não sessão. O token de acesso já emitido vale até vencer (1 hora).',
+        parameters: [{ name: 'X-Requested-With', in: 'header', required: true, schema: { type: 'string' } }],
+        responses: {
+          '204': { description: 'Sessão encerrada' },
+          '403': { description: 'Falta o cabeçalho `X-Requested-With`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
     '/auth/me': {
       get: {
         tags: ['Auth'],
