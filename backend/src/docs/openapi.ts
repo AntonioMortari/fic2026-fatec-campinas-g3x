@@ -449,6 +449,45 @@ export const openApiDocument = {
         },
       },
     },
+    '/admin/report': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Relatório do período: números e atividades (equipe, RF30–RF32)',
+        description:
+          'Janela de 1, 3 ou 6 meses que termina no mês atual (`offset` 0) ou nas anteriores (`-1`, `-2`…), com os meses fechados à meia-noite de São Paulo. ' +
+          '"Atividades realizadas" são as publicadas que já acabaram dentro da janela; todo outro número conta as inscrições delas, **sem as canceladas**. ' +
+          'Veio / faltou / sem conferir somam as inscrições: quem ninguém marcou **não** é falta. Uma contagem que falhou vem `null` (a tela mostra um traço), nunca `0`. ' +
+          'A tabela traz as 5 atividades mais recentes (`events`); `eventsTotal` é quantas há. Só números: nenhum nome, e-mail ou documento.',
+        parameters: [
+          { name: 'period', in: 'query', schema: { type: 'string', enum: ['month', 'quarter', 'semester'], default: 'month' } },
+          { name: 'offset', in: 'query', schema: { type: 'integer', maximum: 0, minimum: -240, default: 0 } },
+        ],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'O relatório' },
+          '400': { description: 'Período inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/report/csv': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Planilha do relatório (equipe)',
+        description: 'As mesmas contagens, com **todas** as atividades da janela (não só as 5 da tela) e uma linha de total. Traço (—) onde a contagem falhou. `;`, BOM UTF-8, fórmulas neutralizadas.',
+        parameters: [
+          { name: 'period', in: 'query', schema: { type: 'string', enum: ['month', 'quarter', 'semester'], default: 'month' } },
+          { name: 'offset', in: 'query', schema: { type: 'integer', maximum: 0, minimum: -240, default: 0 } },
+        ],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Arquivo CSV', content: { 'text/csv': { schema: { type: 'string' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
     '/admin/events/{id}/publication': {
       patch: {
         tags: ['Admin'],

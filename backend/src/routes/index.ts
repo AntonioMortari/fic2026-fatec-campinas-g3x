@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { adminEventsRoutes } from './admin-events.routes';
+import { adminReportRoutes } from './admin-report.routes';
 import { authRoutes } from './auth.routes';
 import { eventsRoutes } from './events.routes';
 import { healthRoutes } from './health.routes';
@@ -12,5 +13,6 @@ routes.use('/health', healthRoutes);
 routes.use('/auth', authRoutes);
 routes.use('/events', eventsRoutes);
 routes.use('/admin/events', adminEventsRoutes);
+routes.use('/admin/report', adminReportRoutes);
 routes.use('/me', meRoutes);
 routes.use('/registrations', registrationsRoutes);
