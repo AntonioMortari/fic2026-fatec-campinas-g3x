@@ -26,6 +26,52 @@ export const openApiDocument = {
           },
         },
       },
+      User: {
+        type: 'object',
+        required: ['id', 'name', 'email', 'personType', 'wantsToVolunteer', 'wantsToDonate', 'isStaff'],
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          name: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          phone: { type: ['string', 'null'], description: 'Só dígitos, com DDD.' },
+          personType: { type: 'string', enum: ['individual', 'organization'] },
+          wantsToVolunteer: { type: 'boolean' },
+          wantsToDonate: { type: 'boolean' },
+          isStaff: { type: 'boolean', description: 'Nunca vem do cadastro: só é concedido direto no banco.' },
+        },
+      },
+      AuthResult: {
+        type: 'object',
+        required: ['token', 'user'],
+        properties: {
+          token: { type: 'string', description: 'JWT. Vai em `Authorization: Bearer <token>`.' },
+          user: { $ref: '#/components/schemas/User' },
+        },
+      },
+      RegisterRequest: {
+        type: 'object',
+        required: ['name', 'email', 'password', 'personType', 'confirmsAdult', 'consent'],
+        properties: {
+          name: { type: 'string', maxLength: 120 },
+          email: { type: 'string', format: 'email', maxLength: 254 },
+          phone: { type: ['string', 'null'], description: 'Opcional. 10 ou 11 dígitos, com DDD.' },
+          password: { type: 'string', minLength: 8, description: 'No máximo 72 bytes (limite do bcrypt).' },
+          personType: { type: 'string', enum: ['individual', 'organization'] },
+          wantsToVolunteer: { type: 'boolean', default: false },
+          wantsToDonate: { type: 'boolean', default: false },
+          confirmsAdult: { type: 'boolean', enum: [true], description: 'Só maiores de 18 anos criam conta (RN01). Só o valor `true` é aceito.' },
+          consent: { type: 'boolean', enum: [true], description: 'Concordância com o uso dos dados. Só o valor `true` é aceito.' },
+        },
+        description: 'Ao menos um entre `wantsToVolunteer` e `wantsToDonate` precisa ser `true`. Campos desconhecidos são descartados.',
+      },
+      LoginRequest: {
+        type: 'object',
+        required: ['email', 'password'],
+        properties: {
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string' },
+        },
+      },
       Event: {
         type: 'object',
         required: ['id', 'title', 'startsAt'],
@@ -53,6 +99,49 @@ export const openApiDocument = {
     },
   },
   paths: {
+    '/auth/register': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Cria uma conta e já devolve a sessão',
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/RegisterRequest' } } } },
+        responses: {
+          '201': { description: 'Conta criada', content: { 'application/json': { schema: { $ref: '#/components/schemas/AuthResult' } } } },
+          '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: 'Já existe conta com esse e-mail', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/auth/login': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Entra com e-mail e senha',
+        description: 'E-mail inexistente e senha errada respondem igual, para não revelar quem tem conta.',
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/LoginRequest' } } } },
+        responses: {
+          '200': { description: 'Sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/AuthResult' } } } },
+          '400': { description: 'Dados inválidos', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'E-mail ou senha não conferem', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/auth/me': {
+      get: {
+        tags: ['Auth'],
+        summary: 'Dados da conta de quem está autenticado',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'A conta',
+            content: {
+              'application/json': {
+                schema: { type: 'object', required: ['user'], properties: { user: { $ref: '#/components/schemas/User' } } },
+              },
+            },
+          },
+          '401': { description: 'Sem token, token inválido ou expirado, ou conta que não existe mais', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
     '/events': {
       get: {
         tags: ['Events'],
