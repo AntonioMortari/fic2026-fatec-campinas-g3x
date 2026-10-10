@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom'
+import { cn } from '../../lib/cn'
 import { Chevron } from './Chevron'
 
-export function BackLink({ to, label }: { to: string; label: string }) {
+export function BackLink({ to, label, tone = 'ink' }: { to: string; label: string; tone?: 'ink' | 'link' }) {
   return (
     <Link
       to={to}
-      className="-ml-3 inline-flex min-h-11 items-center gap-2 px-3 text-[0.9375rem] font-semibold text-brown no-underline hover:text-blue-deep"
+      className={cn(
+        '-ml-3 inline-flex min-h-11 items-center gap-2 px-3 font-semibold no-underline',
+        tone === 'link' ? 'text-[0.875rem] text-blue-deep hover:text-brown' : 'text-[0.9375rem] text-brown hover:text-blue-deep',
+      )}
     >
       <Chevron direction="left" />
       <span>

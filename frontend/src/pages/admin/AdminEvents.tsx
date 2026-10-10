@@ -1,5 +1,7 @@
 import { AdminEventCard } from '../../components/admin/AdminEventCard'
-import { BackLink, Button, Container, EmptyState, PageHeader, useToast } from '../../components/ui'
+import { AdminPage } from '../../components/admin/AdminPage'
+import { AdminTitle } from '../../components/admin/AdminTitle'
+import { Button, EmptyState, useToast } from '../../components/ui'
 import { useAdminEvents, useSetPublication } from '../../services/admin-events'
 import type { AdminEvent } from '../../types/admin-event'
 
@@ -47,17 +49,13 @@ export function AdminEvents() {
   const published = events?.filter((event) => event.published) ?? []
 
   return (
-    <Container className="pb-12">
-      <div className="pt-2">
-        <BackLink to="/admin" label="Painel da equipe" />
-      </div>
-      <PageHeader
-        overline="Equipe"
-        title="Eventos"
+    <AdminPage className="flex flex-col gap-6">
+      <AdminTitle
+        title="Eventos e presença"
         lead="Salvar não publica: publique pelo botão de cada evento. Eventos não são apagados, porque isso levaria junto a lista de inscritos."
         action={
-          <Button to="/admin/eventos/novo" variant="applique">
-            Novo evento
+          <Button to="/admin/eventos/novo" variant="secondary" size="compact" className="min-h-11 whitespace-nowrap">
+            + Novo evento
           </Button>
         }
       />
@@ -80,6 +78,6 @@ export function AdminEvents() {
         <Section title="Rascunhos" events={drafts} busyId={busyId} onPublication={change} />
         <Section title="Publicados" events={published} busyId={busyId} onPublication={change} />
       </div>
-    </Container>
+    </AdminPage>
   )
 }

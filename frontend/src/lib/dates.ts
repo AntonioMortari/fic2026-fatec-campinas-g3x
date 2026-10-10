@@ -34,3 +34,16 @@ export function shortDate(iso: string): string {
   const weekday = format(date, { weekday: 'short' }).replace('.', '')
   return `${weekday} ${format(date, { day: '2-digit', month: '2-digit' })}`
 }
+
+export function greeting(now = new Date()): string {
+  const hour = Number(new Intl.DateTimeFormat('en-US', { timeZone: TIME_ZONE, hour: 'numeric', hourCycle: 'h23' }).format(now))
+  return hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
+}
+
+// "Quinta, 9 de outubro" on the desktop, "Quinta, 9 out" on the phone.
+export function todayLabel(now = new Date()): { long: string; short: string } {
+  const weekday = format(now, { weekday: 'long' })
+  const capital = weekday.charAt(0).toLocaleUpperCase('pt-BR') + weekday.slice(1)
+  const day = format(now, { day: 'numeric' })
+  return { long: `${capital}, ${day} de ${format(now, { month: 'long' })}`, short: `${capital.replace(/-feira$/, '')}, ${day} ${format(now, { month: 'short' }).replace('.', '')}` }
+}

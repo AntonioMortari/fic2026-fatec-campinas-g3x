@@ -13,6 +13,7 @@ export function FocusedLayout() {
   const [searchParams] = useSearchParams()
   const handles = useMatches().map((match) => match.handle as RouteHandle | undefined)
   const defaultBack = handles.map((handle) => handle?.backTo).findLast(Boolean)
+  const customLabel = handles.map((handle) => handle?.backLabel).findLast(Boolean)
   const wide = handles.some((handle) => handle?.wide)
   const genericBack = handles.some((handle) => handle?.genericBack)
   const back = safeRedirect(searchParams.get('voltar'), defaultBack ?? '/')
@@ -33,13 +34,14 @@ export function FocusedLayout() {
           >
             <Chevron direction="left" />
             <span>
-              {!backLabel && 'Voltar'}
-              {backLabel && genericBack && (
+              {customLabel}
+              {!customLabel && !backLabel && 'Voltar'}
+              {!customLabel && backLabel && genericBack && (
                 <>
                   Voltar <span className="hidden desktop:inline">para {backLabel}</span>
                 </>
               )}
-              {backLabel && !genericBack && (
+              {!customLabel && backLabel && !genericBack && (
                 <>
                   <span className="hidden desktop:inline">Voltar para</span> {backLabel}
                 </>

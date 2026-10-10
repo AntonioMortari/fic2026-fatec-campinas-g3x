@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { isMissingEvent } from '../../lib/api-error'
 import { RegistrantCard } from '../../components/admin/RegistrantCard'
-import { BackLink, Button, Container, EmptyState, PageHeader, useToast } from '../../components/ui'
+import { AdminPage } from '../../components/admin/AdminPage'
+import { AdminTitle } from '../../components/admin/AdminTitle'
+import { BackLink, Button, EmptyState, useToast } from '../../components/ui'
 import { dateParts } from '../../lib/dates'
 import { downloadRegistrationsCsv, useAdminRegistrations } from '../../services/admin-events'
 import { NotFound } from '../NotFound'
@@ -32,15 +34,11 @@ export function AdminRegistrants() {
   const minors = registrations.filter((registration) => registration.isMinor).length
 
   return (
-    <Container className="pb-12">
-      <div className="pt-2">
-        <BackLink to="/admin/eventos" label="Eventos" />
+    <AdminPage className="flex flex-col gap-5">
+      <div className="flex flex-col gap-1">
+        <BackLink to="/admin/eventos" label="Eventos e presença" tone="link" />
+        <AdminTitle title="Inscritos" lead={data ? `${data.event.title} · ${dateParts(new Date(data.event.startsAt)).spoken}` : undefined} />
       </div>
-      <PageHeader
-        overline="Equipe"
-        title="Inscritos"
-        lead={data ? `${data.event.title} · ${dateParts(new Date(data.event.startsAt)).spoken}` : undefined}
-      />
 
       <div className="flex max-w-xl flex-col gap-5">
         {isPending && <p role="status" className="m-0">Carregando os inscritos…</p>}
@@ -81,6 +79,6 @@ export function AdminRegistrants() {
           </>
         )}
       </div>
-    </Container>
+    </AdminPage>
   )
 }

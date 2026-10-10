@@ -37,8 +37,8 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/admin', element: <AdminHome /> },
       { path: '/admin/eventos', element: <AdminEvents /> },
-      { path: '/admin/eventos/novo', element: <AdminEventForm />, handle: { hideBottomBar: true } },
-      { path: '/admin/eventos/:id/editar', element: <AdminEventForm />, handle: { hideBottomBar: true } },
+      { path: '/admin/eventos/novo', element: <AdminEventForm />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/eventos/:id/editar', element: <AdminEventForm />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/eventos/:id/inscritos', element: <AdminRegistrants /> },
       { path: '/admin/relatorio', element: <AdminReport />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/eventos/:id/presenca', element: <AdminAttendance />, handle: { hideHeaderOnMobile: true } },
@@ -48,7 +48,7 @@ export const routes: RouteObject[] = [
     element: <FocusedLayout />,
     children: [
       { path: '/entrar', element: <Auth />, handle: { wide: true, genericBack: true } },
-      { element: <RequireAuth />, children: [{ path: '/minha-conta/dados', element: <AccountEdit />, handle: { backTo: '/minha-conta' } }] },
+      { element: <RequireAuth />, children: [{ path: '/minha-conta/dados', element: <AccountEdit />, handle: { backTo: '/minha-conta', backLabel: 'Voltar para sua conta' } }] },
       { path: '/agenda/:id/inscricao', element: <EventRegistration />, handle: { backTo: '/agenda' } },
       { path: '/inscricao/cancelar', element: <CancelRegistration />, handle: { backTo: '/agenda' } },
     ],

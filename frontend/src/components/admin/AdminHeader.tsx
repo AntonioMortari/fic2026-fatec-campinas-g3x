@@ -6,26 +6,12 @@ export function AdminHeader({ hideOnMobile }: { hideOnMobile: boolean }) {
   const { user } = useAuth()
 
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-30 bg-brown text-cream print:hidden desktop:border-b desktop:border-line desktop:bg-cream desktop:text-brown',
-        hideOnMobile && 'max-desktop:hidden',
-      )}
-    >
+    <header className={cn('sticky top-0 z-30 border-b border-line bg-cream print:hidden', hideOnMobile && 'max-desktop:hidden')}>
       <div className="mx-auto flex h-15 max-w-page items-center gap-3 px-4 desktop:h-18 desktop:max-w-none desktop:px-8">
-        <Link to="/admin" className="flex min-h-11 items-center gap-3.5 text-cream no-underline hover:text-cream desktop:text-brown desktop:hover:text-brown">
-          <img
-            src="/images/logo.png"
-            alt=""
-            width={520}
-            height={212}
-            className="hidden h-9.5 w-auto desktop:block"
-          />
-          <span className="flex h-6 flex-wrap items-baseline gap-x-2 overflow-hidden desktop:h-auto desktop:overflow-visible">
-            <span className="text-item font-bold desktop:border-[1.5px] desktop:border-brown desktop:px-2 desktop:py-0.5 desktop:text-[0.6875rem] desktop:tracking-[0.1em] desktop:uppercase">
-              Painel
-            </span>
-            <span className="text-small text-cream-dim desktop:hidden">· Ateliê Afro</span>
+        <Link to="/admin" className="flex min-h-11 items-center gap-2.5 text-brown no-underline hover:text-brown desktop:gap-3.5">
+          <img src="/images/logo.png" alt="" width={520} height={212} className="block h-8 w-auto desktop:h-9.5" />
+          <span className="border border-brown px-1.75 py-0.5 text-[0.625rem] leading-[1.2] font-bold tracking-[0.1em] uppercase desktop:px-2 desktop:py-[3px] desktop:text-[0.6875rem]">
+            Painel
           </span>
         </Link>
 
@@ -35,17 +21,14 @@ export function AdminHeader({ hideOnMobile }: { hideOnMobile: boolean }) {
           <Link
             to="/minha-conta"
             aria-label={`Minha conta, ${user.name}`}
-            className="hidden min-h-11 items-center text-[0.9375rem] font-semibold text-brown no-underline hover:text-brown desktop:inline-flex"
+            className="hidden min-h-11 max-w-56 items-center text-[0.9375rem] font-semibold text-brown no-underline hover:text-blue-deep desktop:inline-flex"
           >
-            {user.name.split(' ')[0]}
+            <span className="truncate">{user.name}</span>
           </Link>
         )}
         <Link
           to="/"
-          className={cn(
-            'inline-flex min-h-11 shrink-0 items-center rounded-control border-[1.5px] border-cream px-3.5 text-small font-semibold whitespace-nowrap text-cream no-underline hover:text-cream',
-            'desktop:rounded-none desktop:border-0 desktop:px-0 desktop:text-[0.9375rem] desktop:text-blue-deep desktop:hover:text-brown',
-          )}
+          className="hidden min-h-11 shrink-0 items-center text-[0.9375rem] font-semibold whitespace-nowrap text-blue-deep no-underline hover:text-brown desktop:inline-flex"
         >
           Ver o site
         </Link>

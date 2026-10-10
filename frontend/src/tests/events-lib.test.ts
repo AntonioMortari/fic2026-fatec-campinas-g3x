@@ -1,3 +1,4 @@
+import { greeting, todayLabel } from '../lib/dates'
 import { ALL_CATEGORIES, categoryOptions, eventMeta, filterByCategory, formatTimeRange, groupByMonth, isFilterUseful } from '../lib/events'
 import type { EventSummary } from '../types/event'
 
@@ -109,5 +110,22 @@ describe('category filter', () => {
     expect(useful([event(), event()])).toBe(false)
     expect(useful([event({ category: 'Oficina' }), event({ category: 'Oficina' })])).toBe(false)
     expect(useful([event({ category: 'Oficina' }), event()])).toBe(true)
+  })
+})
+
+describe('the greeting of the panel', () => {
+  it.each([
+    ['2030-11-20T12:00:00Z', 'Bom dia'],
+    ['2030-11-20T14:59:00Z', 'Bom dia'],
+    ['2030-11-20T15:00:00Z', 'Boa tarde'],
+    ['2030-11-20T18:00:00Z', 'Boa tarde'],
+    ['2030-11-20T23:30:00Z', 'Boa noite'],
+  ])('at %s in São Paulo it says %s', (iso, expected) => {
+    expect(greeting(new Date(iso))).toBe(expected)
+  })
+
+  it('writes the date in São Paulo, not in the device zone', () => {
+    expect(todayLabel(new Date('2030-11-21T02:30:00Z')).long).toBe('Quarta-feira, 20 de novembro')
+    expect(todayLabel(new Date('2030-11-21T02:30:00Z')).short).toBe('Quarta, 20 nov')
   })
 })

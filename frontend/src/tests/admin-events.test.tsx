@@ -54,11 +54,11 @@ describe('who sees the panel', () => {
   })
 
   it('opens the panel for staff, with the way to the events', async () => {
-    openAs(STAFF)
+    openAs(STAFF, { 'GET /admin/events': () => ({ status: 200, data: { data: [] } }) })
     renderRoute('/admin')
 
-    expect(await screen.findByRole('heading', { name: 'Painel da equipe' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Eventos/ })).toHaveAttribute('href', '/admin/eventos')
+    expect(await screen.findByRole('heading', { name: /^(Bom dia|Boa tarde|Boa noite), / })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Eventos e presença' })).toHaveAttribute('href', '/admin/eventos')
   })
 
   it('offers the panel in the menu only to staff', async () => {
@@ -120,7 +120,7 @@ describe('the list of events', () => {
     renderRoute('/admin/eventos')
 
     expect(await screen.findByText('Nenhum evento ainda')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Novo evento' })).toHaveAttribute('href', '/admin/eventos/novo')
+    expect(screen.getAllByRole('link', { name: /Novo evento/ })[0]).toHaveAttribute('href', '/admin/eventos/novo')
   })
 
   it('says when the list could not be loaded, and tries again', async () => {
@@ -200,7 +200,8 @@ describe('the event form', () => {
     })
     const router = renderRoute('/admin/eventos/novo')
     await user.type(await screen.findByLabelText(/^Título/), 'Contação de histórias')
-    await user.type(field(/^Começa em/), '2030-11-20T15:00')
+    await user.type(field(/^Dia/), '2030-11-20')
+    await user.type(field(/^Início/), '15:00')
     await user.click(screen.getByRole('button', { name: 'Salvar' }))
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/admin/eventos'))
@@ -223,7 +224,8 @@ describe('the event form', () => {
     openAs(STAFF, { 'POST /admin/events': () => apiError(400, 'invalid_data', 'x', [{ field: 'capacity', message: 'O limite de vagas precisa ser um número inteiro, ou fique em branco.' }]) })
     renderRoute('/admin/eventos/novo')
     await user.type(await screen.findByLabelText(/^Título/), 'X')
-    await user.type(field(/^Começa em/), '2030-11-20T15:00')
+    await user.type(field(/^Dia/), '2030-11-20')
+    await user.type(field(/^Início/), '15:00')
 
     await user.type(field(/^Limite de vagas/), '12')
     await user.click(screen.getByRole('button', { name: 'Salvar' }))
@@ -245,21 +247,55 @@ describe('the event form', () => {
     })
     renderRoute('/admin/eventos/novo')
     await user.type(await screen.findByLabelText(/^Título/), 'Roda de conversa')
-    await user.type(field(/^Começa em/), '2030-11-20T15:00')
-    await user.type(field(/^Termina em/), '2030-11-20T14:00')
+    await user.type(field(/^Dia/), '2030-11-20')
+    await user.type(field(/^Início/), '15:00')
+    await user.type(field(/^Fim/), '14:00')
     await user.click(screen.getByRole('button', { name: 'Salvar' }))
 
-    await waitFor(() => expect(field(/^Termina em/)).toHaveAttribute('aria-invalid', 'true'))
-    expect(field(/^Termina em/)).toHaveAccessibleDescription('O término precisa ser depois do início.')
-    expect(field(/^Termina em/)).toHaveFocus()
+    await waitFor(() => expect(field(/^Fim/)).toHaveAttribute('aria-invalid', 'true'))
+    expect(field(/^Fim/)).toHaveAccessibleDescription('O término precisa ser depois do início.')
+    expect(field(/^Fim/)).toHaveFocus()
     expect(field(/^Título/)).toHaveValue('Roda de conversa')
+  })
+
+  it('shows one section per screen on the phone, moving with "Próximo" and "Anterior"', async () => {
+    const user = userEvent.setup()
+    openAs(STAFF)
+    renderRoute('/admin/eventos/novo')
+    await screen.findByLabelText(/^Título/)
+    const section = (name: string) => screen.getByRole('heading', { name: new RegExp(name) }).closest('section')!
+
+    expect(section('O que é')).not.toHaveClass('hidden')
+    expect(section('Quando e onde')).toHaveClass('hidden')
+    await user.click(screen.getByRole('button', { name: 'Próximo: Quando e onde' }))
+    expect(section('Quando e onde')).not.toHaveClass('hidden')
+    expect(section('O que é')).toHaveClass('hidden')
+    expect(screen.getByText('Passo 2 de 3')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Anterior' }))
+    expect(section('O que é')).not.toHaveClass('hidden')
+  })
+
+  it('takes the person to the screen of the field the server refused', async () => {
+    const user = userEvent.setup()
+    openAs(STAFF, { 'POST /admin/events': () => apiError(400, 'invalid_data', 'x', [{ field: 'capacity', message: 'O limite de vagas precisa ser um número inteiro, ou fique em branco.' }]) })
+    renderRoute('/admin/eventos/novo')
+    await user.type(await screen.findByLabelText(/^Título/), 'X')
+    await user.type(field(/^Dia/), '2030-11-20')
+    await user.type(field(/^Início/), '15:00')
+    await user.type(field(/^Limite de vagas/), 'muitas')
+    await user.click(screen.getByRole('button', { name: 'Salvar' }))
+
+    await waitFor(() => expect(field(/^Limite de vagas/)).toHaveAttribute('aria-invalid', 'true'))
+    expect(field(/^Limite de vagas/).closest('section')).not.toHaveClass('hidden')
+    expect(field(/^Título/).closest('section')).toHaveClass('hidden')
+    expect(field(/^Limite de vagas/)).toHaveFocus()
   })
 
   it('says the time is São Paulo time', async () => {
     openAs(STAFF)
     renderRoute('/admin/eventos/novo')
 
-    expect(await screen.findByLabelText(/^Começa em/)).toHaveAccessibleDescription('Horário de São Paulo.')
+    expect(await screen.findByLabelText(/^Início/)).toHaveAccessibleDescription('Horário de São Paulo.')
   })
 
   it('edits an existing event showing São Paulo time and sends a PUT, keeping it published', async () => {
@@ -272,7 +308,8 @@ describe('the event form', () => {
     const router = renderRoute(`/admin/eventos/${live.id}/editar`)
 
     expect(await screen.findByLabelText(/^Título/)).toHaveValue('Oficina de turbantes')
-    expect(field(/^Começa em/)).toHaveValue('2030-11-20T15:00')
+    expect(field(/^Dia/)).toHaveValue('2030-11-20')
+    expect(field(/^Início/)).toHaveValue('15:00')
     expect(field(/^Limite de vagas/)).toHaveValue('')
     await user.clear(field(/^Título/))
     await user.type(field(/^Título/), 'Oficina de turbantes — nova data')

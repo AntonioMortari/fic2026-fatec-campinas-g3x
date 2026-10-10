@@ -20,14 +20,14 @@ function Ficha({ user }: { user: AuthUser }) {
       <dl className="m-0 flex flex-col">
         {rows.map(([term, value]) => (
           <div key={term} className="flex flex-col gap-0.5 border-b border-line px-4 py-3">
-            <dt className="text-small text-brown-400">{term}</dt>
+            <dt className="text-xs font-semibold text-brown-400">{term}</dt>
             <dd className="m-0 text-body font-semibold break-words">{value}</dd>
           </div>
         ))}
         <div className="flex flex-col gap-0.5 px-4 py-3">
-          <dt className="text-small text-brown-400">E-mail</dt>
+          <dt className="text-xs font-semibold text-brown-400">E-mail</dt>
           <dd className="m-0 text-body font-semibold break-words">{user.email}</dd>
-          <dd className="m-0 text-small text-brown-400">
+          <dd className="m-0 text-[0.8125rem] text-brown-400">
             Para trocar o e-mail, fale com a gente pelo <a href={CONTACTS.whatsapp}>WhatsApp</a>.
           </dd>
         </div>
@@ -55,7 +55,13 @@ export function Account() {
           Seus dados foram atualizados.
         </Alert>
       )}
-      <PageHeader overline="Área da conta" title="Sua conta" lead="Só você e a equipe do Ateliê enxergam esta página." />
+      <PageHeader
+        overline="Área da conta"
+        title="Sua conta"
+        lead="Só você e a equipe do Ateliê enxergam esta página."
+        titleClassName="text-[1.875rem] leading-[1.1]"
+        leadClassName="text-[0.9375rem] text-brown-400"
+      />
       <div className="flex max-w-xl flex-col gap-5">
         {me.isPending && <p role="status" className="m-0">Carregando seus dados…</p>}
         {me.isError && (
@@ -84,7 +90,7 @@ export function Account() {
             <MyRegistrations />
           </section>
         )}
-        <Button variant="secondary" onClick={signOut} className="self-start">
+        <Button variant="secondary" onClick={signOut} className="self-start border-0 px-0 text-[0.9375rem] text-blue-deep hover:text-brown">
           Sair da conta
         </Button>
       </div>

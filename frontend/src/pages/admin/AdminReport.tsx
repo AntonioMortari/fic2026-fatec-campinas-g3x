@@ -4,7 +4,8 @@ import { PeriodPicker } from '../../components/report/PeriodPicker'
 import { Swatch } from '../../components/report/Bar'
 import { EventList, EventTable } from '../../components/report/EventRows'
 import { Totals } from '../../components/report/Totals'
-import { ActionBar, BackLink, Button, Container, EmptyState, PageHeader, useToast } from '../../components/ui'
+import { AdminPage } from '../../components/admin/AdminPage'
+import { ActionBar, BackLink, Button, EmptyState, PageHeader, useToast } from '../../components/ui'
 import { listLabel } from '../../lib/report'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/use-media-query'
 import { downloadReportCsv, useReport } from '../../services/report'
@@ -62,14 +63,16 @@ export function AdminReport() {
   )
 
   return (
-    <Container className="pb-44 desktop:pb-12">
+    <AdminPage className="pb-44 desktop:pb-12">
       {!desktop && (
-        <div className="flex items-center justify-between pt-2 print:hidden">
-          <BackLink to="/admin" label="Painel" />
-          <span className="border-[1.5px] border-brown px-2 py-0.5 text-[0.6875rem] font-bold tracking-[0.1em] uppercase">Equipe</span>
+        <div className="flex items-center pt-2 print:hidden">
+          <BackLink to="/admin" label="Início" tone="link" />
         </div>
       )}
       <PageHeader
+        className="pt-2 desktop:pt-0"
+        titleClassName="text-[1.875rem] leading-[1.1] desktop:text-h1-desktop"
+        leadClassName="text-[0.90625rem] text-brown-400"
         overline={desktop ? 'Prestação de contas' : undefined}
         title={desktop && data ? `Relatório · ${data.label}` : 'Relatório'}
         lead={desktop ? undefined : 'Para anexar a uma prestação de contas.'}
@@ -138,6 +141,6 @@ export function AdminReport() {
       </div>
 
       {!desktop && <ActionBar wrap secondaryFirst primary={pdfButton} secondary={csvButton} />}
-    </Container>
+    </AdminPage>
   )
 }
