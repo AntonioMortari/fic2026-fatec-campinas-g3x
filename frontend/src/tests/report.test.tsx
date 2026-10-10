@@ -76,7 +76,7 @@ describe('the report on the phone (design 7i)', () => {
     expect(totals.getByText('112')).toBeInTheDocument()
     expect(totals.getByText('87')).toBeInTheDocument()
     expect(totals.getByText('41')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Voltar para Painel/ })).toHaveAttribute('href', '/admin')
+    expect(screen.getByRole('link', { name: /Voltar para Início/ })).toHaveAttribute('href', '/admin')
     expect(reportCalls()[0]).toBeDefined()
   })
 
@@ -238,7 +238,7 @@ describe('the report on the desktop (design 7j)', () => {
     expect(screen.getByRole('button', { name: 'Baixar CSV' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Salvar em PDF' })).toBeInTheDocument()
     expect(within(screen.getByRole('navigation', { name: 'Seções do painel' })).getByRole('link', { name: 'Relatório' })).toHaveAttribute('aria-current', 'page')
-    expect(screen.queryByRole('link', { name: /Voltar para Painel/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Voltar para Início/ })).not.toBeInTheDocument()
   })
 
   it('draws the table with a column for those who missed apart from the ones nobody checked, and a total', async () => {

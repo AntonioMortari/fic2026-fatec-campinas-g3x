@@ -1,31 +1,38 @@
 import { Link, useLocation } from 'react-router-dom'
-import { ADMIN_SIDEBAR, isActiveAdminRoute } from '../../lib/admin-navigation'
+import { ADMIN_SIDEBAR_GROUPS, isActiveAdminRoute } from '../../lib/admin-navigation'
 import { cn } from '../../lib/cn'
 
 export function AdminSidebar() {
   const { pathname } = useLocation()
 
   return (
-    <nav aria-label="Seções do painel" className="sticky top-18 hidden h-[calc(100dvh-4.5rem)] flex-col self-start border-r border-line py-6 desktop:flex print:hidden">
-      <ul className="m-0 flex list-none flex-col p-0">
-        {ADMIN_SIDEBAR.map((destination) => {
-          const active = isActiveAdminRoute(destination.to, pathname)
-          return (
-            <li key={destination.to}>
-              <Link
-                to={destination.to}
-                aria-current={active ? 'page' : undefined}
-                className={cn(
-                  'flex min-h-11 items-center text-[0.9375rem] no-underline hover:bg-hover hover:text-brown',
-                  active ? 'border-l-[3px] border-ochre bg-cream-dark pr-6 pl-[21px] font-bold text-brown' : 'px-6 font-semibold text-brown',
-                )}
-              >
-                {destination.label}
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
+    <nav aria-label="Seções do painel" className="sticky top-18 hidden h-[calc(100dvh-4.5rem)] flex-col self-start overflow-y-auto border-r border-line py-4 desktop:flex print:hidden">
+      {ADMIN_SIDEBAR_GROUPS.map((group, index) => (
+        <section key={group.title ?? index} aria-label={group.title}>
+          {group.title && (
+            <p className="m-0 px-6 pt-3.5 pb-1 text-[0.6875rem] leading-[1.2] font-semibold tracking-[0.12em] text-brown-400 uppercase">{group.title}</p>
+          )}
+          <ul className="m-0 flex list-none flex-col p-0">
+            {group.items.map((destination) => {
+              const active = isActiveAdminRoute(destination.to, pathname)
+              return (
+                <li key={destination.to}>
+                  <Link
+                    to={destination.to}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn(
+                      'flex min-h-11 items-center text-[0.9375rem] no-underline hover:bg-hover hover:text-brown',
+                      active ? 'border-l-[3px] border-ochre bg-cream-dark pr-6 pl-[21px] font-bold text-brown' : 'px-6 font-semibold text-brown',
+                    )}
+                  >
+                    {destination.label}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      ))}
     </nav>
   )
 }

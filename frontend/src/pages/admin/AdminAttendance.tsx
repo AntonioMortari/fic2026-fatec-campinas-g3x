@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { AttendanceRow } from '../../components/admin/AttendanceRow'
-import { Button, Chevron, EmptyState, useToast } from '../../components/ui'
+import { BackLink, Button, EmptyState, useToast } from '../../components/ui'
 import { isMissingEvent } from '../../lib/api-error'
 import { dateParts } from '../../lib/dates'
 import { displayNames, plain } from '../../lib/attendance'
@@ -46,20 +46,20 @@ export function AdminAttendance() {
   }
 
   return (
-    <div className="max-w-xl pb-12">
-      <div className="sticky top-0 z-20 bg-brown text-cream desktop:top-18">
-        <div className="flex h-14 items-center px-1 pr-2">
-          <Link to={`/admin/eventos/${id}/inscritos`} className="flex min-h-11 items-center gap-2 px-3 text-[0.9375rem] font-semibold text-cream no-underline hover:text-cream">
-            <Chevron direction="left" />
-            <span>
-              <span className="sr-only">Voltar para</span> Inscritos
+    <div className="max-w-xl pb-12 desktop:ml-12 desktop:pb-12">
+      <div className="sticky top-0 z-20 border-b border-line bg-cream desktop:top-18">
+        <div className="flex h-15 items-center justify-between px-4 desktop:h-auto desktop:px-0 desktop:pt-5">
+          <BackLink to={`/admin/eventos/${id}/inscritos`} label="Inscritos" tone="link" />
+          {entries.length > 0 && (
+            <span className="text-[0.8125rem] text-brown-400">
+              {checked} de {entries.length}
             </span>
-          </Link>
+          )}
         </div>
-        <div className="flex flex-col gap-2.5 px-4 pb-3.5">
+        <div className="flex flex-col gap-3 px-4 pb-3.5 desktop:px-0">
           <div>
-            <h1 className="m-0 text-h2 font-bold">Lista de presença</h1>
-            {data && <p className="m-0 text-small text-cream-dim">{`${data.event.title} · ${dateParts(new Date(data.event.startsAt)).spoken}`}</p>}
+            <h1 className="m-0 text-[1.75rem] leading-[1.2] font-bold desktop:text-[2.125rem]">Lista de presença</h1>
+            {data && <p className="m-0 text-small text-brown-400">{`${data.event.title} · ${dateParts(new Date(data.event.startsAt)).spoken}`}</p>}
           </div>
           {entries.length > 0 && (
             <div className="flex flex-col gap-1.5">
@@ -67,7 +67,7 @@ export function AdminAttendance() {
                 <span>
                   {checked} de {entries.length} conferidos
                 </span>
-                <span className="text-cream-dim">
+                <span className="text-brown-400">
                   {came} {came === 1 ? 'veio' : 'vieram'} · {missed} {missed === 1 ? 'faltou' : 'faltaram'}
                 </span>
               </div>
@@ -77,7 +77,7 @@ export function AdminAttendance() {
                 aria-valuemin={0}
                 aria-valuemax={entries.length}
                 aria-valuenow={checked}
-                className="h-1.5 bg-cream-dim/30"
+                className="h-1.5 bg-cream-dark"
               >
                 <div className="h-full bg-ochre" style={{ width: `${(checked / entries.length) * 100}%` }} />
               </div>
@@ -95,7 +95,7 @@ export function AdminAttendance() {
                 placeholder="Buscar pelo nome…"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                className="min-h-11.5 w-full rounded-control border border-cream-dim/50 bg-brown-800 px-3.5 text-body text-cream outline-none placeholder:text-cream-dim"
+                className="min-h-11.5 w-full rounded-control border border-line-strong bg-card px-3.5 text-body text-brown outline-none placeholder:text-brown-300 focus:border-brown focus:shadow-focus"
               />
             </>
           )}

@@ -41,7 +41,7 @@ function Form({ user }: { user: AuthUser }) {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 pb-24 desktop:pb-0">
-      <h1 className="m-0 text-h1 font-bold">Alterar meus dados</h1>
+      <h1 className="m-0 text-[1.875rem] leading-[1.1] font-bold desktop:text-h1-desktop">Alterar meus dados</h1>
       {feedback.error && (
         <Alert ref={alertRef} tone="error">
           {summary}
@@ -63,7 +63,7 @@ function Form({ user }: { user: AuthUser }) {
       <div className="flex flex-col gap-1">
         <p className="m-0 text-[0.9375rem] font-semibold">E-mail</p>
         <p className="m-0 text-body break-words">{user.email}</p>
-        <p className="m-0 text-small text-brown-400">
+        <p className="m-0 text-[0.84375rem] text-brown-400">
           Não muda por aqui: seria preciso confirmar o endereço novo por e-mail. Fale com a gente pelo WhatsApp <a href={CONTACTS.whatsapp}>{CONTACTS.phoneDisplay}</a>.
         </p>
       </div>
@@ -75,7 +75,7 @@ function Form({ user }: { user: AuthUser }) {
           </Button>
         }
         secondary={
-          <Link to="/minha-conta" className="inline-flex min-h-13 items-center px-3 text-body font-semibold text-blue-deep no-underline hover:text-brown">
+          <Link to="/minha-conta" className="inline-flex min-h-13 items-center px-3 text-[0.9375rem] font-semibold text-blue-deep no-underline hover:text-brown">
             Cancelar
           </Link>
         }

@@ -12,7 +12,7 @@ interface ActionBarProps {
 export function ActionBar({ primary, secondary, secondaryFirst = false, wrap = false }: ActionBarProps) {
   return (
     <div
-      className={`safe-area-bottom fixed inset-x-0 bottom-0 z-30 gap-2 print:hidden border-t-[1.5px] border-brown bg-card px-4 pt-3 desktop:static desktop:mt-8 desktop:flex desktop:border-0 desktop:bg-transparent desktop:p-0 ${
+      className={`safe-area-bottom fixed inset-x-0 bottom-0 z-30 gap-2 print:hidden border-t border-line bg-cream px-4 pt-3 desktop:static desktop:mt-8 desktop:flex desktop:border-0 desktop:bg-transparent desktop:p-0 ${
         wrap ? 'flex flex-wrap' : secondaryFirst ? 'grid grid-cols-[auto_1fr] items-center' : 'grid grid-cols-[1fr_auto]'
       }`}
     >

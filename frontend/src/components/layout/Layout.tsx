@@ -12,6 +12,7 @@ export interface RouteHandle {
   hideBottomBar?: boolean
   hideHeaderOnMobile?: boolean
   backTo?: string
+  backLabel?: string
   wide?: boolean
   genericBack?: boolean
 }
