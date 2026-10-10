@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { dateParts } from '../../lib/dates'
 import { formatTimeRange } from '../../lib/events'
+import { loadFailureText } from '../../lib/api-error'
 import { useMyRegistrations } from '../../services/events'
 import type { MyRegistration } from '../../types/my-registration'
 import { Button, Card, EmptyState } from '../ui'
@@ -47,7 +48,7 @@ function Group({ title, items }: { title: string; items: MyRegistration[] }) {
 }
 
 export function MyRegistrations() {
-  const { data, isPending, isError, refetch } = useMyRegistrations()
+  const { data, isPending, isError, error, refetch } = useMyRegistrations()
   const upcoming = data?.filter((registration) => !registration.event.isOver) ?? []
   const past = (data?.filter((registration) => registration.event.isOver) ?? []).reverse()
 
@@ -61,7 +62,7 @@ export function MyRegistrations() {
         <EmptyState
           tone="error"
           title="Não conseguimos carregar suas inscrições"
-          text="Tente de novo em alguns minutos."
+          text={loadFailureText(error)}
           actions={
             <Button variant="secondary" size="compact" onClick={() => void refetch()}>
               Tentar de novo

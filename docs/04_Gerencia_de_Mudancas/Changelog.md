@@ -343,3 +343,12 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Decidido aqui, sem desenho:** "Minha conta" e os controles de leitura moram na folha "Mais"; o item do menu lateral tem 44px.
 - **PR:** branch `feat/admin-design-pattern`
 
+## 2026-10-10 — API desatualizada vira mensagem, e o ambiente de desenvolvimento passa a fazer polling
+- **Artefato:** Arquitetura (ambiente de desenvolvimento)
+- **Antes:** com um back-end em execução mais antigo que o front, "Minhas inscrições", a lista de presença e o relatório
+  davam 404 sem explicação (as três leem rotas das últimas entregas), e o `docker compose` em Windows/macOS não
+  recarregava o código por falta de eventos de arquivo nos volumes.
+- **Depois:** erro `not_found` da API mostra "a API está desatualizada. Reinicie o back-end"; `CHOKIDAR_USEPOLLING=true` no
+  back-end e no front do `docker-compose.yml`, e o Vite faz polling quando a variável está ligada.
+- **PR:** branch `fix/panel-404s`
+

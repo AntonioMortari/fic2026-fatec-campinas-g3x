@@ -2,6 +2,7 @@ import { AdminEventCard } from '../../components/admin/AdminEventCard'
 import { AdminPage } from '../../components/admin/AdminPage'
 import { AdminTitle } from '../../components/admin/AdminTitle'
 import { Button, EmptyState, useToast } from '../../components/ui'
+import { loadFailureText } from '../../lib/api-error'
 import { useAdminEvents, useSetPublication } from '../../services/admin-events'
 import type { AdminEvent } from '../../types/admin-event'
 
@@ -27,7 +28,7 @@ function Section({ title, events, busyId, onPublication }: {
 }
 
 export function AdminEvents() {
-  const { data: events, isPending, isError, refetch } = useAdminEvents()
+  const { data: events, isPending, isError, error, refetch } = useAdminEvents()
   const publication = useSetPublication()
   const toast = useToast()
 
@@ -66,7 +67,7 @@ export function AdminEvents() {
           <EmptyState
             tone="error"
             title="Não conseguimos carregar os eventos"
-            text="Tente de novo em alguns minutos."
+            text={loadFailureText(error)}
             actions={
               <Button variant="secondary" size="compact" onClick={() => void refetch()}>
                 Tentar de novo

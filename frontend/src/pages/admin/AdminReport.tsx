@@ -6,6 +6,7 @@ import { EventList, EventTable } from '../../components/report/EventRows'
 import { Totals } from '../../components/report/Totals'
 import { AdminPage } from '../../components/admin/AdminPage'
 import { ActionBar, BackLink, Button, EmptyState, PageHeader, useToast } from '../../components/ui'
+import { loadFailureText } from '../../lib/api-error'
 import { listLabel } from '../../lib/report'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/use-media-query'
 import { downloadReportCsv, useReport } from '../../services/report'
@@ -52,7 +53,7 @@ export function AdminReport() {
   const rows = data?.events ?? []
   const label = data ? listLabel(rows.length, data.eventsTotal) : null
   const csvButton = (
-    <Button variant="secondary" disabled={downloading} onClick={() => void download()} className="min-h-12 grow basis-28 print:hidden">
+    <Button variant="secondary" disabled={downloading} onClick={() => void download()} className="min-h-12 grow basis-28 whitespace-nowrap print:hidden">
       {downloading ? 'Preparando…' : 'Baixar CSV'}
     </Button>
   )
@@ -95,7 +96,7 @@ export function AdminReport() {
           <EmptyState
             tone="error"
             title="Não conseguimos carregar o relatório"
-            text="Tente de novo em alguns minutos."
+            text={loadFailureText(report.error)}
             actions={
               <Button variant="secondary" size="compact" onClick={() => void report.refetch()}>
                 Tentar de novo
