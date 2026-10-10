@@ -48,8 +48,21 @@ export function DesktopMenu({ open, section, onClose }: DesktopMenuProps) {
       className="m-0 h-dvh max-h-none w-full max-w-none border-0 bg-transparent p-0 text-brown backdrop:bg-transparent"
     >
       <div className="flex h-full flex-col">
-        <div aria-hidden="true" className="h-[calc(4.75rem+1px)] shrink-0" />
-        <div data-menu-panel className="bg-card shadow-[0_18px_30px_rgb(43_32_25/0.12)]">
+        <div
+          aria-hidden="true"
+          className="h-[calc(4.75rem+1px)] shrink-0"
+          onMouseMove={(event) => {
+            const trigger = document.querySelector('[data-menu-trigger]')?.getBoundingClientRect()
+            const margin = 8
+            const over =
+              trigger &&
+              event.clientX >= trigger.left - margin &&
+              event.clientX <= trigger.right + margin &&
+              event.clientY >= trigger.top - margin
+            if (!over) onClose()
+          }}
+        />
+        <div data-menu-panel className="animate-drop bg-card shadow-[0_18px_30px_rgb(43_32_25/0.12)]">
           <h2 id="desktop-menu-title" className="sr-only">
             Menu
           </h2>
@@ -153,7 +166,7 @@ export function DesktopMenu({ open, section, onClose }: DesktopMenuProps) {
             </div>
           </div>
         </div>
-        <div aria-hidden="true" className="flex-1 bg-scrim" />
+        <div aria-hidden="true" className="flex-1 animate-page bg-scrim" onMouseEnter={onClose} />
       </div>
     </dialog>
   )

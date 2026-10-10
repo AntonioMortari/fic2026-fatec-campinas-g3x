@@ -307,3 +307,14 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   precisa ser confirmado com a ONG.
 - **PR:** branch `fix/design-fidelity`
 
+## 2026-10-10 — Entrar no desktop igual ao desenho e menu "Mais" abrindo ao passar o mouse
+- **Artefato:** Protótipos
+- **Antes:** o lado esquerdo de `/entrar` no desktop omitia a lista numerada do desenho 8b e trocava o texto de apoio por
+  um que o grupo não aprovou; o menu "Mais" só abria no clique.
+- **Depois:** o lado esquerdo traz o texto e a lista numerada do desenho (também no texto de apoio do celular), e o menu
+  abre quando o ponteiro chega em "Mais", fechando ao levar o ponteiro para a página escurecida ou para longe do botão
+  (clique, Esc e clique fora continuam valendo).
+- **Observação:** o texto promete acompanhar candidatura e doações, funcionalidades que o site ainda não tem — decisão do
+  grupo, revisar quando RF19–RF26 entrarem.
+- **PR:** branch `fix/login-left-menu-hover`
+
