@@ -363,6 +363,14 @@ versão `.html` ao lado, mais fácil de ler). Quando o documento evoluir, a v2 v
   celular, 48px do menu lateral no desktop) e, quando é lista ou formulário, em `AdminTitle` (título à esquerda, a única
   ação secundária à direita). Uma rota pode esconder o cabeçalho **só no celular** com `handle: { hideHeaderOnMobile: true }`
   (a lista de presença, o relatório e o formulário de evento trazem o próprio topo).
+- **404 da API não é "página não encontrada" (e a API de desenvolvimento pode ficar para trás).** O Express responde
+  `404 not_found` para rota que não tem; só `event_not_found` vira a tela 404 (`isMissingEvent`). Qualquer outro erro de
+  carga mostra "Não conseguimos carregar…" e, **se o código é `not_found`, diz que a API está desatualizada**
+  (`loadFailureText`) — é o que aparece quando o back-end em execução é mais antigo que o front. Medido: o
+  `docker compose` monta `./backend` e `./frontend` por volume, e em Windows/macOS o volume **não entrega eventos de
+  arquivo**, então `tsx watch` e o Vite seguem rodando o código de quando subiram; por isso os dois serviços têm
+  `CHOKIDAR_USEPOLLING=true`. Depois de um `git pull` com migration nova, reinicie o back-end (`docker compose restart
+  backend` aplica as migrations ao subir).
 - **Troca de rota move o foco para o `<main>`** (`useRouteFocus`), comparando com o caminho
   anterior — uma trava de "primeira vez" quebra no StrictMode (medido, há teste).
 
