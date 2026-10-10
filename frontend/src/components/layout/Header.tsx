@@ -44,6 +44,8 @@ export function Header({ openMenu, menuOpen = false }: { openMenu: OpenMenu; men
               <button
                 type="button"
                 aria-expanded={menuOpen}
+                data-menu-trigger
+                onMouseEnter={() => !menuOpen && openMenu('start')}
                 onClick={() => openMenu('start')}
                 className={cn(
                   'flex min-h-11 cursor-pointer items-center gap-2 rounded-control px-3.5 text-[0.9375rem]',

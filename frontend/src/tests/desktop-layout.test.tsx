@@ -50,6 +50,20 @@ describe('desktop menu panel (design 8a)', () => {
     expect(more).toHaveAttribute('aria-expanded', 'false')
   })
 
+  it('opens when the pointer reaches "Mais", and closes when it moves onto the dimmed page', async () => {
+    desktop()
+    const user = userEvent.setup()
+    renderRoute('/')
+    const more = screen.getByRole('button', { name: /^Mais/ })
+
+    await user.hover(more)
+    const menu = screen.getByRole('dialog', { name: 'Menu' })
+    expect(menu).toHaveAttribute('open')
+
+    await user.hover(menu.querySelector('.bg-scrim') as HTMLElement)
+    expect(menu).not.toHaveAttribute('open')
+  })
+
   it('keeps every destination reachable on desktop: no repeated and no unknown route', () => {
     const everyMobileTarget = MENU_GROUPS.flatMap((group) => group.items.map((item) => item.to))
     const panelTargets = DESKTOP_MENU_GROUPS.flatMap((group) => group.items.map((item) => item.to))
@@ -93,6 +107,18 @@ describe('focused layout and sign-in screen (designs 3f and 8b)', () => {
 
     expect(screen.getByLabelText(/^E-mail/)).toBeRequired()
     expect(screen.getByText('E-mail', { selector: 'label' }).textContent).toBe('E-mail')
+  })
+
+  it('lists what the account is for on the left of the desktop sign-in, in order', () => {
+    renderRoute('/entrar')
+    const list = screen.getByText('Veja se sua candidatura foi aceita').closest('ol') as HTMLElement
+
+    expect(within(list).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      '1Veja se sua candidatura foi aceita',
+      '2Acompanhe as doações que você ofereceu',
+      '3Receba os avisos da equipe para voluntários',
+    ])
+    expect(screen.getByText('Para acompanhar sua candidatura ao voluntariado e suas doações.', { exact: false })).toBeInTheDocument()
   })
 
   it('tells the visitor that signing up for an event needs no account', () => {

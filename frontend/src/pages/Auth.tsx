@@ -8,6 +8,8 @@ import { useAuth } from '../contexts/useAuth'
 import { labelForRoute } from '../lib/navigation'
 import { safeRedirect } from '../lib/safe-redirect'
 
+const BENEFITS = ['Veja se sua candidatura foi aceita', 'Acompanhe as doações que você ofereceu', 'Receba os avisos da equipe para voluntários']
+
 export function Auth() {
   const [searchParams] = useSearchParams()
   const { user, status, sessionExpired, signIn } = useAuth()
@@ -33,9 +35,19 @@ export function Auth() {
           Sua conta<span className="hidden desktop:inline"> no Ateliê</span>
         </h1>
         <p className="m-0 text-[0.9375rem] leading-[1.4] text-brown-600 desktop:text-[1.125rem] desktop:leading-[1.42]">
-          Entre ou crie uma conta para participar do Ateliê.
+          Para acompanhar sua candidatura ao voluntariado e suas doações.
           <span className="desktop:hidden"> Inscrição em evento não precisa de conta.</span>
         </p>
+        <ol className="m-0 hidden list-none border-t border-line p-0 desktop:block">
+          {BENEFITS.map((benefit, index) => (
+            <li key={benefit} className="grid grid-cols-[2.5rem_1fr] border-b border-line py-[1.03125rem] text-body leading-[1.2]">
+              <span aria-hidden="true" className="font-bold text-ochre-deep">
+                {index + 1}
+              </span>
+              <span className="relative top-0.5">{benefit}</span>
+            </li>
+          ))}
+        </ol>
         <p className="m-0 hidden bg-cream-dark px-4 py-3.5 text-[0.9375rem] desktop:block">
           <strong>Só quer ir a um evento?</strong> Inscrição não precisa de conta. <Link to="/agenda" className="relative before:absolute before:-inset-y-3.5 before:inset-x-0 before:content-['']">
             Ver a agenda
