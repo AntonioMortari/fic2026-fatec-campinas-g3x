@@ -550,4 +550,12 @@ describe('the attendance list (RF17, screen 3g)', () => {
     renderRoute(page)
     expect(await screen.findAllByRole('heading', { name: 'Página não encontrada' })).not.toHaveLength(0)
   })
+
+  it('does not call it a missing page when the API itself lacks the route (an out-of-date server)', async () => {
+    openAs(STAFF, { [route]: () => apiError(404, 'not_found', 'Rota GET /api/admin/events/x/attendance não existe.') })
+    renderRoute(page)
+
+    expect(await screen.findByText('Não conseguimos carregar a lista')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Página não encontrada' })).not.toBeInTheDocument()
+  })
 })

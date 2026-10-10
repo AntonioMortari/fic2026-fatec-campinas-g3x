@@ -19,7 +19,7 @@ export interface RouteHandle {
 export function Layout({ children }: { children?: ReactNode }) {
   const [menu, setMenu] = useState<{ open: boolean; section: MenuSection }>({ open: false, section: 'start' })
   const openMenu = useCallback((section: MenuSection) => setMenu({ open: true, section }), [])
-  const closeMenu = useCallback(() => setMenu((current) => ({ ...current, open: false })), [])
+  const closeMenu = useCallback(() => setMenu((current) => (current.open ? { ...current, open: false } : current)), [])
   const { pathname } = useLocation()
   const hideBottomBar = useMatches().some((match) => (match.handle as RouteHandle | undefined)?.hideBottomBar)
   useRouteFocus()
@@ -40,6 +40,7 @@ export function Layout({ children }: { children?: ReactNode }) {
           open={menu.open}
           section={menu.section}
           onClose={closeMenu}
+          onOpen={() => openMenu('start')}
           bottomBar={<BottomBar openMenu={openMenu} menuOpen onCloseMenu={closeMenu} />}
         />
       </div>

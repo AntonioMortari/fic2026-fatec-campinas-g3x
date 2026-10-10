@@ -22,16 +22,17 @@ export type ButtonProps = InternalLinkProps | ExternalLinkProps | NativeButtonPr
 const BASE =
   'inline-flex items-center justify-center gap-2 px-5 text-center font-semibold no-underline ' +
   'border-[1.5px] border-brown select-none cursor-pointer ' +
-  'transition-[transform,box-shadow,background-color] duration-[90ms] ease-out ' +
+  'transition-[transform,box-shadow,background-color,filter] duration-150 ease-out ' +
   'disabled:cursor-not-allowed disabled:opacity-60 aria-disabled:opacity-60'
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-brown text-cream hover:text-cream active:scale-[.98]',
+  primary: 'bg-brown text-cream hover:text-cream not-disabled:hover:-translate-y-px not-disabled:hover:bg-brown-800 active:scale-[.98]',
   applique:
     'bg-brown text-cream hover:text-cream shadow-applique-ochre ' +
+    'not-disabled:hover:-translate-x-0.5 not-disabled:hover:-translate-y-0.5 not-disabled:hover:shadow-[6px_6px_0_var(--color-ochre)] ' +
     'active:translate-x-1 active:translate-y-1 active:shadow-none',
-  secondary: 'bg-transparent text-brown hover:text-brown active:bg-cream-dark active:scale-[.98]',
-  support: 'bg-ochre text-brown hover:text-brown font-bold active:scale-[.98]',
+  secondary: 'bg-transparent text-brown hover:text-brown not-disabled:hover:bg-hover active:bg-cream-dark active:scale-[.98]',
+  support: 'bg-ochre text-brown hover:text-brown font-bold not-disabled:hover:-translate-y-px not-disabled:hover:brightness-95 active:scale-[.98]',
 }
 
 const SIZES = {

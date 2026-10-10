@@ -34,6 +34,7 @@
   --color-cream-dark: #efe6d6;
   --color-cream-dim: #d8cbb8;
   --color-card: #fffdf7;
+  --color-hover: #efe6d6;
   --color-line: rgb(43 32 25 / 0.25);
   --color-line-strong: rgb(43 32 25 / 0.4);
   --color-scrim: rgb(43 32 25 / 0.55);
@@ -72,6 +73,8 @@
   --animate-sheet: sheet 280ms var(--ease-out-soft) both;
   --animate-page: page 150ms ease-out both;
   --animate-drop: drop 180ms var(--ease-out-soft) both;
+  --animate-drop-out: drop-out 150ms var(--ease-out-soft) forwards;
+  --animate-page-out: page-out 150ms ease-in forwards;
 
   @keyframes rise {
     from {
@@ -90,6 +93,19 @@
     from {
       opacity: 0;
       transform: translateY(-8px);
+    }
+  }
+
+  @keyframes drop-out {
+    to {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes page-out {
+    to {
+      opacity: 0;
     }
   }
 
@@ -114,7 +130,7 @@
   html[data-font-scale="2"] { --font-scale: 1.25; }
   html[data-font-scale="3"] { --font-scale: 1.375; }
 
-  html:has(dialog[open]) {
+  html:has(dialog[open]:not([data-desktop-menu])) {
     overflow: hidden;
   }
 
@@ -138,6 +154,24 @@
     text-decoration-thickness: 2px;
   }
 
+  a,
+  button,
+  summary,
+  [role="tab"] {
+    transition-property: color, background-color, border-color, box-shadow, transform, filter, opacity, text-decoration-color;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out-soft);
+  }
+
+  button:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  button:not(:disabled):hover {
+    filter: brightness(0.96);
+  }
+
   :focus-visible {
     outline: 3px solid var(--color-blue);
     outline-offset: 2px;
@@ -152,6 +186,7 @@
 html[data-contrast="high"] {
   --color-cream: #ffffff;
   --color-card: #ffffff;
+  --color-hover: #e2e2e2;
   --color-cream-dark: #ffffff;
   --color-brown: #000000;
   --color-brown-800: #000000;

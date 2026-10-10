@@ -42,7 +42,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   toast.action?.onClick()
                   setToast(null)
                 }}
-                className="min-h-11 cursor-pointer bg-transparent px-1 text-small font-bold text-ochre"
+                className="min-h-11 cursor-pointer bg-transparent px-1 text-small font-bold text-ochre hover:text-cream"
               >
                 {toast.action.label}
               </button>

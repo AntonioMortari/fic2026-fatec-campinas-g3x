@@ -30,7 +30,7 @@ export function BottomBar({ openMenu, menuOpen, onCloseMenu }: BottomBarProps) {
                 to={destination.to}
                 onClick={onCloseMenu}
                 aria-current={active ? 'page' : undefined}
-                className={cn(ITEM, active ? 'font-bold text-brown' : 'font-semibold text-brown-400', 'hover:text-brown')}
+                className={cn(ITEM, active ? 'font-bold text-brown' : 'font-semibold text-brown-400', 'hover:text-blue-deep')}
               >
                 {active && <ActiveMarker />}
                 {destination.label}
@@ -45,7 +45,7 @@ export function BottomBar({ openMenu, menuOpen, onCloseMenu }: BottomBarProps) {
             aria-current={!menuOpen && isActiveRoute(SUPPORT.to, pathname) ? 'page' : undefined}
             className={ITEM}
           >
-            <span className="rounded-control bg-ochre px-2 py-1.75 font-bold text-brown">{SUPPORT.label}</span>
+            <span className="rounded-control bg-ochre px-2 py-1.75 font-bold text-brown transition-[filter] hover:brightness-95">{SUPPORT.label}</span>
           </Link>
         </li>
         <li>

@@ -318,3 +318,14 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   grupo, revisar quando RF19–RF26 entrarem.
 - **PR:** branch `fix/login-left-menu-hover`
 
+## 2026-10-10 — Hover padrão, saída animada do menu e ajustes de acabamento
+- **Artefato:** Protótipos
+- **Antes:** botões e links sem resposta ao hover (cada tela decidia o seu), o menu "Mais" do desktop sumia de uma vez, a seta do
+  "Mais" ficava abaixo do texto, o menu reabria sozinho depois do Esc se o mouse ficasse parado sobre "Mais", a barra de rolagem
+  da página sumia (e empurrava o layout) quando o menu abria, e um 404 da própria API (rota inexistente num servidor
+  desatualizado) aparecia como "Página não encontrada" na lista de presença.
+- **Depois:** hover padrão para o projeto (ver "Hover é padrão" no CLAUDE.md), menu com saída animada, seta alinhada, sem
+  reabertura fantasma e sem travar a rolagem, e "Página não encontrada" só quando a API diz que o **evento** não existe
+  (`event_not_found`); qualquer outro erro mostra "Não conseguimos carregar a lista", com "Tentar de novo".
+- **PR:** branch `fix/admin-hover-and-polish`
+

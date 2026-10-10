@@ -16,7 +16,7 @@ export function AdminSidebar() {
                 to={destination.to}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex min-h-11 items-center text-[0.9375rem] no-underline hover:text-brown',
+                  'flex min-h-11 items-center text-[0.9375rem] no-underline hover:bg-hover hover:text-brown',
                   active ? 'border-l-[3px] border-ochre bg-cream-dark pr-6 pl-[21px] font-bold text-brown' : 'px-6 font-semibold text-brown',
                 )}
               >

@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { EventForm } from '../../components/admin/EventForm'
+import { isMissingEvent } from '../../lib/api-error'
 import { BackLink, Button, Container, EmptyState, PageHeader, useToast } from '../../components/ui'
 import { useAdminEvent, useSaveEvent } from '../../services/admin-events'
 import type { EventInput } from '../../types/admin-event'
@@ -29,8 +30,7 @@ export function AdminEventForm() {
   }
 
   if (id && existing.isError) {
-    const missing = (existing.error as { response?: { status?: number } }).response?.status === 404
-    if (missing) return <NotFound />
+    if (isMissingEvent(existing.error)) return <NotFound />
   }
 
   return (

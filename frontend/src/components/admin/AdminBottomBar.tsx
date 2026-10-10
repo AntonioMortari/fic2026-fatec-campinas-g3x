@@ -29,7 +29,7 @@ export function AdminBottomBar({ openMenu, menuOpen, onCloseMenu }: AdminBottomB
                 to={destination.to}
                 onClick={onCloseMenu}
                 aria-current={active ? 'page' : undefined}
-                className={cn(ITEM, active ? 'font-bold text-brown' : 'font-semibold text-brown-400', 'hover:text-brown')}
+                className={cn(ITEM, active ? 'font-bold text-brown' : 'font-semibold text-brown-400', 'hover:text-blue-deep')}
               >
                 {active && <ActiveMarker />}
                 {destination.label}

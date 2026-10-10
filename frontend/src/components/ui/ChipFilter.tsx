@@ -31,9 +31,9 @@ export function ChipFilter({ options, selected, onSelect, label, listOnDesktop =
             onClick={() => onSelect(option.value)}
             className={cn(
               'inline-flex min-h-11 flex-none cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] border-brown px-3.5 text-small font-semibold',
-              active ? 'bg-brown text-cream' : 'bg-card text-brown',
+              active ? 'bg-brown text-cream hover:bg-brown-800' : 'bg-card text-brown hover:bg-hover',
               listOnDesktop && 'desktop:min-h-11 desktop:w-full desktop:justify-between desktop:rounded-none desktop:border-0 desktop:px-3 desktop:text-[0.9375rem] desktop:font-semibold',
-              listOnDesktop && !active && 'desktop:bg-transparent',
+              listOnDesktop && !active && 'desktop:bg-transparent desktop:hover:bg-hover',
             )}
           >
             {option.label}

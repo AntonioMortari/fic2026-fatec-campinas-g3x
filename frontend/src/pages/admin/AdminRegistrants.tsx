@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { isMissingEvent } from '../../lib/api-error'
 import { RegistrantCard } from '../../components/admin/RegistrantCard'
 import { BackLink, Button, Container, EmptyState, PageHeader, useToast } from '../../components/ui'
 import { dateParts } from '../../lib/dates'
@@ -24,7 +25,7 @@ export function AdminRegistrants() {
     }
   }
 
-  if (isError && (error as { response?: { status?: number } }).response?.status === 404) return <NotFound />
+  if (isError && isMissingEvent(error)) return <NotFound />
 
   const registrations = data?.data ?? []
   const authorized = registrations.filter((registration) => registration.imageAuthorized).length
