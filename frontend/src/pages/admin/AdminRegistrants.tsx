@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { isMissingEvent } from '../../lib/api-error'
+import { isMissingEvent, loadFailureText } from '../../lib/api-error'
 import { RegistrantCard } from '../../components/admin/RegistrantCard'
 import { AdminPage } from '../../components/admin/AdminPage'
 import { AdminTitle } from '../../components/admin/AdminTitle'
@@ -46,7 +46,7 @@ export function AdminRegistrants() {
           <EmptyState
             tone="error"
             title="Não conseguimos carregar os inscritos"
-            text="Tente de novo em alguns minutos."
+            text={loadFailureText(error)}
             actions={
               <Button variant="secondary" size="compact" onClick={() => void refetch()}>
                 Tentar de novo

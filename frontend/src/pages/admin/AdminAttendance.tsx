@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AttendanceRow } from '../../components/admin/AttendanceRow'
 import { BackLink, Button, EmptyState, useToast } from '../../components/ui'
-import { isMissingEvent } from '../../lib/api-error'
+import { isMissingEvent, loadFailureText } from '../../lib/api-error'
 import { dateParts } from '../../lib/dates'
 import { displayNames, plain } from '../../lib/attendance'
 import { useAttendance, useMarkAttendance } from '../../services/admin-events'
@@ -108,7 +108,7 @@ export function AdminAttendance() {
           <EmptyState
             tone="error"
             title="Não conseguimos carregar a lista"
-            text="Tente de novo em alguns minutos."
+            text={loadFailureText(error)}
             actions={
               <Button variant="secondary" size="compact" onClick={() => void refetch()}>
                 Tentar de novo

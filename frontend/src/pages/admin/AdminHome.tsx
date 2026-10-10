@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { AdminPage } from '../../components/admin/AdminPage'
 import { Button, Chevron, DateBadge, EmptyState } from '../../components/ui'
 import { useAuth } from '../../contexts/useAuth'
+import { loadFailureText } from '../../lib/api-error'
 import { greeting, shortDate, todayLabel } from '../../lib/dates'
 import { eventMeta } from '../../lib/events'
 import { useAdminEvents } from '../../services/admin-events'
@@ -98,7 +99,7 @@ function Needs({ drafts }: { drafts: AdminEvent[] }) {
 
 export function AdminHome() {
   const { user } = useAuth()
-  const { data: events, isPending, isError, refetch } = useAdminEvents()
+  const { data: events, isPending, isError, error, refetch } = useAdminEvents()
   const [now] = useState(() => new Date())
   const today = todayLabel(now)
   const upcoming = (events ?? []).filter((event) => event.published && endsAtOf(event) >= now.getTime()).sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
@@ -123,7 +124,7 @@ export function AdminHome() {
         <EmptyState
           tone="error"
           title="Não conseguimos carregar o painel"
-          text="Tente de novo em alguns minutos."
+          text={loadFailureText(error)}
           actions={
             <Button variant="secondary" size="compact" onClick={() => void refetch()}>
               Tentar de novo

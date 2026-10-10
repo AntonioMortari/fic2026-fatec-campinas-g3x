@@ -26,6 +26,8 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3333
+      # Bind mounts on Windows and macOS do not deliver file events: without polling the API keeps running the code it started with.
+      CHOKIDAR_USEPOLLING: "true"
       CORS_ORIGINS: http://localhost:5173
       DB_HOST: db
       DB_PORT: 3306
@@ -49,6 +51,7 @@ services:
       target: dev
     environment:
       VITE_API_URL: http://localhost:3333/api
+      CHOKIDAR_USEPOLLING: "true"
     ports:
       - "5173:5173"
     volumes:
