@@ -71,6 +71,8 @@ export function EventRegistration() {
         title="Sua inscrição"
         lead={user ? undefined : 'Não precisa criar conta. Leva 1 minuto.'}
         className="py-0 desktop:py-0"
+        titleClassName="text-[1.75rem] leading-[1.2]"
+        leadClassName="text-[0.9375rem] text-brown-400"
       />
       <RegistrationForm key={round} event={detail} account={user} onDone={setDone} />
     </div>

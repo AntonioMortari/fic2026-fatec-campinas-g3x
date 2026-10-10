@@ -42,7 +42,7 @@ export function TabList({ tabs, activeId, onChange, label, prefix, className }: 
       role="tablist"
       aria-label={label}
       onKeyDown={handleKeyDown}
-      className={cn('grid overflow-hidden rounded-control border-[1.5px] border-brown bg-cream', className)}
+      className={cn('grid overflow-hidden rounded-control border border-brown bg-cream', className)}
       style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
     >
       {tabs.map((tab, index) => {
@@ -61,7 +61,7 @@ export function TabList({ tabs, activeId, onChange, label, prefix, className }: 
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(tab.id)}
             className={cn(
-              'min-h-11 cursor-pointer px-3 text-[0.9375rem] font-semibold transition-colors duration-[90ms]',
+              'min-h-11.5 cursor-pointer px-3 text-[0.9375rem] font-semibold transition-colors duration-[90ms]',
               selected ? 'bg-brown text-cream' : 'bg-transparent text-brown',
             )}
           >
@@ -85,7 +85,7 @@ export function Tabs({ tabs, activeId, onChange, label }: TabsProps) {
   const activeTab = tabs.find((tab) => tab.id === activeId)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4.5">
       <TabList tabs={tabs} activeId={activeId} onChange={onChange} label={label} prefix={prefix} />
       {activeTab && (
         <div

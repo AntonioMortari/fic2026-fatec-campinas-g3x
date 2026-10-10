@@ -20,6 +20,8 @@ export function Agenda() {
 
   const options = useMemo(() => categoryOptions(events ?? []), [events])
   const showFilter = isFilterUseful(options, events?.length ?? 0)
+  // On the desktop the column of types is part of the page whenever there is a type to filter by; the chips on the phone stay out of the way until they would tell something.
+  const hasTypes = options.length > 1
   const visible = filterByCategory(events ?? [], category)
 
   function changePeriod(next: string) {
@@ -28,9 +30,9 @@ export function Agenda() {
   }
 
   return (
-    <Container className="pb-4 desktop:grid desktop:grid-cols-[15rem_minmax(0,1fr)] desktop:gap-x-14">
+    <Container className="pb-4 desktop:grid desktop:pb-18 desktop:grid-cols-[15rem_minmax(0,1fr)] desktop:gap-x-14">
       <PageHeader
-        className="desktop:col-start-1 desktop:col-end-3 desktop:row-start-1 desktop:pr-[22rem]"
+        className="desktop:col-start-1 desktop:col-end-3 desktop:row-start-1"
         overline="Participar"
         title="Agenda"
         lead="Oficinas, apresentações e vivências abertas ao público. Para se inscrever não é preciso criar conta."
@@ -40,22 +42,29 @@ export function Agenda() {
         <TabList tabs={TABS} activeId={period} onChange={changePeriod} label="Período" prefix={prefix} />
       </div>
 
-      {showFilter && (
-        <aside aria-label="Filtrar atividades" className="mb-3.5 desktop:col-start-1 desktop:row-start-2 desktop:mb-0 desktop:border-t desktop:border-line desktop:pt-6">
-          <p className="mb-2 hidden text-overline font-semibold uppercase tracking-[0.12em] text-brown-400 desktop:block">Tipo</p>
-          <ChipFilter label="Tipo de atividade" options={options} selected={category} onSelect={setCategory} listOnDesktop />
-          <div className="mt-8 hidden desktop:block">
-            <SchoolsPromo />
+      <div aria-hidden="true" className="hidden border-t border-line desktop:col-span-2 desktop:col-start-1 desktop:row-start-2 desktop:block" />
+
+      <aside
+        aria-label="Filtrar atividades"
+        className={`desktop:col-start-1 desktop:row-start-3 desktop:pt-6 ${showFilter ? 'mb-3.5 desktop:mb-0' : 'hidden desktop:block'}`}
+      >
+        {hasTypes && (
+          <div className={showFilter ? '' : 'hidden desktop:block'}>
+            <p className="mb-2 hidden text-overline font-semibold uppercase tracking-[0.12em] text-brown-400 desktop:block">Tipo</p>
+            <ChipFilter label="Tipo de atividade" options={options} selected={category} onSelect={setCategory} listOnDesktop />
           </div>
-        </aside>
-      )}
+        )}
+        <div className={`hidden desktop:block ${hasTypes ? 'mt-8' : ''}`}>
+          <SchoolsPromo />
+        </div>
+      </aside>
 
       <div
         role="tabpanel"
         id={panelId(prefix, period)}
         aria-labelledby={tabId(prefix, period)}
         tabIndex={-1}
-        className="desktop:col-start-2 desktop:row-start-2 desktop:border-t desktop:border-line desktop:pt-6"
+        className="desktop:col-start-2 desktop:row-start-3 desktop:pt-6"
       >
         {isPending && <p role="status" className="m-0 text-brown-400">Carregando a agenda…</p>}
 

@@ -29,7 +29,7 @@ export function ListItem({ title, description, to, number, tone = 'ochre', class
         )}
       >
         {number && (
-          <span aria-hidden="true" className={cn('text-[0.8125rem] font-bold', TONES[tone])}>
+          <span aria-hidden="true" className={cn('text-[0.8125rem] font-bold desktop:text-sm', TONES[tone])}>
             {number}
           </span>
         )}

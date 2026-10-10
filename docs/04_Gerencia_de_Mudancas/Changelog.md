@@ -288,3 +288,22 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   (como no desenho: "Jul–Set", "Abr–Set"), em vez de seguir o ano civil; a tabela traz as cinco atividades mais
   recentes e a planilha, todas.
 - **PR:** branch `feat/report`
+
+## 2026-10-10 — Fidelidade ao desenho: Entrar, Agenda no desktop e Menu "Mais" (telas 3f, 6b, 8a e 8b)
+- **Artefato:** Protótipos · Requisitos (RF01, RF08, RF10, RF14)
+- **Antes:** o celular de `/entrar` não seguia a 3f (nota de destino antes das abas, "Voltar" com nome, asteriscos nos
+  rótulos, texto de apoio diferente); o desktop não tinha a 8b nem o menu da 8a (o "Mais" abria a folha do celular);
+  a agenda no desktop perdia a coluna lateral com os tipos e o cartão de escolas quando havia um tipo só.
+- **Depois:** as três telas seguem o desenho (medido contra o HTML do Claude Design, texto por texto, e conferido no
+  Chromium a 390, 320 com A+ e alto contraste e 1440). Ajustes compartilhados que o desenho pedia e estavam fora:
+  contêiner de 1200px, escala tipográfica, cabeçalho, rodapé, selo de data, campo de 52px, botão de aplique de 4px
+  e rótulo de campo sem asterisco (opcional diz "(opcional)").
+- **Deixado de fora de propósito (não existe, ou não há texto):** "Biblioteca" no cabeçalho, "Depoimentos", "Para
+  empresas" e "Perguntas frequentes" no menu, foto e "Ver detalhes" no destaque da agenda, "Esqueci minha senha" (depende
+  de e-mail) e a lista numerada de benefícios do 8b (fala de candidatura e doações). "Acervo" no painel fica sem linha
+  de explicação.
+- **Decidido aqui, sem desenho:** no painel do desktop, quem entrou ganha "Minha conta" e "Painel da equipe" (a equipe
+  perderia o único caminho para `/admin` no desktop); "seg a sáb, 9h–18h" no cartão de contato veio do desenho e
+  precisa ser confirmado com a ONG.
+- **PR:** branch `fix/design-fidelity`
+

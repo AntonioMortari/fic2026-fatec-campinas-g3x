@@ -17,7 +17,7 @@ export function LoginForm({ onSuccess }: { onSuccess: (result: AuthResult) => vo
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4.5">
       {feedback.error && (
         <Alert ref={alertRef} tone="error">
           {hasFieldErrors ? 'Confira os campos destacados abaixo.' : feedback.error.message}

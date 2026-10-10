@@ -9,7 +9,7 @@ export function Footer() {
   return (
     <footer>
       <StripedBand />
-      <div className="mx-auto flex max-w-page flex-col gap-1.5 px-4 pt-5.5 pb-7 text-small text-brown-400 desktop:flex-row desktop:items-center desktop:justify-between desktop:gap-8 desktop:px-8">
+      <div className="mx-auto flex max-w-page flex-col gap-1.5 px-4 pt-5.5 pb-7 text-small text-brown-400 desktop:flex-row desktop:text-[0.9375rem] desktop:items-center desktop:justify-between desktop:gap-8 desktop:px-8">
         <div className="hidden desktop:block">
           <Logo className="h-7" />
         </div>
@@ -17,7 +17,7 @@ export function Footer() {
           {CONTACTS.address}
           <span className="hidden desktop:inline"> · {CONTACTS.phoneDisplay}</span>
         </p>
-        <ul className="m-0 flex list-none flex-wrap gap-x-4 p-0">
+        <ul className="m-0 flex list-none flex-wrap gap-x-4 p-0 desktop:gap-x-5">
           <li>
             <a className={LINK} href={CONTACTS.whatsapp} target="_blank" rel="noreferrer">
               WhatsApp

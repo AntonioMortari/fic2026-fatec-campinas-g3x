@@ -15,9 +15,8 @@ export function TextAreaField({ label, hint, error, id, className, rows = 5, ...
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={fieldId} className="text-[0.9375rem] font-semibold">
+      <label htmlFor={fieldId} className="text-[0.9375rem] leading-[1.2] font-semibold">
         {label}
-        {textarea.required && <span aria-hidden="true"> *</span>}
       </label>
       <div className={fieldBox(Boolean(error), 'items-stretch')}>
         <textarea

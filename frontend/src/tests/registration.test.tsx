@@ -63,7 +63,7 @@ describe('the registration screen (design 3d)', () => {
     renderRoute(PATH)
     await screen.findByRole('heading', { name: 'Sua inscrição' })
 
-    expect(screen.getByRole('link', { name: 'Agenda' })).toHaveAttribute('href', '/agenda')
+    expect(screen.getByRole('link', { name: 'Voltar para Agenda' })).toHaveAttribute('href', '/agenda')
   })
 
   it('asks for the CPF only when the event does', async () => {
