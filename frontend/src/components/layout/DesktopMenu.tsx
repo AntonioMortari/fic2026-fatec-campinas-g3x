@@ -62,7 +62,7 @@ export function DesktopMenu({ open, section, onClose }: DesktopMenuProps) {
             if (!over) onClose()
           }}
         />
-        <div data-menu-panel className="bg-card shadow-[0_18px_30px_rgb(43_32_25/0.12)]">
+        <div data-menu-panel className="animate-drop bg-card shadow-[0_18px_30px_rgb(43_32_25/0.12)]">
           <h2 id="desktop-menu-title" className="sr-only">
             Menu
           </h2>
@@ -166,7 +166,7 @@ export function DesktopMenu({ open, section, onClose }: DesktopMenuProps) {
             </div>
           </div>
         </div>
-        <div aria-hidden="true" className="flex-1 bg-scrim" onMouseEnter={onClose} />
+        <div aria-hidden="true" className="flex-1 animate-page bg-scrim" onMouseEnter={onClose} />
       </div>
     </dialog>
   )
