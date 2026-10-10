@@ -16,7 +16,7 @@ export function PasswordField(props: Omit<TextFieldProps, 'type' | 'addon'>) {
           aria-pressed={visible}
           aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}
           onClick={() => setVisible((value) => !value)}
-          className="mr-1 inline-flex min-h-11 cursor-pointer items-center px-3 text-small font-semibold text-blue-deep"
+          className="mr-1 inline-flex min-h-11 cursor-pointer items-center px-3 text-small font-semibold text-blue-deep hover:text-brown"
         >
           {visible ? 'Ocultar' : 'Mostrar'}
         </button>

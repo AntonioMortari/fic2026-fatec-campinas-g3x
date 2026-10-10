@@ -30,14 +30,14 @@ export function AttendanceRow({ entry, displayName, onMark }: AttendanceRowProps
         <button
           type="button"
           onClick={() => onMark(true)}
-          className="inline-grid min-h-12 min-w-16 cursor-pointer place-items-center border-[1.5px] border-brown bg-brown px-3 text-small font-semibold text-cream"
+          className="inline-grid min-h-12 min-w-16 cursor-pointer place-items-center border-[1.5px] border-brown bg-brown px-3 text-small font-semibold text-cream hover:bg-brown-800"
         >
           Veio <span className="sr-only">{displayName}</span>
         </button>
         <button
           type="button"
           onClick={() => onMark(false)}
-          className="inline-grid min-h-12 min-w-16 cursor-pointer place-items-center border-[1.5px] border-brown bg-transparent px-3 text-small font-semibold text-brown"
+          className="inline-grid min-h-12 min-w-16 cursor-pointer place-items-center border-[1.5px] border-brown bg-transparent px-3 text-small font-semibold text-brown hover:bg-hover"
         >
           Faltou <span className="sr-only">{displayName}</span>
         </button>
@@ -60,7 +60,7 @@ export function AttendanceRow({ entry, displayName, onMark }: AttendanceRowProps
       <button
         type="button"
         onClick={() => onMark(null)}
-        className="min-h-11 shrink-0 cursor-pointer bg-transparent px-1.5 text-small font-semibold text-blue-deep"
+        className="min-h-11 shrink-0 cursor-pointer bg-transparent px-1.5 text-small font-semibold text-blue-deep hover:text-brown"
       >
         Limpar <span className="sr-only">{displayName}</span>
       </button>

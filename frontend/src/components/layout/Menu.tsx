@@ -23,12 +23,13 @@ interface MenuProps {
   accountFirst?: boolean
   section: MenuSection
   onClose: () => void
+  onOpen?: () => void
   bottomBar?: ReactNode
 }
 
 export function Menu(props: MenuProps) {
   const desktop = useMediaQuery(DESKTOP_QUERY)
-  if (desktop) return <DesktopMenu open={props.open} section={props.section} onClose={props.onClose} />
+  if (desktop) return <DesktopMenu open={props.open} section={props.section} onClose={props.onClose} onOpen={props.onOpen ?? props.onClose} />
   return <MenuSheet {...props} />
 }
 
@@ -63,7 +64,7 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
           <Link
             to="/minha-conta"
             onClick={onClose}
-            className="flex min-h-13 items-center text-item font-semibold text-brown no-underline hover:text-brown"
+            className="flex min-h-13 items-center text-item font-semibold text-brown no-underline hover:text-blue-deep"
           >
             Minha conta
           </Link>
@@ -73,7 +74,7 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
             <Link
               to="/admin"
               onClick={onClose}
-              className="flex min-h-13 items-center text-item font-semibold text-brown no-underline hover:text-brown"
+              className="flex min-h-13 items-center text-item font-semibold text-brown no-underline hover:text-blue-deep"
             >
               Painel da equipe
             </Link>
@@ -86,7 +87,7 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
               onClose()
               signOut()
             }}
-            className="flex min-h-13 w-full cursor-pointer items-center bg-transparent p-0 text-left text-item font-semibold text-brown"
+            className="flex min-h-13 w-full cursor-pointer items-center bg-transparent p-0 text-left text-item font-semibold text-brown hover:text-blue-deep"
           >
             Sair da conta
           </button>
@@ -140,7 +141,7 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
                       <Link
                         to={item.to}
                         onClick={onClose}
-                        className="flex min-h-13 items-center text-item font-semibold text-brown no-underline hover:text-brown"
+                        className="flex min-h-13 items-center text-item font-semibold text-brown no-underline hover:text-blue-deep"
                       >
                         {item.label}
                       </Link>
@@ -159,14 +160,14 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
               href={CONTACTS.whatsapp}
               target="_blank"
               rel="noreferrer"
-              className="flex min-h-12 items-center justify-center bg-brown text-[0.9375rem] font-semibold text-cream no-underline hover:text-cream"
+              className="flex min-h-12 items-center justify-center bg-brown text-[0.9375rem] font-semibold text-cream no-underline hover:bg-brown-800 hover:text-cream"
             >
               WhatsApp
             </a>
             <Link
               to="/contato"
               onClick={onClose}
-              className="flex min-h-12 items-center justify-center border-[1.5px] border-brown text-[0.9375rem] font-semibold text-brown no-underline hover:text-brown"
+              className="flex min-h-12 items-center justify-center border-[1.5px] border-brown text-[0.9375rem] font-semibold text-brown no-underline hover:bg-hover hover:text-brown"
             >
               Contato
             </Link>

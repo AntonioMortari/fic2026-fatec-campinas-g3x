@@ -28,3 +28,6 @@ export function parseApiError(error: unknown): ParsedApiError {
   }
   return { code: 'unknown', message: 'Não foi possível concluir agora. Tente de novo em alguns minutos.', fields: {} }
 }
+
+// A route the API does not have also answers 404 ("not_found"): only an unknown event is a missing page for the person.
+export const isMissingEvent = (error: unknown) => parseApiError(error).code === 'event_not_found'

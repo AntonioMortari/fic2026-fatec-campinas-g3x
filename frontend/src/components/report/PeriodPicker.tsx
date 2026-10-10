@@ -14,7 +14,7 @@ interface PeriodPickerProps {
   desktop: boolean
 }
 
-const ARROW = 'inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center bg-transparent font-semibold disabled:cursor-not-allowed disabled:text-brown-300'
+const ARROW = 'inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center bg-transparent font-semibold not-disabled:hover:bg-hover disabled:cursor-not-allowed disabled:text-brown-300'
 
 export function PeriodPicker({ period, onPeriod, label, canGoForward, onBack, onForward, desktop }: PeriodPickerProps) {
   const picker = <SegmentedField legend="Período" hideLegend name="report-period" options={OPTIONS} value={period} onChange={onPeriod} />

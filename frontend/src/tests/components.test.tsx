@@ -8,6 +8,14 @@ import { safeRedirect } from '../lib/safe-redirect'
 import { renderWithRouter } from './render'
 
 describe('Button', () => {
+  it.each(['primary', 'applique', 'secondary', 'support'] as const)('the %s variant answers hover, but not while disabled', (variant) => {
+    renderWithRouter(<Button variant={variant}>Enviar</Button>)
+    const classes = screen.getByRole('button', { name: 'Enviar' }).className
+
+    expect(classes).toMatch(/not-disabled:hover:/)
+    expect(classes).not.toMatch(/(^| )hover:(bg|translate|shadow)/)
+  })
+
   it('is an internal link with `to`, an external one with `href`, and a type="button" otherwise', () => {
     renderWithRouter(
       <>

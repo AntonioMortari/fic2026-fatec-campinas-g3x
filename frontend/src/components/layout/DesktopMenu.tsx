@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { MAX_FONT_STEP, MIN_FONT_STEP } from '../../contexts/reading-context'
@@ -11,41 +11,58 @@ import type { MenuSection } from './Menu'
 const TONES = { ochre: 'text-ochre-deep', blue: 'text-blue-deep', brown: 'text-brown-400' }
 const OVERLINE = 'm-0 text-overline font-semibold uppercase tracking-[0.12em]'
 const READING_BUTTON =
-  'grid min-h-11 cursor-pointer place-items-center rounded-control border border-brown px-0.5 text-small font-semibold'
+  'grid min-h-11 cursor-pointer place-items-center rounded-control border border-brown px-0.5 text-small font-semibold hover:bg-card'
+
+const EXIT_MS = 150
 
 interface DesktopMenuProps {
   open: boolean
   section: MenuSection
   onClose: () => void
+  onOpen: () => void
 }
 
-export function DesktopMenu({ open, section, onClose }: DesktopMenuProps) {
-  const dialog = useRef<HTMLDialogElement>(null)
+export function DesktopMenu({ open, section, onClose, onOpen }: DesktopMenuProps) {
+  const [shown, setShown] = useState(false)
+  if (open && !shown) setShown(true)
+  const leaving = shown && !open
   const firstLink = useRef<HTMLAnchorElement>(null)
+  const dialog = useRef<HTMLDialogElement>(null)
   const readingHeading = useRef<HTMLHeadingElement>(null)
   const reading = useReadingPreferences()
   const { user } = useAuth()
 
   useEffect(() => {
+    if (open || !shown) return
+    const instant = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const timer = window.setTimeout(() => setShown(false), instant ? 0 : EXIT_MS)
+    return () => window.clearTimeout(timer)
+  }, [open, shown])
+
+  useEffect(() => {
     const element = dialog.current
     if (!element) return
-    if (open && !element.open) {
+    if (shown && !element.open) {
       element.showModal()
       ;(section === 'reading' ? readingHeading : firstLink).current?.focus()
-    } else if (!open && element.open) {
+    } else if (!shown && element.open) {
       element.close()
     }
-  }, [open, section])
+  }, [shown, section])
 
   return (
     <dialog
       ref={dialog}
       aria-labelledby="desktop-menu-title"
       onClose={onClose}
+      onCancel={(event) => {
+        event.preventDefault()
+        onClose()
+      }}
       onClick={(event) => {
         if (!(event.target as Element).closest('[data-menu-panel]')) onClose()
       }}
-      className="m-0 h-dvh max-h-none w-full max-w-none border-0 bg-transparent p-0 text-brown backdrop:bg-transparent"
+      data-desktop-menu="" className="m-0 h-dvh max-h-none w-full max-w-none border-0 bg-transparent p-0 text-brown backdrop:bg-transparent"
     >
       <div className="flex h-full flex-col">
         <div
@@ -59,10 +76,12 @@ export function DesktopMenu({ open, section, onClose }: DesktopMenuProps) {
               event.clientX >= trigger.left - margin &&
               event.clientX <= trigger.right + margin &&
               event.clientY >= trigger.top - margin
-            if (!over) onClose()
+            if (over) {
+              if (leaving) onOpen()
+            } else onClose()
           }}
         />
-        <div data-menu-panel className="animate-drop bg-card shadow-[0_18px_30px_rgb(43_32_25/0.12)]">
+        <div data-menu-panel className={cn(leaving ? 'animate-drop-out' : 'animate-drop', 'bg-card shadow-[0_18px_30px_rgb(43_32_25/0.12)]')}>
           <h2 id="desktop-menu-title" className="sr-only">
             Menu
           </h2>
@@ -79,9 +98,9 @@ export function DesktopMenu({ open, section, onClose }: DesktopMenuProps) {
                         ref={groupIndex === 0 && itemIndex === 0 ? firstLink : undefined}
                         to={item.to}
                         onClick={onClose}
-                        className="flex min-h-11 flex-col gap-0.5 py-3 text-brown no-underline hover:text-brown"
+                        className="group -mx-2 flex min-h-11 flex-col gap-0.5 px-2 py-3 text-brown no-underline transition-colors hover:bg-hover hover:text-brown"
                       >
-                        <span className="text-item leading-[1.2] font-bold">{item.label}</span>
+                        <span className="text-item leading-[1.2] font-bold transition-colors group-hover:text-blue-deep">{item.label}</span>
                         {item.description && <span className="text-small leading-[1.4] text-brown-400">{item.description}</span>}
                       </Link>
                     </li>
@@ -96,11 +115,11 @@ export function DesktopMenu({ open, section, onClose }: DesktopMenuProps) {
                   <h3 id="desktop-menu-account" className={cn(OVERLINE, 'text-brown-400')}>
                     Sua conta
                   </h3>
-                  <Link to="/minha-conta" onClick={onClose} className="flex min-h-11 items-center font-semibold text-brown no-underline hover:text-brown">
+                  <Link to="/minha-conta" onClick={onClose} className="flex min-h-11 items-center font-semibold text-brown no-underline hover:text-blue-deep">
                     Minha conta
                   </Link>
                   {user.isStaff && (
-                    <Link to="/admin" onClick={onClose} className="flex min-h-11 items-center font-semibold text-brown no-underline hover:text-brown">
+                    <Link to="/admin" onClick={onClose} className="flex min-h-11 items-center font-semibold text-brown no-underline hover:text-blue-deep">
                       Painel da equipe
                     </Link>
                   )}
@@ -117,7 +136,7 @@ export function DesktopMenu({ open, section, onClose }: DesktopMenuProps) {
                 href={CONTACTS.whatsapp}
                 target="_blank"
                 rel="noreferrer"
-                className="flex min-h-12 items-center justify-center bg-brown text-[0.9375rem] font-semibold text-cream no-underline hover:text-cream"
+                className="flex min-h-12 items-center justify-center bg-brown text-[0.9375rem] font-semibold text-cream no-underline hover:bg-brown-800 hover:text-cream"
               >
                 Abrir WhatsApp
               </a>
@@ -166,7 +185,7 @@ export function DesktopMenu({ open, section, onClose }: DesktopMenuProps) {
             </div>
           </div>
         </div>
-        <div aria-hidden="true" className="flex-1 animate-page bg-scrim" onMouseEnter={onClose} />
+        <div aria-hidden="true" className={cn(leaving ? 'animate-page-out' : 'animate-page', 'flex-1 bg-scrim')} onMouseEnter={onClose} />
       </div>
     </dialog>
   )

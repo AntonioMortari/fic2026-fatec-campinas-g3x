@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { AttendanceRow } from '../../components/admin/AttendanceRow'
 import { Button, Chevron, EmptyState, useToast } from '../../components/ui'
+import { isMissingEvent } from '../../lib/api-error'
 import { dateParts } from '../../lib/dates'
 import { displayNames, plain } from '../../lib/attendance'
 import { useAttendance, useMarkAttendance } from '../../services/admin-events'
@@ -17,7 +18,7 @@ export function AdminAttendance() {
   const mark = useMarkAttendance(id)
   const [search, setSearch] = useState('')
 
-  if (isError && (error as { response?: { status?: number } }).response?.status === 404) return <NotFound />
+  if (isError && isMissingEvent(error)) return <NotFound />
 
   const entries = data?.data ?? []
   const names = displayNames(entries)

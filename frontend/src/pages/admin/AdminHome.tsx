@@ -19,8 +19,8 @@ export function AdminHome() {
                   to={action.to}
                   className={
                     index === 0
-                      ? 'flex min-h-24 items-end border-[1.5px] border-brown bg-brown p-4 text-item font-bold text-cream no-underline hover:text-cream'
-                      : 'flex min-h-24 items-end border-[1.5px] border-brown p-4 text-item font-bold text-brown no-underline hover:text-brown'
+                      ? 'flex min-h-24 items-end border-[1.5px] border-brown bg-brown p-4 text-item font-bold text-cream no-underline transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-brown-800 hover:text-cream'
+                      : 'flex min-h-24 items-end border-[1.5px] border-brown p-4 text-item font-bold text-brown no-underline transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-hover hover:text-brown'
                   }
                 >
                   {action.label}

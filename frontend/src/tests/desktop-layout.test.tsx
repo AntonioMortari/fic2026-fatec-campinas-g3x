@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { DESKTOP_MENU_GROUPS, DESKTOP_NAV, MENU_GROUPS } from '../lib/navigation'
@@ -46,8 +46,8 @@ describe('desktop menu panel (design 8a)', () => {
     expect(menu).toHaveAttribute('open')
 
     await user.click(menu)
-    expect(menu).not.toHaveAttribute('open')
     expect(more).toHaveAttribute('aria-expanded', 'false')
+    await waitFor(() => expect(menu).not.toHaveAttribute('open'))
   })
 
   it('opens when the pointer reaches "Mais", and closes when it moves onto the dimmed page', async () => {
@@ -61,7 +61,23 @@ describe('desktop menu panel (design 8a)', () => {
     expect(menu).toHaveAttribute('open')
 
     await user.hover(menu.querySelector('.bg-scrim') as HTMLElement)
-    expect(menu).not.toHaveAttribute('open')
+    await waitFor(() => expect(menu).not.toHaveAttribute('open'))
+  })
+
+  it('plays the exit animation before the dialog closes, and the dialog still closes after it', async () => {
+    desktop()
+    const user = userEvent.setup()
+    renderRoute('/')
+    await user.click(screen.getByRole('button', { name: /^Mais/ }))
+    const menu = screen.getByRole('dialog', { name: 'Menu' })
+    const panel = menu.querySelector('[data-menu-panel]') as HTMLElement
+    expect(panel).toHaveClass('animate-drop')
+
+    await user.click(menu)
+
+    expect(menu).toHaveAttribute('open')
+    expect(panel).toHaveClass('animate-drop-out')
+    await waitFor(() => expect(menu).not.toHaveAttribute('open'))
   })
 
   it('keeps every destination reachable on desktop: no repeated and no unknown route', () => {

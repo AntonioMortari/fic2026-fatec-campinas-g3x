@@ -29,7 +29,7 @@ export function FocusedLayout() {
           </div>
           <Link
             to={back}
-            className="flex min-h-11 items-center gap-2 px-3 text-[0.9375rem] font-semibold text-brown no-underline hover:text-brown desktop:-mr-3"
+            className="flex min-h-11 items-center gap-2 px-3 text-[0.9375rem] font-semibold text-brown no-underline hover:text-blue-deep desktop:-mr-3"
           >
             <Chevron direction="left" />
             <span>

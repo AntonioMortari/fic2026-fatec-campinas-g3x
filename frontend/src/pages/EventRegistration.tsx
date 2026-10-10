@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { isMissingEvent } from '../lib/api-error'
 import { LoadingSession } from '../components/auth/LoadingSession'
 import { EventSummaryCard } from '../components/registration/EventSummaryCard'
 import { RegistrationDone } from '../components/registration/RegistrationDone'
@@ -19,7 +20,7 @@ export function EventRegistration() {
   if (status === 'loading' || event.isPending) return <LoadingSession />
 
   if (event.isError) {
-    if ((event.error as { response?: { status?: number } }).response?.status === 404) return <NotFound />
+    if (isMissingEvent(event.error)) return <NotFound />
     return (
       <EmptyState
         tone="error"

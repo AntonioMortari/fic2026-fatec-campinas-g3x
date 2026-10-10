@@ -24,7 +24,7 @@ export function ListItem({ title, description, to, number, tone = 'ochre', class
       <Link
         to={to}
         className={cn(
-          'grid min-h-18 items-center gap-2 py-3 text-brown no-underline hover:text-brown desktop:min-h-21 desktop:gap-2.5',
+          'group grid min-h-18 items-center gap-2 py-3 text-brown no-underline hover:text-brown desktop:min-h-21 desktop:gap-2.5',
           number ? 'grid-cols-[2rem_1fr_1rem]' : 'grid-cols-[1fr_1rem]',
         )}
       >
@@ -34,10 +34,12 @@ export function ListItem({ title, description, to, number, tone = 'ochre', class
           </span>
         )}
         <span>
-          <span className="block text-item font-bold desktop:text-h3">{title}</span>
+          <span className="block text-item font-bold transition-colors group-hover:text-blue-deep desktop:text-h3">{title}</span>
           {description && <span className="block text-small text-brown-400 desktop:text-[0.9375rem]">{description}</span>}
         </span>
-        <Chevron />
+        <span className="transition-transform duration-150 group-hover:translate-x-1">
+          <Chevron />
+        </span>
       </Link>
     </li>
   )
