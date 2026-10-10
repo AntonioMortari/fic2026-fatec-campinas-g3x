@@ -329,3 +329,17 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   (`event_not_found`); qualquer outro erro mostra "Não conseguimos carregar a lista", com "Tentar de novo".
 - **PR:** branch `fix/admin-hover-and-polish`
 
+## 2026-10-10 — Painel no padrão das rodadas 9 e 10 (desenhos 9a–9c e 10a–10e)
+- **Artefato:** Protótipos · Requisitos (RF13, RF16, RF17, RF30–RF33)
+- **Antes:** o painel seguia o desenho 2c/7j: cabeçalho escuro no celular, "Mais" abrindo o menu público, home com "Ações rápidas"
+  e "Todas as telas", formulário de evento num bloco só com data e hora no mesmo campo.
+- **Depois:** cabeçalho creme nos dois tamanhos, menu lateral com grupos, "Mais" como folha própria do painel, home com
+  saudação, próximo evento, "Depois" e "Precisa de você", e o formulário em seções numeradas (desktop) e passos (celular), com
+  Dia, Início e Fim separados. Lista de presença, inscritos, eventos e relatório ganharam a mesma moldura. O texto de
+  `/minha-conta` e `/minha-conta/dados` e o relatório mobile ganharam os tamanhos do desenho (título de 30px, legendas de 12px).
+- **Deixado de fora de propósito (não existe):** busca global, Atividades, Contatos, Voluntários, Doações, Depoimentos,
+  Publicações, Galeria, Biblioteca, Avisos, Exportar, Configurações, a fila com detalhe, "+ Subir fotos", autosave do rascunho e
+  "Publicar na agenda" (salvar continua não publicando). "Precisa de você" conta só rascunhos.
+- **Decidido aqui, sem desenho:** "Minha conta" e os controles de leitura moram na folha "Mais"; o item do menu lateral tem 44px.
+- **PR:** branch `feat/admin-design-pattern`
+
