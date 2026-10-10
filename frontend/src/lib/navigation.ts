@@ -1,6 +1,7 @@
 export interface Destination {
   label: string
   to: string
+  description?: string
 }
 
 export interface MenuGroup {
@@ -46,6 +47,34 @@ export const MENU_GROUPS: MenuGroup[] = [
     items: [
       { label: 'Notícias', to: '/noticias' },
       { label: 'Acervo', to: '/acervo' },
+    ],
+  },
+]
+
+export const DESKTOP_MENU_GROUPS: MenuGroup[] = [
+  {
+    title: 'Conhecer',
+    tone: 'ochre',
+    items: [
+      { label: 'Galeria', to: '/galeria', description: 'Fotos das oficinas e saraus' },
+      { label: 'Notícias', to: '/noticias', description: 'O que aconteceu e o que vem' },
+      { label: 'Acervo', to: '/acervo' },
+    ],
+  },
+  {
+    title: 'Participar',
+    tone: 'blue',
+    items: [
+      { label: 'Voluntariado', to: '/voluntariado', description: 'Doe seu tempo e seu ofício' },
+      { label: 'Para escolas', to: '/para-escolas', description: 'Leve uma oficina para sua turma' },
+    ],
+  },
+  {
+    title: 'Ajuda',
+    tone: 'brown',
+    items: [
+      { label: 'Contato', to: '/contato', description: 'Escreva para a equipe' },
+      { label: 'Privacidade', to: '/privacidade', description: 'Como cuidamos dos seus dados' },
     ],
   },
 ]

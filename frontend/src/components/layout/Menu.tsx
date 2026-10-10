@@ -7,6 +7,8 @@ import { cn } from '../../lib/cn'
 import { CONTACTS } from '../../lib/contacts'
 import { MENU_GROUPS } from '../../lib/navigation'
 import { useSignOut } from '../auth/useSignOut'
+import { DESKTOP_QUERY, useMediaQuery } from '../../lib/use-media-query'
+import { DesktopMenu } from './DesktopMenu'
 
 export type MenuSection = 'start' | 'reading'
 export type OpenMenu = (section: MenuSection) => void
@@ -24,7 +26,13 @@ interface MenuProps {
   bottomBar?: ReactNode
 }
 
-export function Menu({ open, section, onClose, bottomBar, accountFirst = false }: MenuProps) {
+export function Menu(props: MenuProps) {
+  const desktop = useMediaQuery(DESKTOP_QUERY)
+  if (desktop) return <DesktopMenu open={props.open} section={props.section} onClose={props.onClose} />
+  return <MenuSheet {...props} />
+}
+
+function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: MenuProps) {
   const dialog = useRef<HTMLDialogElement>(null)
   const readingHeading = useRef<HTMLHeadingElement>(null)
   const reading = useReadingPreferences()
@@ -98,7 +106,6 @@ export function Menu({ open, section, onClose, bottomBar, accountFirst = false }
       className={cn(
         'm-0 mt-auto h-[calc(100dvh-4rem)] max-h-none w-full max-w-none border-0 border-t-[1.5px] border-brown bg-card p-0 text-brown',
         'backdrop:bg-scrim open:animate-sheet',
-        'desktop:mx-auto desktop:max-w-xl desktop:border-x-[1.5px]',
       )}
     >
       <div className="flex h-full flex-col">

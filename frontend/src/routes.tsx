@@ -47,7 +47,7 @@ export const routes: RouteObject[] = [
   {
     element: <FocusedLayout />,
     children: [
-      { path: '/entrar', element: <Auth /> },
+      { path: '/entrar', element: <Auth />, handle: { wide: true, genericBack: true } },
       { element: <RequireAuth />, children: [{ path: '/minha-conta/dados', element: <AccountEdit />, handle: { backTo: '/minha-conta' } }] },
       { path: '/agenda/:id/inscricao', element: <EventRegistration />, handle: { backTo: '/agenda' } },
       { path: '/inscricao/cancelar', element: <CancelRegistration />, handle: { backTo: '/agenda' } },

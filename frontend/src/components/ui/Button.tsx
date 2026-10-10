@@ -29,7 +29,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-brown text-cream hover:text-cream active:scale-[.98]',
   applique:
     'bg-brown text-cream hover:text-cream shadow-applique-ochre ' +
-    'active:translate-x-[5px] active:translate-y-[5px] active:shadow-none',
+    'active:translate-x-1 active:translate-y-1 active:shadow-none',
   secondary: 'bg-transparent text-brown hover:text-brown active:bg-cream-dark active:scale-[.98]',
   support: 'bg-ochre text-brown hover:text-brown font-bold active:scale-[.98]',
 }

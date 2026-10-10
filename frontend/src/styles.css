@@ -62,7 +62,7 @@
   --radius-control: 3px;
 
   --shadow-applique: 5px 5px 0 var(--color-brown);
-  --shadow-applique-ochre: 5px 5px 0 var(--color-ochre);
+  --shadow-applique-ochre: 4px 4px 0 var(--color-ochre);
   --shadow-applique-hero: 6px 6px 0 var(--color-brown);
   --shadow-applique-hero-desktop: 8px 8px 0 var(--color-brown);
   --shadow-focus: 0 0 0 3px var(--color-blue);

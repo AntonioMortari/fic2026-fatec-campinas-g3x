@@ -10,7 +10,7 @@ import type { OpenMenu } from './Menu'
 const CONTROL =
   'min-h-11 items-center justify-center rounded-control border-[1.5px] border-brown text-brown no-underline hover:text-brown cursor-pointer'
 
-export function Header({ openMenu }: { openMenu: OpenMenu }) {
+export function Header({ openMenu, menuOpen = false }: { openMenu: OpenMenu; menuOpen?: boolean }) {
   const { pathname } = useLocation()
   const { user, status } = useAuth()
   const signOut = useSignOut()
@@ -43,10 +43,14 @@ export function Header({ openMenu }: { openMenu: OpenMenu }) {
             <li>
               <button
                 type="button"
+                aria-expanded={menuOpen}
                 onClick={() => openMenu('start')}
-                className="flex min-h-11 cursor-pointer items-center gap-2 bg-transparent px-3.5 text-[0.9375rem] font-semibold text-brown-600"
+                className={cn(
+                  'flex min-h-11 cursor-pointer items-center gap-2 rounded-control px-3.5 text-[0.9375rem]',
+                  menuOpen ? 'bg-brown font-bold text-cream' : 'bg-transparent font-semibold text-brown-600',
+                )}
               >
-                Mais <Chevron direction="down" />
+                Mais <Chevron direction={menuOpen ? 'up' : 'down'} />
               </button>
             </li>
           </ul>

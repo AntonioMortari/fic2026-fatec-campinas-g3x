@@ -48,7 +48,7 @@ export function EventCard({ event, variant, isNext = false }: EventCardProps) {
           <p className="m-0 text-small text-brown-400 desktop:text-body">{eventMeta(event, { withCapacity: !soldOut })}</p>
           {event.description && <p className="m-0 mt-1.5 hidden text-body leading-[1.55] text-brown-600 desktop:block">{event.description}</p>}
         </div>
-        <div className="col-span-2 col-start-1 row-start-2 grid grid-cols-[1fr_auto] gap-2 desktop:col-span-1 desktop:col-start-2 desktop:flex desktop:gap-3 desktop:pt-3.5">
+        <div className="col-span-2 col-start-1 row-start-2 grid grid-cols-[minmax(0,1fr)_auto] gap-2 desktop:col-span-1 desktop:col-start-2 desktop:flex desktop:gap-3 desktop:pt-3.5">
           {soldOut ? (
             <SoldOut className="px-2" />
           ) : (

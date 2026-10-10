@@ -15,7 +15,7 @@ export function HomeHero() {
         <p className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-ochre-deep desktop:text-[0.8125rem]">
           Casa Verde · São Paulo
         </p>
-        <h1 id="home-title" className="m-0 text-[1.875rem] leading-[1.12] font-bold text-pretty desktop:text-[3.25rem] desktop:leading-[1.06]">
+        <h1 id="home-title" className="m-0 [overflow-wrap:anywhere] text-[1.875rem] leading-[1.12] font-bold text-pretty desktop:text-[3.25rem] desktop:leading-[1.06]">
           Arte, memória e <em className="text-ochre-deep not-italic">pertencimento</em> — feitos à mão, todo dia
         </h1>
         <p className="m-0 text-body text-brown-600 desktop:text-[1.1875rem]">
@@ -23,7 +23,7 @@ export function HomeHero() {
           <span className="hidden desktop:inline">, na zona norte de São Paulo</span>.
         </p>
         <div className="mt-1.5 flex flex-col gap-3 desktop:mt-2 desktop:flex-row desktop:items-center">
-          <Button to="/projetos" fullWidth className="desktop:w-auto desktop:min-h-13.5 desktop:px-6.5">
+          <Button to="/projetos" fullWidth className="desktop:w-auto desktop:min-h-13.5 desktop:px-6.5 desktop:text-[1.0625rem]">
             Conhecer nossos projetos
           </Button>
           <Link to="/agenda" className="hidden min-h-11 items-center px-2.5 font-semibold desktop:inline-flex">

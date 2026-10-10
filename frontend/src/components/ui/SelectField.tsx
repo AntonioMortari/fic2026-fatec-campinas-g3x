@@ -21,16 +21,15 @@ export function SelectField({ label, options, hint, error, id, className, ...sel
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={fieldId} className="text-[0.9375rem] font-semibold">
+      <label htmlFor={fieldId} className="text-[0.9375rem] leading-[1.2] font-semibold">
         {label}
-        {select.required && <span aria-hidden="true"> *</span>}
       </label>
       <div className={fieldBox(Boolean(error))}>
         <select
           id={fieldId}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className="min-h-13 w-full min-w-0 flex-1 cursor-pointer bg-transparent px-3 text-body text-brown outline-none"
+          className="min-h-12.5 w-full min-w-0 flex-1 cursor-pointer bg-transparent px-3 text-body text-brown outline-none"
           {...select}
         >
           <option value="">Escolha uma opção</option>

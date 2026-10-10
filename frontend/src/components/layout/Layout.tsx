@@ -12,6 +12,8 @@ export interface RouteHandle {
   hideBottomBar?: boolean
   hideHeaderOnMobile?: boolean
   backTo?: string
+  wide?: boolean
+  genericBack?: boolean
 }
 
 export function Layout({ children }: { children?: ReactNode }) {
@@ -26,7 +28,7 @@ export function Layout({ children }: { children?: ReactNode }) {
     <ToastProvider>
       <div className="flex min-h-dvh flex-col pb-[4.5rem] desktop:pb-0">
         <SkipLink />
-        <Header openMenu={openMenu} />
+        <Header openMenu={openMenu} menuOpen={menu.open} />
         <main id="content" tabIndex={-1} className="flex-1 outline-none">
           <div key={pathname} className="animate-page">
             {children ?? <Outlet />}

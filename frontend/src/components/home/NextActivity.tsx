@@ -25,7 +25,7 @@ export function NextActivity({ event }: { event: EventSummary }) {
           {event.spotsLeft === 0 ? (
             <span className="mt-1.5 inline-flex min-h-11 items-center font-semibold text-brown-400">Vagas esgotadas</span>
           ) : (
-            <Link to={`/agenda/${event.id}/inscricao`} className="mt-1.5 inline-flex min-h-11 items-center font-semibold">
+            <Link to={`/agenda/${event.id}/inscricao`} className="mt-1.5 inline-flex min-h-11 items-center text-[0.9375rem] font-semibold desktop:text-base">
               Quero me inscrever
             </Link>
           )}

@@ -17,17 +17,16 @@ export function TextField({ label, labelNote, hint, error, addon, id, className,
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={fieldId} className="text-[0.9375rem] font-semibold">
+      <label htmlFor={fieldId} className="text-[0.9375rem] leading-[1.2] font-semibold">
         {label}
         {labelNote && <span className="font-normal text-brown-400"> {labelNote}</span>}
-        {input.required && <span aria-hidden="true"> *</span>}
       </label>
       <div className={fieldBox(Boolean(error))}>
         <input
           id={fieldId}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className="min-h-13 w-full min-w-0 flex-1 bg-transparent px-3.5 text-body text-brown outline-none placeholder:text-brown-300"
+          className="min-h-12.5 w-full min-w-0 flex-1 bg-transparent px-3.5 text-body text-brown outline-none placeholder:text-brown-300"
           {...input}
         />
         {addon}
