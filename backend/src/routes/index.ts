@@ -9,6 +9,7 @@ import { registrationsRoutes } from './registrations.routes';
 import { adminVolunteersRoutes } from './admin-volunteers.routes';
 import { volunteerApplicationsRoutes, volunteerAreasRoutes } from './volunteers.routes';
 import { contactsRoutes } from './contacts.routes';
+import { adminContactsRoutes } from './admin-contacts.routes';
 
 export const routes = Router();
 
@@ -23,3 +24,4 @@ routes.use('/volunteer-areas', volunteerAreasRoutes);
 routes.use('/volunteer-applications', volunteerApplicationsRoutes);
 routes.use('/admin/volunteer-applications', adminVolunteersRoutes);
 routes.use('/contacts', contactsRoutes);
+routes.use('/admin/contacts', adminContactsRoutes);

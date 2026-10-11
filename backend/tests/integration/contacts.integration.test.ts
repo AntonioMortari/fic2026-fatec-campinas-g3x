@@ -68,7 +68,14 @@ describe('contact messages against a real MySQL', () => {
     expect(row!.consentedAt.getTime()).toBeGreaterThanOrEqual(before - 1000);
     expect(row!.consentedAt.getTime()).toBeLessThanOrEqual(Date.now() + 1000);
     const columns = Object.keys(await sequelize.getQueryInterface().describeTable('contacts'));
-    expect(columns.sort()).toEqual(['consented_at', 'created_at', 'email', 'id', 'institution', 'message', 'name', 'origin_hash', 'phone']);
+    expect(columns.sort()).toEqual(['consented_at', 'created_at', 'email', 'id', 'institution', 'message', 'name', 'origin_hash', 'phone', 'staff_note', 'status']);
+  });
+
+  it('ignores a situation and an internal note in the body: the row is born new and without a note', async () => {
+    const response = await send(message(1, { status: 'done', staffNote: 'escrita por quem enviou', staff_note: 'x' }));
+
+    expect(response.status).toBe(201);
+    expect(await Contact.findOne({ raw: true })).toMatchObject({ status: 'new', staffNote: null });
   });
 
   it('refuses without the consent and writes nothing', async () => {
@@ -153,11 +160,11 @@ describe('contact messages against a real MySQL', () => {
     expect((await send(message(41), '203.0.113.60')).status).toBe(201);
   });
 
-  it('has no route that reads the messages back', async () => {
+  it('has no public route that reads the messages back, and the staff one asks for a session', async () => {
     await send(message(1));
 
     expect((await request(app).get('/api/contacts')).status).toBe(404);
-    expect((await request(app).get('/api/admin/contacts')).status).toBe(404);
+    expect((await request(app).get('/api/admin/contacts')).status).toBe(401);
   });
 
   it('is refused by the database itself when the NOT NULL columns are missing', async () => {
