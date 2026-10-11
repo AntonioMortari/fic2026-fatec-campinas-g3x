@@ -18,6 +18,7 @@ function open(handlers: Handlers = {}, account = ACCOUNT) {
     'POST /auth/refresh': () => ({ status: 200, data: { token: 'a.b.c', user: account } }),
     'GET /auth/me': () => ({ status: 200, data: { user: account } }),
     'GET /me/registrations': () => ({ status: 200, data: { data: [] } }),
+    'GET /me/volunteer-applications': () => ({ status: 200, data: { data: [] } }),
     ...handlers,
   })
 }
@@ -57,13 +58,14 @@ describe('your account (design 7a)', () => {
     expect(screen.queryByRole('textbox', { name: /Nome/ })).not.toBeInTheDocument()
   })
 
-  it('lists only the participations that exist: the registrations. Nothing is promised that is not built', async () => {
+  it('lists only the participations that exist: the volunteer applications and the registrations. Nothing is promised that is not built', async () => {
     open()
     renderRoute('/minha-conta')
 
     expect(await screen.findByRole('heading', { name: 'Minhas participações' })).toBeInTheDocument()
     expect(await screen.findByRole('heading', { name: 'Minhas inscrições' })).toBeInTheDocument()
-    expect(screen.queryByText(/Candidaturas ao voluntariado|Minhas doações|Trocar minha senha/)).not.toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /Candidaturas ao voluntariado/ })).toHaveAttribute('href', '/minha-conta/candidaturas')
+    expect(screen.queryByText(/Minhas doações|Trocar minha senha/)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sair da conta' })).toBeInTheDocument()
   })
 

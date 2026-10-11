@@ -1,12 +1,15 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { MyRegistrations } from '../components/account/MyRegistrations'
+import { ParticipationItem } from '../components/account/ParticipationItem'
 import { useSignOut } from '../components/auth/useSignOut'
 import { Alert, Button, Card, Container, EmptyState, PageHeader } from '../components/ui'
 import { CONTACTS } from '../lib/contacts'
 import { formatPhone } from '../lib/format-phone'
 import { PERSON_TYPE_SHORT_LABELS } from '../lib/person-type'
+import { accountSummary } from '../lib/volunteering'
 import { useMe, type AuthUser } from '../services/auth'
+import { useMyVolunteerApplications } from '../services/volunteering'
 
 function Ficha({ user }: { user: AuthUser }) {
   const rows: [string, string][] = [
@@ -38,6 +41,7 @@ function Ficha({ user }: { user: AuthUser }) {
 
 export function Account() {
   const me = useMe()
+  const applications = useMyVolunteerApplications()
   const signOut = useSignOut()
   const location = useLocation()
   const navigate = useNavigate()
@@ -82,11 +86,20 @@ export function Account() {
           </Button>
         )}
         {me.data && (
-          <section aria-labelledby="participations" className="flex flex-col gap-3 pt-2">
-            <h2 id="participations" className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-brown-400">
+          <section aria-labelledby="participations" className="flex flex-col gap-1.5 pt-2">
+            <h2 id="participations" className="m-0 text-overline leading-[1.2] font-semibold uppercase tracking-[0.12em] text-brown-400">
               Minhas participações
             </h2>
-            <MyRegistrations />
+            <ul className="m-0 list-none border-t border-line p-0">
+              <ParticipationItem
+                title="Candidaturas ao voluntariado"
+                description={applications.data ? accountSummary(applications.data) : undefined}
+                to="/minha-conta/candidaturas"
+              />
+            </ul>
+            <div className="mt-4">
+              <MyRegistrations />
+            </div>
           </section>
         )}
         <button
