@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { cn } from '../../lib/cn'
-import { DESKTOP_NAV, SUPPORT, isActiveRoute } from '../../lib/navigation'
+import { DESKTOP_NAV, SUPPORT, isActiveRoute, isMenuRoute } from '../../lib/navigation'
 import { useSignOut } from '../auth/useSignOut'
 import { Chevron } from '../ui/Chevron'
 import { Logo } from './Logo'
@@ -17,6 +17,7 @@ export function Header({ openMenu, menuOpen = false, hideOnMobile = false }: { o
   const { pathname } = useLocation()
   const { user, status } = useAuth()
   const signOut = useSignOut()
+  const moreIsCurrent = isMenuRoute(pathname, DESKTOP_NAV)
   const pointer = useRef({ x: -1, y: -1 })
   const lock = useRef({ x: -1, y: -1 })
 
@@ -73,11 +74,15 @@ export function Header({ openMenu, menuOpen = false, hideOnMobile = false }: { o
                   if (!menuOpen && !parked) openMenu('start')
                 }}
                 onClick={() => openMenu('start')}
+                data-current-section={moreIsCurrent && !menuOpen ? 'true' : undefined}
                 className={cn(
-                  'flex min-h-11 cursor-pointer items-center gap-2 rounded-control px-3.5 text-[0.9375rem]',
-                  menuOpen ? 'bg-brown font-bold text-cream' : 'bg-transparent font-semibold text-brown-600 hover:text-brown',
+                  'relative flex min-h-11 cursor-pointer items-center gap-2 rounded-control px-3.5 text-[0.9375rem]',
+                  menuOpen
+                    ? 'bg-brown font-bold text-cream'
+                    : cn('bg-transparent hover:text-brown', moreIsCurrent ? 'font-bold text-brown' : 'font-semibold text-brown-600'),
                 )}
               >
+                {moreIsCurrent && !menuOpen && <span aria-hidden="true" className="absolute inset-x-3.5 bottom-1 h-0.75 bg-ochre" />}
                 Mais <Chevron direction={menuOpen ? 'up' : 'down'} />
               </button>
             </li>

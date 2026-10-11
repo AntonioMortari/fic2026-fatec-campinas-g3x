@@ -18,7 +18,7 @@ export function FieldMessages({ error, errorId, hint, hintId }: FieldMessagesPro
         </p>
       )}
       {hint && !error && (
-        <p id={hintId} className="m-0 text-small text-brown-400">
+        <p id={hintId} className="m-0 text-[0.84375rem] leading-[1.45] text-brown-400">
           {hint}
         </p>
       )}

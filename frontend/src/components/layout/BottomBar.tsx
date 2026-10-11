@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../../lib/cn'
-import { BOTTOM_BAR, SUPPORT, isActiveRoute } from '../../lib/navigation'
+import { BOTTOM_BAR, SUPPORT, isActiveRoute, isMenuRoute } from '../../lib/navigation'
 import type { OpenMenu } from './Menu'
 
 // Labels stop growing at 15px: with five columns at 320px, larger text made "Projetos" touch "Apoiar".
@@ -18,6 +18,7 @@ interface BottomBarProps {
 
 export function BottomBar({ openMenu, menuOpen, onCloseMenu }: BottomBarProps) {
   const { pathname } = useLocation()
+  const menuIsCurrent = menuOpen || isMenuRoute(pathname, [...BOTTOM_BAR, SUPPORT])
 
   return (
     <nav aria-label="Atalhos" className="safe-area-bottom fixed inset-x-0 bottom-0 z-30 border-t-[1.5px] border-brown bg-card px-1.5 desktop:hidden">
@@ -53,9 +54,9 @@ export function BottomBar({ openMenu, menuOpen, onCloseMenu }: BottomBarProps) {
             type="button"
             aria-expanded={menuOpen}
             onClick={menuOpen && onCloseMenu ? onCloseMenu : () => openMenu('start')}
-            className={cn(ITEM, 'w-full cursor-pointer bg-transparent', menuOpen ? 'font-bold text-brown' : 'font-semibold text-brown-400')}
+            className={cn(ITEM, 'w-full cursor-pointer bg-transparent', menuIsCurrent ? 'font-bold text-brown' : 'font-semibold text-brown-400')}
           >
-            {menuOpen && <ActiveMarker />}
+            {menuIsCurrent && <ActiveMarker />}
             Menu
           </button>
         </li>

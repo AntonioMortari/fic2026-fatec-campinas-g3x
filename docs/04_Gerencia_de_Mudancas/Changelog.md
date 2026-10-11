@@ -356,6 +356,26 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Antes:** `/voluntariado` e a candidatura não existiam (o link "Voluntariado" do menu levava ao 404), a lista "Minhas participações" só tinha inscrições, e o painel não tinha "Pessoas". O projeto de origem guardava a candidatura em duas tabelas sem transação e protegia a regra de duplicata só no código.
 - **Depois:** três tabelas novas por migration (`volunteer_areas` com as 5 áreas reais, `volunteer_applications`, `volunteer_application_areas`), rotas documentadas no Swagger, e as telas conforme o desenho: `/voluntariado`, `/voluntariado/candidatura` (sem conta, formulário e "você já se candidatou"), `/minha-conta/candidaturas`, o item "Candidaturas ao voluntariado" em `/minha-conta`, e `/admin/voluntarios` (lista e detalhe) com selo de novas no menu do painel. **Decisões de arquitetura:** candidatura e áreas gravadas numa transação só; quem tem candidatura viva não manda outra e a regra vale **no banco** (coluna gerada `active_key` com índice único, como em `registrations`), não só no service; dois vocabulários de situação (equipe: Nova / Em contato / Voluntariando / Encerrada; pessoa: "Recebida, ainda sem resposta" etc.); o `PATCH` da equipe grava só a situação.
 - **Diferenças em relação ao desenho, e por quê:** (1) sem o cartão "Ver o mural de avisos" da 10g: o mural (RF27) não existe e um link para o 404 é pior que a ausência; (2) a nota interna da 10j fica de fora, como o próprio desenho diz; (3) o limite do texto da candidatura é 2000 caracteres (o desenho avisa que o 1000 é exemplo; é o limite do projeto de origem); (4) a linha do tempo da 10f avança com a situação, o desenho só mostra a primeira etapa marcada; (5) telefone e e-mail das telas 10d e 10f são links, para tocar e abrir o WhatsApp ou o e-mail; (6) no celular os valores de contato do painel têm alvo de 44px (regra do projeto), então a linha fica 12px mais alta que no desenho; (7) o chip de área da fila é um `<select>` nativo; (8) a entrada "Voluntários" fica em "Pessoas" no menu lateral e na folha "Mais", sem o botão "Pessoas" da barra inferior (a barra do painel continua com Início, Agenda e Mais).
-- **Depende de outra PR:** "Tenho uma dúvida" (10c) e "Fale com a gente" (10i) apontam para `/contato`, que é a tela de Contato de outra PR e responde 404 até ela entrar.
+- **Contato:** "Tenho uma dúvida" (10c) e "Fale com a gente" (10i) apontam para `/contato`, que já existe (PR do RF06/RF07).
 - **Por quê:** requisitos RF24 a RF26 e o desenho das rodadas 4 (Contato e Voluntariado) do Claude Design; o desenho exige que candidatar-se seja ligado a uma conta e que "encerrar" devolva o direito de se candidatar de novo, o que só se garante contra dois envios simultâneos com uma restrição no banco.
 - **PR:** branch `feat/volunteering`
+## 2026-10-11 — RF06 e RF07 (Contato): formulário público, limite por conexão e duas diferenças do desenho
+- **Artefato:** Requisitos · Protótipos
+- **Antes:** o menu ("Mais" no desktop, folha do celular) apontava para `/contato`, que dava 404. O RF07 (formulário de
+  contato) dizia apenas que qualquer pessoa pode escrever para a ONG; não havia tabela, rota nem tela.
+- **Depois:** `/contato` implementa as telas 10a, 10b e 10h do Claude Design — canais diretos antes do formulário,
+  formulário com aviso único no topo e regra embaixo do campo, e a caixa "Mensagem recebida" no topo depois do envio.
+  Back-end: tabela `contacts` (migration 20261011130000), `POST /api/contacts` aberto, **sem conta**, que não devolve a
+  linha nem dado pessoal; o consentimento é obrigatório e gravado como data (`consented_at`); 30 mensagens por hora por
+  conexão (HMAC do IP, o IP nunca é gravado, `429 too_many_requests`). Não existe rota de leitura: a fila de atendimento
+  para a equipe é o RF29. Diferenças em relação ao desenho: (1) a frase "…está na política de privacidade" **não tem
+  link**, porque a página `/privacidade` ainda não existe e um link para o 404 é pior que a ausência; vira link quando a
+  página for migrada; (2) o espaço "Mapa" virou o embed do Google Maps sem chave (como no projeto de origem), na mesma
+  moldura e proporção, carregado só quando a pessoa rola até ele — isso passa a mandar uma requisição ao Google para
+  quem chega até lá, e **a página de privacidade precisa dizer isso**; (3) a palavra "opcional" fica no rótulo do telefone
+  e da instituição nos dois tamanhos, e o campo tem 52px (regra do alvo de toque) em vez dos 50px do desktop. Também: o
+  nome da coluna é `consented_at`, como em `users` e `registrations`, e não `consent_at`.
+- **Por quê:** um formulário público grava dado pessoal de quem não tem conta, então a validação no servidor é a única
+  barreira e o limite por conexão é obrigatório; o desenho não pode prometer prazo de resposta nem apontar para página
+  inexistente (regras da ONG: não inventar conteúdo).
+- **PR:** branch `feat/contact`
