@@ -1,8 +1,15 @@
 export const CONTACTS = {
   phoneDisplay: '(11) 95396-8344',
+  phoneLink: 'tel:+5511953968344',
   whatsapp: 'https://wa.me/5511953968344',
   email: 'atelieafro@gmail.com',
   instagram: 'https://instagram.com/atelie_afrocultural',
+  instagramHandle: '@atelie_afrocultural',
   tiktok: 'https://tiktok.com/@ateli.afro.cultur',
+  tiktokHandle: '@ateli.afro.cultur',
+  youtube: 'https://www.youtube.com/channel/UCWeZ-53etejdUzUi3eR81zg',
   address: 'Rua Dr. Paulo Gatti, 135 — Vila Romero, São Paulo/SP',
+  street: 'Rua Dr. Paulo Gatti, 135 — Vila Romero',
+  city: 'São Paulo/SP',
+  postalCode: '02468-030',
 } as const

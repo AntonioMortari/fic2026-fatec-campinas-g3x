@@ -351,3 +351,23 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Por quê:** conferência número a número de todas as telas implementadas contra o zip, em 390 e 1440px; cada ajuste é uma diferença que não tinha justificativa de desenvolvimento.
 - **PR:** branch `fix/design-alignment`
 
+## 2026-10-11 — RF06 e RF07 (Contato): formulário público, limite por conexão e duas diferenças do desenho
+- **Artefato:** Requisitos · Protótipos
+- **Antes:** o menu ("Mais" no desktop, folha do celular) apontava para `/contato`, que dava 404. O RF07 (formulário de
+  contato) dizia apenas que qualquer pessoa pode escrever para a ONG; não havia tabela, rota nem tela.
+- **Depois:** `/contato` implementa as telas 10a, 10b e 10h do Claude Design — canais diretos antes do formulário,
+  formulário com aviso único no topo e regra embaixo do campo, e a caixa "Mensagem recebida" no topo depois do envio.
+  Back-end: tabela `contacts` (migration 20261011130000), `POST /api/contacts` aberto, **sem conta**, que não devolve a
+  linha nem dado pessoal; o consentimento é obrigatório e gravado como data (`consented_at`); 30 mensagens por hora por
+  conexão (HMAC do IP, o IP nunca é gravado, `429 too_many_requests`). Não existe rota de leitura: a fila de atendimento
+  para a equipe é o RF29. Diferenças em relação ao desenho: (1) a frase "…está na política de privacidade" **não tem
+  link**, porque a página `/privacidade` ainda não existe e um link para o 404 é pior que a ausência; vira link quando a
+  página for migrada; (2) o espaço "Mapa" virou o embed do Google Maps sem chave (como no projeto de origem), na mesma
+  moldura e proporção, carregado só quando a pessoa rola até ele — isso passa a mandar uma requisição ao Google para
+  quem chega até lá, e **a página de privacidade precisa dizer isso**; (3) a palavra "opcional" fica no rótulo do telefone
+  e da instituição nos dois tamanhos, e o campo tem 52px (regra do alvo de toque) em vez dos 50px do desktop. Também: o
+  nome da coluna é `consented_at`, como em `users` e `registrations`, e não `consent_at`.
+- **Por quê:** um formulário público grava dado pessoal de quem não tem conta, então a validação no servidor é a única
+  barreira e o limite por conexão é obrigatório; o desenho não pode prometer prazo de resposta nem apontar para página
+  inexistente (regras da ONG: não inventar conteúdo).
+- **PR:** branch `feat/contact`

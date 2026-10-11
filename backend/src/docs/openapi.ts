@@ -157,6 +157,19 @@ export const openApiDocument = {
           checkedAt: { type: 'string', format: 'date-time' },
         },
       },
+      ContactRequest: {
+        type: 'object',
+        required: ['name', 'email', 'message', 'consent'],
+        description: 'O que vem do corpo além disso é descartado.',
+        properties: {
+          name: { type: 'string', maxLength: 120 },
+          email: { type: 'string', format: 'email', maxLength: 254, description: 'É por ele que a equipe responde. Guardado em minúsculas.' },
+          phone: { type: ['string', 'null'], description: 'Opcional, com DDD. Só os dígitos são guardados.' },
+          institution: { type: ['string', 'null'], maxLength: 160, description: 'Opcional: escola, empresa, coletivo, veículo de imprensa.' },
+          message: { type: 'string', maxLength: 5000 },
+          consent: { type: 'boolean', enum: [true], description: 'Obrigatório: concordância com o uso dos dados para responder a mensagem. Guardada como data.' },
+        },
+      },
     },
   },
   paths: {
@@ -615,6 +628,21 @@ export const openApiDocument = {
             description: 'API de pé, banco fora do ar',
             content: { 'application/json': { schema: { $ref: '#/components/schemas/Health' } } },
           },
+        },
+      },
+    },
+    '/contacts': {
+      post: {
+        tags: ['Contact'],
+        summary: 'Envia uma mensagem para a equipe, sem conta (RF07)',
+        description:
+          'Aberta, sem sessão: quem escreve para o Ateliê não precisa ter conta. A resposta não devolve a mensagem nem dado pessoal. ' +
+          'Cada conexão envia até 30 mensagens por hora (cabe uma turma de escola saindo por um IP só); o IP nunca é gravado, só um hash com chave. Não há leitura nem listagem de mensagens.',
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ContactRequest' } } } },
+        responses: {
+          '201': { description: 'Mensagem registrada', content: { 'application/json': { schema: { type: 'object', properties: { received: { type: 'boolean', enum: [true] } } } } } },
+          '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '429': { description: '`too_many_requests`: mais de 30 mensagens na última hora vindas da mesma conexão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },

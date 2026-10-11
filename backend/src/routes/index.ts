@@ -6,6 +6,7 @@ import { eventsRoutes } from './events.routes';
 import { healthRoutes } from './health.routes';
 import { meRoutes } from './me.routes';
 import { registrationsRoutes } from './registrations.routes';
+import { contactsRoutes } from './contacts.routes';
 
 export const routes = Router();
 
@@ -16,3 +17,4 @@ routes.use('/admin/events', adminEventsRoutes);
 routes.use('/admin/report', adminReportRoutes);
 routes.use('/me', meRoutes);
 routes.use('/registrations', registrationsRoutes);
+routes.use('/contacts', contactsRoutes);
