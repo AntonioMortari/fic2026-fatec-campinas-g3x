@@ -12,13 +12,16 @@ export interface MenuGroup {
 
 export const HOME: Destination = { label: 'Início', to: '/' }
 export const SUPPORT: Destination = { label: 'Apoiar', to: '/doar' }
+export const PROJECTS: Destination = { label: 'Projetos', to: '/projetos' }
+export const VOLUNTEER: Destination = { label: 'Voluntariado', to: '/voluntariado' }
+export const SCHOOLS: Destination = { label: 'Para escolas', to: '/para-escolas' }
 
-export const BOTTOM_BAR: Destination[] = [HOME, { label: 'Agenda', to: '/agenda' }, { label: 'Projetos', to: '/projetos' }]
+export const BOTTOM_BAR: Destination[] = [HOME, { label: 'Agenda', to: '/agenda' }, PROJECTS]
 
 export const DESKTOP_NAV: Destination[] = [
   HOME,
   { label: 'Agenda', to: '/agenda' },
-  { label: 'Projetos', to: '/projetos' },
+  PROJECTS,
   { label: 'Quem somos', to: '/quem-somos' },
 ]
 
@@ -26,20 +29,12 @@ export const MENU_GROUPS: MenuGroup[] = [
   {
     title: 'Conhecer',
     tone: 'ochre',
-    items: [
-      { label: 'Quem somos', to: '/quem-somos' },
-      { label: 'Projetos', to: '/projetos' },
-      { label: 'Galeria', to: '/galeria' },
-    ],
+    items: [{ label: 'Quem somos', to: '/quem-somos' }, PROJECTS, { label: 'Galeria', to: '/galeria' }],
   },
   {
     title: 'Participar',
     tone: 'blue',
-    items: [
-      { label: 'Agenda', to: '/agenda' },
-      { label: 'Voluntariado', to: '/voluntariado' },
-      { label: 'Para escolas', to: '/para-escolas' },
-    ],
+    items: [{ label: 'Agenda', to: '/agenda' }, VOLUNTEER, SCHOOLS],
   },
   {
     title: 'Ler',

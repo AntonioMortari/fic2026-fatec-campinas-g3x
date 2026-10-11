@@ -3,6 +3,7 @@ import { RequireStaff } from './components/admin/RequireStaff'
 import { RequireAuth } from './components/auth/RequireAuth'
 import { FocusedLayout } from './components/layout/FocusedLayout'
 import { Layout } from './components/layout/Layout'
+import { About } from './pages/About'
 import { Account } from './pages/Account'
 import { AccountEdit } from './pages/AccountEdit'
 import { AdminAttendance } from './pages/admin/AdminAttendance'
@@ -35,6 +36,7 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/', element: <HomeContainer /> },
       { path: '/agenda', element: <Agenda /> },
+      { path: '/quem-somos', element: <About /> },
       { path: '/inscricao/cancelada', element: <CancelDone /> },
       { path: '/voluntariado', element: <Volunteering /> },
       {
