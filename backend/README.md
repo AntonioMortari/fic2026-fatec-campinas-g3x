@@ -111,6 +111,11 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 | `GET` · `POST /api/registrations/cancel/:code` | **aberta, sem sessão**: mostra e cancela a inscrição do link pessoal (UUID entregue a quem se inscreveu). Só devolve o evento e o nome abreviado. A linha fica como registro e deixa de contar; 409 `already_cancelled` / `registrations_closed` |
 | `PATCH /api/me` | **conta logada** (RF11): altera `name`, `phone` e `personType` da conta do token. E-mail, senha e papéis não mudam por aqui, seja qual for o corpo |
 | `GET /api/me/registrations` | **conta logada** (RF11): as inscrições ligadas à conta do token, com o evento e o `cancelCode`; `attendanceRecorded` só é verdadeiro quando a equipe marcou presença |
+| `GET /api/volunteer-areas` | **aberta** (RF24): as cinco áreas de voluntariado, com o texto de cada uma, na ordem da ONG |
+| `POST /api/volunteer-applications` | **conta logada** (RF25): candidata a conta do token (nunca do corpo; o corpo só tem `areas` e `message`, até 2000 caracteres). Candidatura e áreas numa transação; 409 `already_applied` enquanto houver uma `new`, `in_contact` ou `volunteering` (regra também no banco, por índice único); `ended` libera outra. Áreas repetidas viram uma, área inexistente ou lista vazia é 400 no campo `areas` |
+| `GET /api/me/volunteer-applications` | **conta logada** (RF11): só as candidaturas da conta do token, as vivas primeiro e as encerradas depois, com as áreas |
+| `GET /api/admin/volunteer-applications` · `/counts` · `/export.csv` · `/:id` | **só equipe** (RF26): a fila com nome, e-mail e telefone do perfil, filtros `status` e `area` por query e `counts` por situação; `/counts` devolve só as contagens; a planilha segue os mesmos filtros (`;`, BOM, fórmula neutralizada) |
+| `PATCH /api/admin/volunteer-applications/:id/status` | **só equipe** (RF26): `{ "status": "new" \| "in_contact" \| "volunteering" \| "ended" }`, o único campo que o corpo aceita; qualquer passagem existe; reabrir uma encerrada quando a pessoa já tem outra viva é 409 `live_application_exists` |
 | `GET /api/auth/me` | a ficha de quem está autenticado; 401 sem token válido, ou se a conta foi apagada |
 
 ### Contratos da API
