@@ -343,3 +343,11 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Decidido aqui, sem desenho:** "Minha conta" e os controles de leitura moram na folha "Mais"; o item do menu lateral tem 44px.
 - **PR:** branch `feat/admin-design-pattern`
 
+## 2026-10-11 — Conferência com o zip do Claude Design: seis ajustes de fidelidade
+- **Artefato:** Protótipos (telas 2a/6a, 7a, 7c, 7d, 7j e "Movimento")
+- **Antes:** a tela "Inscrição cancelada" (7d) aparecia no layout focado, sem logotipo nem barra inferior; o voltar de 7c dizia só "Agenda"; "Sair da conta" (7a) saía como botão com borda e o título tinha 30px; o botão "Baixar CSV" do relatório quebrava em duas linhas de 1024 a 1440px; o cartão "Próxima atividade" da home trazia a linha de vagas, o horário de término e um sobretítulo também no celular (171px de altura); o toque nos botões e links fechava em 150ms.
+- **Depois:** 7d é a rota `/inscricao/cancelada` (cabeçalho com logotipo e barra inferior, como no desenho; recarregar volta para a confirmação, que diz "já foi cancelada") e 7c diz "Voltar para a agenda"; 7a tem "Sair da conta" como link e título de 32px; os dois botões do relatório não quebram o rótulo; o cartão da home mostra só o horário de início e o local, a categoria como prefixo no celular ("Contação: Cafú e o Café") e como sobretítulo no desktop, sem a linha de vagas (a agenda continua mostrando); o toque fecha em 90ms (a transição de hover continua em 150ms). Os títulos de 7c e 7d passaram a 30px, como no desenho.
+- **O que continua diferente, e não foi tocado:** a cor de erro (`#A52A1E` aqui, `#A3341F` nas telas 7), o corpo do botão (16px aqui, 15px no desenho), o sobretítulo de 13px no desktop, o peso 600 do "Por atividade", a linha "Leitura" dentro do menu em folha e a barra inferior (o desenho tem 5 itens nas rodadas 2 e 3 e 4 itens, com "Biblioteca", nas 7). Também o formulário de evento no celular (3 passos aqui, 4 no desenho) e a lista de presença com cabeçalho creme (o 3g era escuro). Dependem de decisão de quem desenha.
+- **Por quê:** conferência número a número de todas as telas implementadas contra o zip, em 390 e 1440px; cada ajuste é uma diferença que não tinha justificativa de desenvolvimento.
+- **PR:** branch `fix/design-alignment`
+

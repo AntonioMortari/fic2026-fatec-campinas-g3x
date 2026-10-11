@@ -61,3 +61,15 @@ describe('the error color', () => {
     expect(contrast(token(theme, 'error'), token(theme, 'ochre'))).toBeGreaterThan(2.5)
   })
 })
+
+describe('motion (design "Movimento")', () => {
+  it('closes the touch feedback in 90ms, which is what the design asks', () => {
+    expect(css).toMatch(/a:active,[\s\S]*?button:active,[\s\S]*?\{\s*transition-duration: 90ms;/)
+  })
+
+  it('keeps the entrance at 200ms, the sheet at 280ms and the page fade at 150ms', () => {
+    expect(css).toMatch(/--animate-rise: rise 200ms/)
+    expect(css).toMatch(/--animate-sheet: sheet 280ms/)
+    expect(css).toMatch(/--animate-page: page 150ms/)
+  })
+})

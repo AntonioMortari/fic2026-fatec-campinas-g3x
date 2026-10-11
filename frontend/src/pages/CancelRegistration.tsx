@@ -1,39 +1,13 @@
-import { Link, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LoadingSession } from '../components/auth/LoadingSession'
 import { Button, Card, DateBadge, EmptyState, PageHeader } from '../components/ui'
 import { CONTACTS } from '../lib/contacts'
-import { shortDate } from '../lib/dates'
 import { formatTimeRange } from '../lib/events'
 import { parseApiError } from '../lib/api-error'
 import { useCancelPreview, useCancelRegistration } from '../services/cancel-registration'
-import { useEvents } from '../services/events'
 import type { CancelPreview } from '../types/cancel-registration'
 
 const CODE_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-function Elsewhere({ eventId }: { eventId: string }) {
-  const { data } = useEvents('upcoming')
-  const others = (data ?? []).filter((event) => event.id !== eventId && event.spotsLeft !== 0).slice(0, 3)
-  if (others.length === 0) return null
-
-  return (
-    <section aria-labelledby="other-dates" className="flex flex-col gap-1 border-t border-line pt-4">
-      <h2 id="other-dates" className="m-0 text-item font-bold">
-        Quer ir em outra data?
-      </h2>
-      <ul className="m-0 list-none p-0">
-        {others.map((event) => (
-          <li key={event.id} className="border-b border-line last:border-b-0">
-            <Link to={`/agenda/${event.id}/inscricao`} className="flex min-h-14 items-center gap-3.5 text-brown no-underline hover:text-brown">
-              <span className="text-small font-bold whitespace-nowrap text-ochre-deep uppercase">{shortDate(event.startsAt)}</span>
-              <span className="font-semibold">{event.title}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
-  )
-}
 
 function Whatsapp() {
   return (
@@ -54,32 +28,13 @@ function Closed({ title }: { title: string }) {
   )
 }
 
-function Done({ registration }: { registration: CancelPreview }) {
-  const { event } = registration
-  return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2.5">
-        <p className="m-0 self-start bg-brown px-2.5 py-1 text-overline font-bold tracking-[0.12em] text-cream uppercase">Feito</p>
-        <h1 className="m-0 text-h1 font-bold">Inscrição cancelada</h1>
-        <p className="m-0 text-body text-pretty text-brown-600">
-          Sua vaga em <strong>{event.title}</strong> ({shortDate(event.startsAt)}) foi liberada. Obrigado por avisar — isso ajuda outra família a vir.
-        </p>
-      </div>
-      <Button to="/agenda" variant="applique">
-        Ver a agenda
-      </Button>
-      <Elsewhere eventId={event.id} />
-    </div>
-  )
-}
-
 function Confirm({ registration, onConfirm, busy, failed }: { registration: CancelPreview; onConfirm: () => void; busy: boolean; failed: string | null }) {
   const { event, name } = registration
   const when = [formatTimeRange(event), event.location].filter(Boolean).join(' · ')
 
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader overline="Sua inscrição" title="Cancelar a inscrição?" className="pt-0" />
+      <PageHeader overline="Sua inscrição" title="Cancelar a inscrição?" className="pt-0" titleClassName="text-[1.875rem] leading-[1.1]" />
       <Card as="section" aria-label="A inscrição" className="flex items-center gap-3.5 p-3.5">
         <DateBadge date={new Date(event.startsAt)} highlight />
         <div className="flex min-w-0 flex-col gap-0.5">
@@ -88,7 +43,7 @@ function Confirm({ registration, onConfirm, busy, failed }: { registration: Canc
           <p className="m-0 text-small font-semibold">Inscrição de {name}</p>
         </div>
       </Card>
-      <p className="m-0 text-body text-pretty text-brown-600">
+      <p className="m-0 text-body text-pretty">
         A vaga volta para a agenda e outra pessoa pode ficar com ela. Se mudar de ideia, é só se inscrever de novo enquanto houver vaga.
       </p>
       {failed && <EmptyState tone="error" title={failed} />}
@@ -110,6 +65,7 @@ export function CancelRegistration() {
   const code = raw && CODE_PATTERN.test(raw) ? raw : null
   const preview = useCancelPreview(code)
   const cancel = useCancelRegistration(code)
+  const navigate = useNavigate()
 
   if (!code) return <Closed title="Não encontramos esta inscrição" />
   if (preview.isPending) return <LoadingSession />
@@ -129,7 +85,6 @@ export function CancelRegistration() {
     )
   }
 
-  if (cancel.isSuccess) return <Done registration={cancel.data} />
   if (preview.data.state === 'cancelled') return <Closed title="Esta inscrição já foi cancelada" />
   if (preview.data.state === 'over') return <Closed title="Esta atividade já aconteceu" />
 
@@ -140,7 +95,11 @@ export function CancelRegistration() {
   return (
     <Confirm
       registration={preview.data}
-      onConfirm={() => cancel.mutate()}
+      onConfirm={() =>
+        cancel.mutate(undefined, {
+          onSuccess: (registration) => void navigate(`/inscricao/cancelada?c=${code}`, { replace: true, state: { registration } }),
+        })
+      }
       busy={cancel.isPending}
       failed={error ? error.message : null}
     />

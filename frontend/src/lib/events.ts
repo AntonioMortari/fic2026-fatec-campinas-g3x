@@ -27,9 +27,9 @@ export function spotsText(event: Pick<EventSummary, 'spotsLeft'>): string | null
   return event.spotsLeft === 1 ? '1 vaga restante' : `${event.spotsLeft} vagas restantes`
 }
 
-export function eventMeta(event: EventSummary, options: { withCapacity?: boolean } = {}): string {
-  const { withCapacity = true } = options
-  return [formatTimeRange(event), event.location ?? 'Local a confirmar', event.ageRange, withCapacity ? spotsText(event) : null]
+export function eventMeta(event: EventSummary, options: { withCapacity?: boolean; startOnly?: boolean } = {}): string {
+  const { withCapacity = true, startOnly = false } = options
+  return [formatTimeRange(startOnly ? { ...event, endsAt: null } : event), event.location ?? 'Local a confirmar', event.ageRange, withCapacity ? spotsText(event) : null]
     .filter(Boolean)
     .join(' · ')
 }

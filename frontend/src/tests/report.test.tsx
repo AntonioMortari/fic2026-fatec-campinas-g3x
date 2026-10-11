@@ -178,6 +178,8 @@ describe('the report on the phone (design 7i)', () => {
 
     expect(screen.queryByRole('navigation', { name: 'Atalhos do painel' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Baixar CSV' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Baixar CSV' })).toHaveClass('whitespace-nowrap')
+    expect(screen.getByRole('button', { name: 'Salvar em PDF' })).toHaveClass('whitespace-nowrap')
     await user.click(screen.getByRole('button', { name: 'Salvar em PDF' }))
     expect(print).toHaveBeenCalledOnce()
   })

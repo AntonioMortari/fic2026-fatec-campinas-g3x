@@ -52,12 +52,12 @@ export function AdminReport() {
   const rows = data?.events ?? []
   const label = data ? listLabel(rows.length, data.eventsTotal) : null
   const csvButton = (
-    <Button variant="secondary" disabled={downloading} onClick={() => void download()} className="min-h-12 grow basis-28 print:hidden">
+    <Button variant="secondary" disabled={downloading} onClick={() => void download()} className="min-h-12 grow basis-28 whitespace-nowrap print:hidden">
       {downloading ? 'Preparando…' : 'Baixar CSV'}
     </Button>
   )
   const pdfButton = (
-    <Button variant="applique" onClick={() => window.print()} className="min-h-12 w-full grow basis-36 print:hidden desktop:w-auto">
+    <Button variant="applique" onClick={() => window.print()} className="min-h-12 w-full grow basis-36 whitespace-nowrap print:hidden desktop:w-auto">
       Salvar em PDF
     </Button>
   )
