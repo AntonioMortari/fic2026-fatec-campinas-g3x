@@ -10,10 +10,10 @@ da **Fatec Campinas** no Fatec Innovation Challenge 2026.
 
 | Integrante | Papel |
 |---|---|
-| _a preencher_ | Front-end |
-| _a preencher_ | Back-end |
-| _a preencher_ | Agilista |
-| _a preencher_ | DevOps |
+| Yuri Oliveira | Front-end |
+| Antonio Mortari | Back-end |
+| João Abilla | Agilista |
+| Stéfano Ferrari | DevOps |
 
 ## O problema e a solução
 
