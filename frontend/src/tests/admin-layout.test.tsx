@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 import { fakeUser, mockApi } from './auth-support'
+import { isMoreRoute } from '../lib/admin-navigation'
 import { renderRoute } from './render'
 
 let mock: ReturnType<typeof mockApi>
@@ -240,5 +241,14 @@ describe('who gets the frame', () => {
 
     expect(screen.queryByText('Ver o site')).not.toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Atalhos' })).toBeInTheDocument()
+  })
+})
+
+describe('which screens belong to "Mais"', () => {
+  it('knows the menu screens and not the ones with a shortcut of their own', () => {
+    expect(isMoreRoute('/admin/relatorio')).toBe(true)
+    expect(isMoreRoute('/minha-conta')).toBe(true)
+    expect(isMoreRoute('/admin')).toBe(false)
+    expect(isMoreRoute('/admin/eventos/1/presenca')).toBe(false)
   })
 })

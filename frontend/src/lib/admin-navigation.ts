@@ -37,3 +37,7 @@ export const ADMIN_MORE_GROUPS: AdminGroup[] = [
 export function isActiveAdminRoute(target: string, current: string): boolean {
   return target === ADMIN_HOME.to ? current === target : isActiveRoute(target, current)
 }
+
+export function isMoreRoute(pathname: string): boolean {
+  return ADMIN_MORE_GROUPS.some((group) => group.items.some((item) => isActiveRoute(item.to, pathname)))
+}

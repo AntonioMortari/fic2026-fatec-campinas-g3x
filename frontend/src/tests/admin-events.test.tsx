@@ -576,11 +576,11 @@ describe('the attendance list (RF17, screen 3g)', () => {
     expect(screen.getByText('Ninguém com esse nome')).toBeInTheDocument()
   })
 
-  it('goes back to the registrants, and says it with an empty list or an unknown event', async () => {
+  it('goes back to the events list, and says it with an empty list or an unknown event', async () => {
     openAs(STAFF, list([]))
     renderRoute(page)
     expect(await screen.findByText('Ninguém se inscreveu ainda')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Voltar para Inscritos/ })).toHaveAttribute('href', `/admin/eventos/${live.id}/inscritos`)
+    expect(screen.getByRole('link', { name: /Voltar para Eventos/ })).toHaveAttribute('href', '/admin/eventos')
     mock.restore()
 
     openAs(STAFF, { [route]: () => apiError(404, 'event_not_found', 'x') })
