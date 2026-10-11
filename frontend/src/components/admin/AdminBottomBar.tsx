@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../../lib/cn'
-import { ADMIN_BOTTOM_BAR, isActiveAdminRoute } from '../../lib/admin-navigation'
+import { ADMIN_BOTTOM_BAR, isActiveAdminRoute, isMoreRoute } from '../../lib/admin-navigation'
 
 const ITEM = 'relative flex min-h-16 items-center justify-center text-[min(0.8125rem,15px)] no-underline'
 
@@ -16,12 +16,13 @@ interface AdminBottomBarProps {
 
 export function AdminBottomBar({ openMenu, menuOpen, onCloseMenu }: AdminBottomBarProps) {
   const { pathname } = useLocation()
+  const moreActive = menuOpen || isMoreRoute(pathname)
 
   return (
     <nav aria-label="Atalhos do painel" className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-cream px-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] desktop:hidden print:hidden">
       <ul className="m-0 grid list-none grid-cols-3 p-0">
         {ADMIN_BOTTOM_BAR.map((destination) => {
-          const active = !menuOpen && isActiveAdminRoute(destination.to, pathname)
+          const active = !moreActive && isActiveAdminRoute(destination.to, pathname)
           return (
             <li key={destination.to}>
               <Link
@@ -40,10 +41,11 @@ export function AdminBottomBar({ openMenu, menuOpen, onCloseMenu }: AdminBottomB
           <button
             type="button"
             aria-expanded={menuOpen}
+            aria-current={!menuOpen && moreActive ? 'page' : undefined}
             onClick={menuOpen && onCloseMenu ? onCloseMenu : openMenu}
-            className={cn(ITEM, 'w-full cursor-pointer bg-transparent', menuOpen ? 'font-bold text-brown' : 'font-semibold text-brown-400')}
+            className={cn(ITEM, 'w-full cursor-pointer bg-transparent', moreActive ? 'font-bold text-brown' : 'font-semibold text-brown-400')}
           >
-            {menuOpen && <ActiveMarker />}
+            {moreActive && <ActiveMarker />}
             Mais
           </button>
         </li>

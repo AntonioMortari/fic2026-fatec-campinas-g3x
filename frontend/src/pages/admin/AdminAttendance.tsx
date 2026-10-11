@@ -49,7 +49,7 @@ export function AdminAttendance() {
     <div className="max-w-xl pb-12 desktop:ml-12 desktop:pb-12">
       <div className="sticky top-0 z-20 border-b border-line bg-cream desktop:top-18">
         <div className="flex h-15 items-center justify-between px-4 desktop:h-auto desktop:px-0 desktop:pt-5">
-          <BackLink to={`/admin/eventos/${id}/inscritos`} label="Inscritos" tone="link" />
+          <BackLink to="/admin/eventos" label="Eventos" tone="link" />
           {entries.length > 0 && (
             <span className="text-[0.8125rem] text-brown-400">
               {checked} de {entries.length}
