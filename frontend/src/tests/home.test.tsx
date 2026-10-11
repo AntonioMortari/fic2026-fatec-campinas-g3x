@@ -67,6 +67,15 @@ describe('home page (UX/UI analysis 2a and 6a)', () => {
     expect(within(section).getByRole('link', { name: 'Quero me inscrever' })).toHaveAttribute('href', '/agenda/cafu-e-o-cafe/inscricao')
   })
 
+  it('keeps the card as compact as the design: start time only, no spots line, category as the eyebrow on desktop', () => {
+    renderWithRouter(<Home nextEvent={{ ...EVENT, endsAt: '2026-10-17T18:30:00Z', capacity: 18, spotsLeft: 18 }} />)
+    const section = screen.getByRole('region', { name: 'Próxima atividade' })
+
+    expect(within(section).getByText('14h · Sede, Vila Romero · Livre')).toBeInTheDocument()
+    expect(within(section).queryByText(/vagas restantes/)).not.toBeInTheDocument()
+    expect(within(section).getByText('Contação de história', { selector: 'span.hidden' })).toBeInTheDocument()
+  })
+
   it('says the spots are over, with no link, when none is left', () => {
     renderWithRouter(<Home nextEvent={{ ...EVENT, capacity: 5, spotsLeft: 0 }} />)
     const section = screen.getByRole('region', { name: 'Próxima atividade' })

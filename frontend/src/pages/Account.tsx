@@ -59,7 +59,6 @@ export function Account() {
         overline="Área da conta"
         title="Sua conta"
         lead="Só você e a equipe do Ateliê enxergam esta página."
-        titleClassName="text-[1.875rem] leading-[1.1]"
         leadClassName="text-[0.9375rem] text-brown-400"
       />
       <div className="flex max-w-xl flex-col gap-5">
@@ -90,9 +89,13 @@ export function Account() {
             <MyRegistrations />
           </section>
         )}
-        <Button variant="secondary" onClick={signOut} className="self-start border-0 px-0 text-[0.9375rem] text-blue-deep hover:text-brown">
+        <button
+          type="button"
+          onClick={signOut}
+          className="inline-flex min-h-11 cursor-pointer items-center self-start bg-transparent p-0 text-[0.9375rem] font-semibold text-blue-deep underline underline-offset-[0.15em] hover:text-brown"
+        >
           Sair da conta
-        </Button>
+        </button>
       </div>
     </Container>
   )

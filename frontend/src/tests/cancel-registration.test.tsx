@@ -54,6 +54,15 @@ describe('cancelling a sign-up with the personal link (designs 7c and 7d)', () =
     expect(calls(`POST ${KEY}`)).toHaveLength(0)
   })
 
+  it('says "Voltar para a agenda" in the focused header, as the design 7c does', async () => {
+    serve()
+    renderRoute(PATH)
+    await screen.findByRole('heading', { name: 'Cancelar a inscrição?' })
+
+    expect(screen.getByRole('link', { name: 'Voltar para a agenda' })).toHaveAttribute('href', '/agenda')
+    expect(screen.queryByRole('navigation', { name: 'Atalhos' })).not.toBeInTheDocument()
+  })
+
   it('needs no session: it asks the API with no credentials', async () => {
     serve()
     renderRoute(PATH)
@@ -155,5 +164,29 @@ describe('cancelling a sign-up with the personal link (designs 7c and 7d)', () =
     await screen.findByRole('heading', { name: 'Inscrição cancelada' })
 
     expect(calls(`POST ${KEY}`)[0]?.body).toBeUndefined()
+  })
+
+  it('moves to the regular header and bottom bar once it is done, as the design 7d does', async () => {
+    const user = userEvent.setup()
+    serve({
+      [`POST ${KEY}`]: () => ({ status: 200, data: { registration: preview('cancelled') } }),
+      'GET /events': () => ({ status: 200, data: { data: [] } }),
+    })
+    const router = renderRoute(PATH)
+
+    await user.click(await screen.findByRole('button', { name: 'Sim, cancelar minha inscrição' }))
+    await screen.findByRole('heading', { name: 'Inscrição cancelada' })
+
+    expect(router.state.location.pathname).toBe('/inscricao/cancelada')
+    expect(screen.getByRole('navigation', { name: 'Atalhos' })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: /Ateliê Afro Cultural/ }).length).toBeGreaterThan(0)
+  })
+
+  it('sends a reload of the done page back to the sign-up, which now says it was cancelled', async () => {
+    serve({ [`GET ${KEY}`]: () => ({ status: 200, data: { registration: preview('cancelled') } }) })
+    const router = renderRoute(`/inscricao/cancelada?c=${CODE}`)
+
+    expect(await screen.findByRole('heading', { name: 'Esta inscrição já foi cancelada' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/inscricao/cancelar')
   })
 })

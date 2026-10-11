@@ -66,6 +66,16 @@ describe('your account (design 7a)', () => {
     expect(screen.queryByText(/Candidaturas ao voluntariado|Minhas doações|Trocar minha senha/)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sair da conta' })).toBeInTheDocument()
   })
+
+  it('draws "Sair da conta" as a link, not as a bordered button, and keeps the 32px title (design 7a)', async () => {
+    open()
+    renderRoute('/minha-conta')
+
+    const signOut = await screen.findByRole('button', { name: 'Sair da conta' })
+    expect(signOut).toHaveClass('text-blue-deep', 'underline')
+    expect(signOut.className).not.toMatch(/border/)
+    expect(screen.getByRole('heading', { level: 1, name: 'Sua conta' }).className).not.toMatch(/text-\[1\.875rem\]/)
+  })
 })
 
 describe('changing my data (design 7b)', () => {

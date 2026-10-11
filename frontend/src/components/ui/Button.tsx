@@ -22,7 +22,7 @@ export type ButtonProps = InternalLinkProps | ExternalLinkProps | NativeButtonPr
 const BASE =
   'inline-flex items-center justify-center gap-2 px-5 text-center font-semibold no-underline ' +
   'border-[1.5px] border-brown select-none cursor-pointer ' +
-  'transition-[transform,box-shadow,background-color,filter] duration-150 ease-out ' +
+  'transition-[transform,box-shadow,background-color,filter] duration-150 ease-out active:duration-90 ' +
   'disabled:cursor-not-allowed disabled:opacity-60 aria-disabled:opacity-60'
 
 const VARIANTS: Record<ButtonVariant, string> = {

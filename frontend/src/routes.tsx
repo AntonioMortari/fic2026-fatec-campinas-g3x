@@ -14,6 +14,7 @@ import { AdminRegistrants } from './pages/admin/AdminRegistrants'
 import { Auth } from './pages/Auth'
 import { EventRegistration } from './pages/EventRegistration'
 import { ComponentCatalog } from './pages/ComponentCatalog'
+import { CancelDone } from './pages/CancelDone'
 import { CancelRegistration } from './pages/CancelRegistration'
 import { Agenda } from './pages/Agenda'
 import { HomeContainer } from './pages/HomeContainer'
@@ -27,6 +28,7 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/', element: <HomeContainer /> },
       { path: '/agenda', element: <Agenda /> },
+      { path: '/inscricao/cancelada', element: <CancelDone /> },
       { element: <RequireAuth />, children: [{ path: '/minha-conta', element: <Account /> }] },
       ...DEV_ONLY,
       { path: '*', element: <NotFound /> },
@@ -50,7 +52,7 @@ export const routes: RouteObject[] = [
       { path: '/entrar', element: <Auth />, handle: { wide: true, genericBack: true } },
       { element: <RequireAuth />, children: [{ path: '/minha-conta/dados', element: <AccountEdit />, handle: { backTo: '/minha-conta', backLabel: 'Voltar para sua conta' } }] },
       { path: '/agenda/:id/inscricao', element: <EventRegistration />, handle: { backTo: '/agenda' } },
-      { path: '/inscricao/cancelar', element: <CancelRegistration />, handle: { backTo: '/agenda' } },
+      { path: '/inscricao/cancelar', element: <CancelRegistration />, handle: { backTo: '/agenda', backLabel: 'Voltar para a agenda' } },
     ],
   },
 ]
