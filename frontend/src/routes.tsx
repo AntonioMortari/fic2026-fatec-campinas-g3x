@@ -11,6 +11,7 @@ import { AdminEvents } from './pages/admin/AdminEvents'
 import { AdminHome } from './pages/admin/AdminHome'
 import { AdminReport } from './pages/admin/AdminReport'
 import { AdminRegistrants } from './pages/admin/AdminRegistrants'
+import { AdminVolunteers } from './pages/admin/AdminVolunteers'
 import { Auth } from './pages/Auth'
 import { EventRegistration } from './pages/EventRegistration'
 import { ComponentCatalog } from './pages/ComponentCatalog'
@@ -55,6 +56,8 @@ export const routes: RouteObject[] = [
       { path: '/admin/eventos/:id/inscritos', element: <AdminRegistrants /> },
       { path: '/admin/relatorio', element: <AdminReport />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/eventos/:id/presenca', element: <AdminAttendance />, handle: { hideHeaderOnMobile: true } },
+      { path: '/admin/voluntarios', element: <AdminVolunteers /> },
+      { path: '/admin/voluntarios/:id', element: <AdminVolunteers />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
     ],
   },
   {
