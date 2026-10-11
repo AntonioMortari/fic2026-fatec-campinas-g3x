@@ -1,0 +1,22 @@
+name: Trello
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, edited, closed]
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test the sync script
+        run: node --test .github/scripts/trello-sync.test.mjs
+      - name: Link the pull request to its Trello cards
+        env:
+          TRELLO_KEY: ${{ secrets.TRELLO_KEY }}
+          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
+          TRELLO_BOARD: ${{ vars.TRELLO_BOARD || '0PhAQ03T' }}
+        run: node .github/scripts/trello-sync.mjs

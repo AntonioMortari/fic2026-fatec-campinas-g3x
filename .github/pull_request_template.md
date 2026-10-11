@@ -1,3 +1,9 @@
+## Cards do Trello
+
+<!-- Cole o endereço de cada card (https://trello.com/c/xxxxxxxx). Ao abrir a PR o card é vinculado e vai para "Em revisão"; ao mesclar, vai para "Feito". -->
+
+- 
+
 ## O que muda
 
 <!-- User Stories (RFxx) cobertas e como foi verificado. -->
