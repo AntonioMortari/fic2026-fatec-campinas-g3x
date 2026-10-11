@@ -379,3 +379,28 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   barreira e o limite por conexão é obrigatório; o desenho não pode prometer prazo de resposta nem apontar para página
   inexistente (regras da ONG: não inventar conteúdo).
 - **PR:** branch `feat/contact`
+
+## 2026-10-12 — Mensagens de contato: fila de atendimento da equipe (RF29, desenhos 10l, 10m e 10n)
+- **Artefato:** Requisitos · Arquitetura · Protótipos
+- **Antes:** `POST /api/contacts` gravava a mensagem em `contacts` e nada a lia: a equipe só a via no banco. A tabela
+  não tinha situação de atendimento nem nota. O RF29 (registro central de contatos) não tinha tela.
+- **Depois:** `/admin/contatos` e `/admin/contatos/:id` conforme os desenhos 10l (desktop), 10m (lista no celular) e
+  10n (detalhe no celular). Back-end: migration `20261012100000-add-contact-triage` (`status` ENUM `new`, `in_contact`,
+  `done` com padrão `new`; `staff_note` TEXT; índice `(status, created_at)`) e as rotas só da equipe
+  `GET /api/admin/contacts` (filtro `status`, `page`, `pageSize` com padrão 20, `counts`, `pagination`), `/counts`,
+  `/export.csv`, `/:id` e `PATCH /:id` (`{ status?, staffNote? }`), todas no Swagger. A ordem da fila (nova, em contato,
+  concluída, e a mais recente primeiro) é feita no SQL, para a paginação cortar a lista já ordenada. O formulário público
+  continua sem aceitar situação nem nota (teste com corpo hostil), e o `PATCH` grava só essas duas colunas. **Não há
+  `DELETE`**: a mensagem é registro; a exclusão a pedido (LGPD) segue como decisão à parte e hoje se faz por SQL. Menu:
+  "Mensagens" em "Pessoas", com selo de novas.
+- **Diferenças em relação ao desenho, e por quê:** (1) **sem origem** ("PARA ESCOLAS", "Biblioteca") e sem filtro por
+  origem: `contacts` não tem essa coluna, o próprio desenho pede para confirmar, e inventar a origem a partir do texto
+  seria dado fabricado; o sobretítulo diz "CONTATO". (2) **"Contatos" no menu e "Mensagens" no título**, que o desenho
+  mostra, foram unificados em **"Mensagens"**, como as notas do 10l sugerem. (3) **Paginação** de 20 por página com
+  "Página N de M", que o desenho mostra e o Documento de Requisitos não descreve: uma fila que só cresce não cabe numa
+  rolagem, e cortar sem dizer esconderia mensagem. (4) **Nota interna** exige migration (o desenho avisa); entra aqui
+  porque a coluna é aditiva e não toca em nada do que a pessoa escreveu. (5) O selo do topo do detalhe no celular diz
+  "Painel", como o resto do painel, e não "Equipe". (6) Sem a busca global do cabeçalho (não existe no projeto).
+- **Por quê:** o formulário de contato (RF07) estava ligado a uma tabela que ninguém podia ler. Sem esta tela, uma
+  escola que escreve não é respondida, e a ONG lê WhatsApp e telefone todos os dias, não o painel do banco.
+- **PR:** branch `feat/admin-contacts`
