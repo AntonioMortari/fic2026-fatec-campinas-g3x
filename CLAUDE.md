@@ -187,6 +187,7 @@ versão `.html` ao lado, mais fácil de ler). Quando o documento evoluir, a v2 v
   existe (ex.: "Atividades", "Pessoas" no menu lateral), o item **não entra** — um link para o 404 é pior que
   a ausência.
 - O PR diz quais critérios de aceitação cobre e como foi verificado.
+- **Todo PR leva o endereço do card do Trello** (`https://trello.com/c/xxxxxxxx`, o endereço puro, no título, no corpo ou no nome da branch). O workflow `.github/workflows/trello.yml` lê esses endereços e, ao **abrir** o PR, anexa o PR ao card e o move de "A fazer"/"Fazendo" para **"Em revisão"** (PR em rascunho só anexa); ao **mesclar**, move para "Feito"; ao **fechar sem mesclar**, devolve de "Em revisão" para "Fazendo". Nunca arrasta para trás um card que já está em "Feito". Precisa dos segredos `TRELLO_KEY` e `TRELLO_TOKEN` no repositório (Settings → Secrets and variables → Actions) e de uma lista chamada exatamente "Em revisão" no quadro; sem os segredos o workflow não faz nada e não falha. O quadro vem da variável `TRELLO_BOARD` (padrão `0PhAQ03T`). Os testes do script rodam no próprio workflow (`node --test .github/scripts/trello-sync.test.mjs`).
 - Antes de abrir: `npm test` e `npm run typecheck` nas duas pastas.
 - **Conformidade com o Regulamento Técnico, em TODO PR.** Antes de abrir (e de novo na entrega), rodar
   `/regulamento` (`.claude/skills/regulamento/SKILL.md`): ele confere stack, estrutura, `docs/originais/`,
