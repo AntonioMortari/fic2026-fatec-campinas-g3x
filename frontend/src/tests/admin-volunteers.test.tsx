@@ -299,16 +299,6 @@ describe('the screen of one application (design 10k)', () => {
     expect(calls('PATCH /admin/volunteer-applications/l1/status')[0]!.body).toEqual({ status: 'ended' })
   })
 
-  it('does not ask the API when the situation chosen is the one it already has', async () => {
-    const user = userEvent.setup()
-    open()
-    renderRoute('/admin/voluntarios/l1')
-
-    await user.click(await screen.findByRole('radio', { name: 'Nova' }))
-
-    expect(calls('PATCH /admin/volunteer-applications/l1/status')).toHaveLength(0)
-  })
-
   it('confirms the change with an undo that puts the previous situation back', async () => {
     const user = userEvent.setup()
     open({

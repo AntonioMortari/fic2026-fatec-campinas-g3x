@@ -37,7 +37,7 @@ export function VolunteerDetail({ application }: { application: AdminVolunteerAp
   }
 
   function change(status: VolunteerStatus) {
-    if (status !== application.status) apply(status, application.status, true)
+    apply(status, application.status, true)
   }
 
   const busy = setStatus.isPending
