@@ -8,10 +8,10 @@ import { useVolunteerAreas } from '../services/volunteering'
 function Actions({ className }: { className: string }) {
   return (
     <div className={className}>
-      <Button to={APPLICATION_PATH} variant="applique" className="min-h-12! whitespace-nowrap px-7 text-[0.9375rem] desktop:min-h-13! desktop:text-body">
+      <Button to={APPLICATION_PATH} variant="applique" className="min-h-12! w-full whitespace-nowrap px-7 min-[24rem]:w-auto text-[0.9375rem] desktop:min-h-13! desktop:text-body">
         Quero me candidatar
       </Button>
-      <Link to="/contato" className="inline-flex min-h-11 items-center text-[0.9375rem] font-semibold whitespace-nowrap">
+      <Link to="/contato" className="inline-flex min-h-11 items-center justify-center text-[0.9375rem] min-[24rem]:justify-start font-semibold whitespace-nowrap">
         Tenho uma dúvida
       </Link>
     </div>
@@ -69,7 +69,7 @@ export function Volunteering() {
       </Container>
 
       <div className="sticky bottom-[calc(3.5rem+1.5px+max(1rem,env(safe-area-inset-bottom)))] z-20 border-t border-line bg-cream desktop:hidden">
-        <Actions className="mx-auto flex max-w-xl flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2.5 pr-5.5 pl-4" />
+        <Actions className="mx-auto flex max-w-xl flex-col gap-y-0.5 py-2.5 pr-5.5 pl-4 min-[24rem]:flex-row min-[24rem]:items-center min-[24rem]:justify-between min-[24rem]:gap-x-3" />
       </div>
     </>
   )
