@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 import { fakeUser, mockApi } from './auth-support'
+import { isMoreRoute } from '../lib/admin-navigation'
 import { renderRoute } from './render'
 
 let mock: ReturnType<typeof mockApi>
@@ -15,6 +16,7 @@ function openAs(account: typeof fakeUser | null, events: unknown[] = []) {
   mock = mockApi({
     'POST /auth/refresh': () => ({ status: 200, data: { token: 'a.b.c', user: account } }),
     'GET /admin/events': () => ({ status: 200, data: { data: events } }),
+    'GET /admin/volunteer-applications/counts': () => ({ status: 200, data: { counts: { all: 3, new: 2, in_contact: 1, volunteering: 0, ended: 0 } } }),
     'GET /admin/events/11111111-1111-4111-8111-111111111111/attendance': () => ({ status: 200, data: { event: { title: 'Roda', startsAt: '2030-11-20T18:00:00.000Z' }, data: [] } }),
   })
 }
@@ -86,7 +88,7 @@ describe("the panel's own frame (screen 2c)", () => {
     await user.click(within(screen.getByRole('navigation', { name: 'Atalhos do painel' })).getByRole('button', { name: 'Mais' }))
     const menu = screen.getByRole('dialog', { name: 'Painel' })
 
-    expect(within(menu).getAllByRole('heading', { level: 3, hidden: true }).map((heading) => heading.textContent)).toEqual(['Gestão', 'Conta', 'Leitura'])
+    expect(within(menu).getAllByRole('heading', { level: 3, hidden: true }).map((heading) => heading.textContent)).toEqual(['Pessoas', 'Gestão', 'Conta', 'Leitura'])
     for (const missing of ['Atividades', 'Publicações', 'Galeria', 'Biblioteca', 'Configurações', 'Notícias']) {
       expect(within(menu).queryByRole('link', { name: missing, hidden: true })).not.toBeInTheDocument()
     }
@@ -109,8 +111,8 @@ describe("the desktop frame of the panel (screen 7j)", () => {
     await screen.findByRole('heading', { name: 'Eventos e presença', level: 1 })
     const side = screen.getByRole('navigation', { name: 'Seções do painel' })
 
-    expect(within(side).getAllByRole('link').map((link) => link.textContent)).toEqual(['Início', 'Eventos e presença', 'Relatório'])
-    expect(within(side).getAllByRole('region').map((group) => group.getAttribute('aria-label'))).toEqual(['Agenda', 'Gestão'])
+    expect(within(side).getAllByRole('link').map((link) => link.textContent)).toEqual(['Início', 'Eventos e presença', 'Voluntários', 'Relatório'])
+    expect(within(side).getAllByRole('region').map((group) => group.getAttribute('aria-label'))).toEqual(['Agenda', 'Pessoas', 'Gestão'])
     expect(within(side).getByRole('link', { name: 'Eventos e presença' })).toHaveAttribute('aria-current', 'page')
     expect(within(side).getByRole('link', { name: 'Início' })).not.toHaveAttribute('aria-current')
     for (const missing of ['Atividades', 'Pessoas', 'Conteúdo', 'Biblioteca', 'Configurações']) {
@@ -239,5 +241,14 @@ describe('who gets the frame', () => {
 
     expect(screen.queryByText('Ver o site')).not.toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Atalhos' })).toBeInTheDocument()
+  })
+})
+
+describe('which screens belong to "Mais"', () => {
+  it('knows the menu screens and not the ones with a shortcut of their own', () => {
+    expect(isMoreRoute('/admin/relatorio')).toBe(true)
+    expect(isMoreRoute('/minha-conta')).toBe(true)
+    expect(isMoreRoute('/admin')).toBe(false)
+    expect(isMoreRoute('/admin/eventos/1/presenca')).toBe(false)
   })
 })

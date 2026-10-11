@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ADMIN_MORE_GROUPS } from '../../lib/admin-navigation'
 import { useSignOut } from '../auth/useSignOut'
 import { ReadingControls } from '../layout/ReadingControls'
+import { NewVolunteersBadge } from './NewVolunteersBadge'
 
 const OVERLINE = 'm-0 mt-6 mb-0.5 text-overline font-semibold uppercase tracking-[0.12em] text-ochre-deep'
 const ROW = 'flex min-h-12.5 items-center text-body font-semibold text-brown no-underline hover:text-blue-deep'
@@ -63,6 +64,7 @@ export function AdminMenu({ open, onClose, bottomBar }: AdminMenuProps) {
                     <li key={item.to} className="border-b border-line">
                       <Link to={item.to} onClick={onClose} className={ROW}>
                         {item.label}
+                        {item.badge === 'new-volunteers' && <NewVolunteersBadge />}
                       </Link>
                     </li>
                   ))}

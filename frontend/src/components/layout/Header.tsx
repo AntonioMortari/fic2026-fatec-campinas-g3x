@@ -13,7 +13,7 @@ const CONTROL =
 const GHOST = `${CONTROL} bg-transparent hover:bg-hover`
 const SOLID = `${CONTROL} hover:brightness-95`
 
-export function Header({ openMenu, menuOpen = false }: { openMenu: OpenMenu; menuOpen?: boolean }) {
+export function Header({ openMenu, menuOpen = false, hideOnMobile = false }: { openMenu: OpenMenu; menuOpen?: boolean; hideOnMobile?: boolean }) {
   const { pathname } = useLocation()
   const { user, status } = useAuth()
   const signOut = useSignOut()
@@ -34,7 +34,7 @@ export function Header({ openMenu, menuOpen = false }: { openMenu: OpenMenu; men
   }, [menuOpen])
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-cream">
+    <header className={cn('sticky top-0 z-30 border-b border-line bg-cream', hideOnMobile && 'max-desktop:hidden')}>
       <div className="mx-auto flex h-15 max-w-page items-center gap-2.5 px-4 desktop:h-19 desktop:gap-8 desktop:px-8">
         <Logo className="min-w-0 desktop:h-11" />
 

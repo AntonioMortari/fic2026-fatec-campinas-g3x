@@ -48,7 +48,7 @@ export function formatPhone(digits: string | null): string {
 
 export const formatCpf = (digits: string | null): string => (digits ? digits.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : '');
 
-function formatDateTime(iso: string): string {
+export function formatDateTime(iso: string): string {
   const parts = new Intl.DateTimeFormat('pt-BR', {
     timeZone: ORGANIZATION_TIME_ZONE,
     day: '2-digit',

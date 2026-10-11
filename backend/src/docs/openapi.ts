@@ -157,6 +157,61 @@ export const openApiDocument = {
           checkedAt: { type: 'string', format: 'date-time' },
         },
       },
+      VolunteerArea: {
+        type: 'object',
+        required: ['id', 'name', 'description'],
+        properties: {
+          id: { type: 'string', example: 'apoio-pedagogico', description: 'Identificador estável, usado nas candidaturas.' },
+          name: { type: 'string', example: 'Apoio pedagógico e oficinas' },
+          description: { type: 'string' },
+        },
+      },
+      VolunteerApplicationRequest: {
+        type: 'object',
+        required: ['areas'],
+        description: 'A conta vem do token, nunca do corpo: `userId`, `status` e qualquer outro campo são descartados.',
+        properties: {
+          areas: { type: 'array', minItems: 1, items: { type: 'string' }, description: 'Ao menos uma área. Repetidas são reduzidas a uma; uma que não existe é recusada.' },
+          message: { type: ['string', 'null'], maxLength: 2000, description: 'Opcional: dias e horários, o que já fez, o que quer aprender.' },
+        },
+      },
+      MyVolunteerApplication: {
+        type: 'object',
+        required: ['id', 'status', 'createdAt', 'areas'],
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          status: { type: 'string', enum: ['new', 'in_contact', 'volunteering', 'ended'] },
+          message: { type: ['string', 'null'] },
+          createdAt: { type: 'string', format: 'date-time' },
+          areas: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' } } } },
+        },
+      },
+      AdminVolunteerApplication: {
+        allOf: [
+          { $ref: '#/components/schemas/MyVolunteerApplication' },
+          {
+            type: 'object',
+            required: ['name', 'email'],
+            properties: {
+              name: { type: 'string', description: 'Do perfil da conta.' },
+              email: { type: 'string', format: 'email' },
+              phone: { type: ['string', 'null'], description: 'Só dígitos, com DDD.' },
+              updatedAt: { type: 'string', format: 'date-time' },
+            },
+          },
+        ],
+      },
+      VolunteerStatusCounts: {
+        type: 'object',
+        required: ['all', 'new', 'in_contact', 'volunteering', 'ended'],
+        properties: {
+          all: { type: 'integer', minimum: 0 },
+          new: { type: 'integer', minimum: 0 },
+          in_contact: { type: 'integer', minimum: 0 },
+          volunteering: { type: 'integer', minimum: 0 },
+          ended: { type: 'integer', minimum: 0 },
+        },
+      },
       ContactRequest: {
         type: 'object',
         required: ['name', 'email', 'message', 'consent'],
@@ -628,6 +683,144 @@ export const openApiDocument = {
             description: 'API de pé, banco fora do ar',
             content: { 'application/json': { schema: { $ref: '#/components/schemas/Health' } } },
           },
+        },
+      },
+    },
+    '/volunteer-areas': {
+      get: {
+        tags: ['Volunteering'],
+        summary: 'As áreas de voluntariado (RF24)',
+        description: 'Pública. Na ordem em que a equipe definiu, com o texto de cada área.',
+        responses: {
+          '200': { description: 'As cinco áreas', content: { 'application/json': { schema: { type: 'object', properties: { data: { type: 'array', items: { $ref: '#/components/schemas/VolunteerArea' } } } } } } },
+        },
+      },
+    },
+    '/volunteer-applications': {
+      post: {
+        tags: ['Volunteering'],
+        summary: 'Candidata a conta do token ao voluntariado (RF25)',
+        description:
+          'Exige sessão: a conta vem do token verificado, nunca do corpo, e já registra a maioridade (RN01). Quem tem candidatura viva (`new`, `in_contact` ou `volunteering`) não manda outra — a regra vale no banco, com um índice único, contra dois envios ao mesmo tempo. `ended` devolve o direito de se candidatar de novo. A candidatura e as áreas são gravadas numa transação só.',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/VolunteerApplicationRequest' } } } },
+        responses: {
+          '201': { description: 'Candidatura registrada', content: { 'application/json': { schema: { type: 'object', properties: { application: { $ref: '#/components/schemas/MyVolunteerApplication' } } } } } },
+          '400': { description: 'Dados inválidos (nenhuma área, área inexistente, texto acima de 2000 caracteres). `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: '`already_applied`: já existe uma candidatura em andamento', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/me/volunteer-applications': {
+      get: {
+        tags: ['Account'],
+        summary: 'As minhas candidaturas ao voluntariado (RF11, RF25)',
+        description: 'Só as da conta do token. As em andamento primeiro, a mais recente em cima; as encerradas descem e nunca somem.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Lista (pode ser vazia)', content: { 'application/json': { schema: { type: 'object', properties: { data: { type: 'array', items: { $ref: '#/components/schemas/MyVolunteerApplication' } } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/volunteer-applications': {
+      get: {
+        tags: ['Admin'],
+        summary: 'A fila de candidaturas ao voluntariado (equipe, RF26)',
+        description:
+          'Filtros por query: `status` e `area`. Vem a candidatura com nome, e-mail e telefone do perfil. `counts` conta por situação respeitando só o filtro de área, para os chips mostrarem quantas há em cada uma. Ordem: nova, em contato, voluntariando, encerrada; dentro de cada uma, a mais recente primeiro.',
+        parameters: [
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['new', 'in_contact', 'volunteering', 'ended'] } },
+          { name: 'area', in: 'query', schema: { type: 'string' } },
+        ],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'A fila e as contagens',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    data: { type: 'array', items: { $ref: '#/components/schemas/AdminVolunteerApplication' } },
+                    counts: { $ref: '#/components/schemas/VolunteerStatusCounts' },
+                  },
+                },
+              },
+            },
+          },
+          '400': { description: 'Filtro inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/volunteer-applications/counts': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Quantas candidaturas há em cada situação (equipe)',
+        description: 'Só as contagens, sem nenhuma linha: é o que o selo do menu do painel lê.',
+        parameters: [{ name: 'area', in: 'query', schema: { type: 'string' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Contagens', content: { 'application/json': { schema: { type: 'object', properties: { counts: { $ref: '#/components/schemas/VolunteerStatusCounts' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/volunteer-applications/export.csv': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Planilha das candidaturas (equipe)',
+        description:
+          'CSV com `;` e BOM UTF-8, com os mesmos filtros da fila. Células que começariam com `=`, `+`, `-` ou `@` levam um apóstrofo na frente: sem isso viram fórmula. A situação usa os rótulos da equipe.',
+        parameters: [
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['new', 'in_contact', 'volunteering', 'ended'] } },
+          { name: 'area', in: 'query', schema: { type: 'string' } },
+        ],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Arquivo CSV', content: { 'text/csv': { schema: { type: 'string' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/volunteer-applications/{id}': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Uma candidatura (equipe)',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'A candidatura', content: { 'application/json': { schema: { type: 'object', properties: { application: { $ref: '#/components/schemas/AdminVolunteerApplication' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`application_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/volunteer-applications/{id}/status': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Muda a situação de uma candidatura (equipe, RF26)',
+        description:
+          'Qualquer passagem entre as quatro situações existe, e o corpo aceita só `status`. Encerrar devolve à pessoa o direito de se candidatar de novo; reabrir uma encerrada quando a pessoa já tem outra em andamento responde 409.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { type: 'object', required: ['status'], properties: { status: { type: 'string', enum: ['new', 'in_contact', 'volunteering', 'ended'] } } } } },
+        },
+        responses: {
+          '200': { description: 'A candidatura atualizada', content: { 'application/json': { schema: { type: 'object', properties: { application: { $ref: '#/components/schemas/AdminVolunteerApplication' } } } } } },
+          '400': { description: 'Situação inválida', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`application_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: '`live_application_exists`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },

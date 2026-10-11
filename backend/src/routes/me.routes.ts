@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getMyRegistrations, profileBody, updateMe } from '../controllers/me.controller';
 import { authenticate } from '../middlewares/authenticate';
+import { getMyApplications } from '../controllers/volunteers.controller';
 import { validate } from '../middlewares/validate';
 
 export const meRoutes = Router();
@@ -12,4 +13,5 @@ meRoutes.use((_req, res, next) => {
 });
 
 meRoutes.get('/registrations', getMyRegistrations);
+meRoutes.get('/volunteer-applications', getMyApplications);
 meRoutes.patch('/', validate({ body: profileBody }), updateMe);

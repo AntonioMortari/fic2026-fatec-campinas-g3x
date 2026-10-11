@@ -76,7 +76,7 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
               onClick={onClose}
               className="flex min-h-13 items-center text-item font-semibold text-brown no-underline hover:text-blue-deep"
             >
-              Painel da equipe
+              Painel
             </Link>
           </li>
         )}

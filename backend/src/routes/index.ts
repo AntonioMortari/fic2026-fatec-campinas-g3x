@@ -6,6 +6,8 @@ import { eventsRoutes } from './events.routes';
 import { healthRoutes } from './health.routes';
 import { meRoutes } from './me.routes';
 import { registrationsRoutes } from './registrations.routes';
+import { adminVolunteersRoutes } from './admin-volunteers.routes';
+import { volunteerApplicationsRoutes, volunteerAreasRoutes } from './volunteers.routes';
 import { contactsRoutes } from './contacts.routes';
 
 export const routes = Router();
@@ -17,4 +19,7 @@ routes.use('/admin/events', adminEventsRoutes);
 routes.use('/admin/report', adminReportRoutes);
 routes.use('/me', meRoutes);
 routes.use('/registrations', registrationsRoutes);
+routes.use('/volunteer-areas', volunteerAreasRoutes);
+routes.use('/volunteer-applications', volunteerApplicationsRoutes);
+routes.use('/admin/volunteer-applications', adminVolunteersRoutes);
 routes.use('/contacts', contactsRoutes);

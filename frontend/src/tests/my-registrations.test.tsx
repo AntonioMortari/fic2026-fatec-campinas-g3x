@@ -34,6 +34,7 @@ function open(listing: () => { status: number; data: unknown } | 'network-error'
     'POST /auth/refresh': () => ({ status: 200, data: { token: 'a.b.c', user: fakeUser } }),
     'GET /auth/me': () => ({ status: 200, data: { user: fakeUser } }),
     'GET /me/registrations': listing,
+    'GET /me/volunteer-applications': () => ({ status: 200, data: { data: [] } }),
   })
 }
 

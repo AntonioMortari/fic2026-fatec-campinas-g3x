@@ -5,7 +5,7 @@ import { fieldBox } from './field-styles'
 import { useFieldIds } from './use-field-ids'
 
 interface TextAreaFieldProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label: string
+  label: ReactNode
   hint?: ReactNode
   error?: string
 }

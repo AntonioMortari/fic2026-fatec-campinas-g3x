@@ -11,6 +11,7 @@ import { AdminEvents } from './pages/admin/AdminEvents'
 import { AdminHome } from './pages/admin/AdminHome'
 import { AdminReport } from './pages/admin/AdminReport'
 import { AdminRegistrants } from './pages/admin/AdminRegistrants'
+import { AdminVolunteers } from './pages/admin/AdminVolunteers'
 import { Auth } from './pages/Auth'
 import { EventRegistration } from './pages/EventRegistration'
 import { ComponentCatalog } from './pages/ComponentCatalog'
@@ -19,6 +20,9 @@ import { CancelRegistration } from './pages/CancelRegistration'
 import { Agenda } from './pages/Agenda'
 import { HomeContainer } from './pages/HomeContainer'
 import { NotFound } from './pages/NotFound'
+import { MyVolunteerApplications } from './pages/MyVolunteerApplications'
+import { VolunteerApplicationPage } from './pages/VolunteerApplication'
+import { Volunteering } from './pages/Volunteering'
 import { Contact } from './pages/Contact'
 
 const DEV_ONLY: RouteObject[] = import.meta.env.DEV ? [{ path: '/componentes', element: <ComponentCatalog /> }] : []
@@ -30,12 +34,20 @@ export const routes: RouteObject[] = [
       { path: '/', element: <HomeContainer /> },
       { path: '/agenda', element: <Agenda /> },
       { path: '/inscricao/cancelada', element: <CancelDone /> },
+      { path: '/voluntariado', element: <Volunteering /> },
+      {
+        element: <RequireAuth />,
+        children: [
+          { path: '/minha-conta', element: <Account /> },
+          { path: '/minha-conta/candidaturas', element: <MyVolunteerApplications />, handle: { hideHeaderOnMobile: true } },
+        ],
+      },
       { path: '/contato', element: <Contact /> },
-      { element: <RequireAuth />, children: [{ path: '/minha-conta', element: <Account /> }] },
       ...DEV_ONLY,
       { path: '*', element: <NotFound /> },
     ],
   },
+  { path: '/voluntariado/candidatura', element: <VolunteerApplicationPage /> },
   {
     element: <RequireStaff />,
     children: [
@@ -46,6 +58,8 @@ export const routes: RouteObject[] = [
       { path: '/admin/eventos/:id/inscritos', element: <AdminRegistrants /> },
       { path: '/admin/relatorio', element: <AdminReport />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/eventos/:id/presenca', element: <AdminAttendance />, handle: { hideHeaderOnMobile: true } },
+      { path: '/admin/voluntarios', element: <AdminVolunteers /> },
+      { path: '/admin/voluntarios/:id', element: <AdminVolunteers />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
     ],
   },
   {

@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { ADMIN_SIDEBAR_GROUPS, isActiveAdminRoute } from '../../lib/admin-navigation'
 import { cn } from '../../lib/cn'
+import { NewVolunteersBadge } from './NewVolunteersBadge'
 
 export function AdminSidebar() {
   const { pathname } = useLocation()
@@ -26,6 +27,7 @@ export function AdminSidebar() {
                     )}
                   >
                     {destination.label}
+                    {destination.badge === 'new-volunteers' && <NewVolunteersBadge />}
                   </Link>
                 </li>
               )

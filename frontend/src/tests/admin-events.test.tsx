@@ -68,7 +68,7 @@ describe('who sees the panel', () => {
     await screen.findByRole('link', { name: /^Minha conta/ })
     await user.click(screen.getByRole('button', { name: /Aa, acessibilidade/ }))
 
-    expect(within(screen.getByRole('dialog', { hidden: true })).getByRole('link', { name: 'Painel da equipe', hidden: true })).toHaveAttribute('href', '/admin')
+    expect(within(screen.getByRole('dialog', { hidden: true })).getByRole('link', { name: 'Painel', hidden: true })).toHaveAttribute('href', '/admin')
   })
 
   it('does not offer it to someone who is not staff', async () => {
@@ -78,7 +78,7 @@ describe('who sees the panel', () => {
     await screen.findByRole('link', { name: /^Minha conta/ })
     await user.click(screen.getByRole('button', { name: /Aa, acessibilidade/ }))
 
-    expect(screen.queryByText('Painel da equipe')).not.toBeInTheDocument()
+    expect(screen.queryByText('Painel')).not.toBeInTheDocument()
   })
 })
 
@@ -576,11 +576,11 @@ describe('the attendance list (RF17, screen 3g)', () => {
     expect(screen.getByText('Ninguém com esse nome')).toBeInTheDocument()
   })
 
-  it('goes back to the registrants, and says it with an empty list or an unknown event', async () => {
+  it('goes back to the events list, and says it with an empty list or an unknown event', async () => {
     openAs(STAFF, list([]))
     renderRoute(page)
     expect(await screen.findByText('Ninguém se inscreveu ainda')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Voltar para Inscritos/ })).toHaveAttribute('href', `/admin/eventos/${live.id}/inscritos`)
+    expect(screen.getByRole('link', { name: /Voltar para Eventos/ })).toHaveAttribute('href', '/admin/eventos')
     mock.restore()
 
     openAs(STAFF, { [route]: () => apiError(404, 'event_not_found', 'x') })
