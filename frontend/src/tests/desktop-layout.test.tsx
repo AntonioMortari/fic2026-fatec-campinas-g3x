@@ -98,7 +98,7 @@ describe('desktop menu panel (design 8a)', () => {
     renderRoute('/')
     await user.click(await screen.findByRole('button', { name: /^Mais/ }))
 
-    expect(within(screen.getByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Painel da equipe' })).toHaveAttribute('href', '/admin')
+    expect(within(screen.getByRole('dialog', { name: 'Menu' })).getByRole('link', { name: 'Painel' })).toHaveAttribute('href', '/admin')
     mock.restore()
   })
 })

@@ -8,14 +8,14 @@ export function AdminHeader({ hideOnMobile }: { hideOnMobile: boolean }) {
   return (
     <header className={cn('sticky top-0 z-30 border-b border-line bg-cream print:hidden', hideOnMobile && 'max-desktop:hidden')}>
       <div className="mx-auto flex h-15 max-w-page items-center gap-3 px-4 desktop:h-18 desktop:max-w-none desktop:px-8">
-        <Link to="/admin" className="flex min-h-11 items-center gap-2.5 text-brown no-underline hover:text-brown desktop:gap-3.5">
+        <Link to="/admin" className="flex min-h-11 flex-1 items-center justify-between gap-2.5 text-brown no-underline hover:text-brown desktop:flex-none desktop:justify-start desktop:gap-3.5">
           <img src="/images/logo.png" alt="" width={520} height={212} className="block h-8 w-auto desktop:h-9.5" />
           <span className="border border-brown px-1.75 py-0.5 text-[0.625rem] leading-[1.2] font-bold tracking-[0.1em] uppercase desktop:px-2 desktop:py-[3px] desktop:text-[0.6875rem]">
             Painel
           </span>
         </Link>
 
-        <span className="flex-1" />
+        <span className="hidden flex-1 desktop:block" />
 
         {user && (
           <Link
