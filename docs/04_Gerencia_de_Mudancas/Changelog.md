@@ -424,3 +424,19 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Comportamento:** nenhum. Mudança de lugar, sem alterar mensagem, regra ou rota; os 504 testes unitários e os 163 de integração (MySQL real) passam como antes.
 - **Por quê:** responsabilidade única do controller e dependência no sentido certo (a rota não precisa do controller para obter a validação).
 - **PR:** branch `refactor/backend-validators`
+
+## 2026-10-10 — Página "Quem somos" (RF02, desenho 5b)
+- **Artefato:** Protótipos · Requisitos (RF02)
+- **Antes:** o link "Quem somos" do menu, do cabeçalho e da home levava ao 404.
+- **Depois:** `/quem-somos` fiel ao desenho 5b: hero com a frase-missão, índice de chips fixo que marca a seção
+  visível, Sankofa, idealizadores com linha do tempo, os três setores, "Para quem", "Onde estamos" com mapa e "Como
+  chegar", e a chamada final para projetos, voluntariado e apoio. Conferido no Chromium a 390, 320 e 1440.
+- **Por quê:** paridade com a V1. Por decisão do Yuri, a página segue o desenho também no texto e nos espaços de imagem.
+- **Diferenças registradas:** o texto é o resumido do 5b, não o literal da V1 — o RF02 pede o texto da organização
+  "palavra por palavra", então a ONG precisa aprovar o resumo; os quadros "Símbolo Sankofa (arte da ONG)" e "Foto de
+  Wil e Nathy" ficam visíveis até a ONG enviar o material; o sobretítulo "Quem somos" e a faixa listrada no meio da
+  página contrariam duas regras de layout do `CLAUDE.md` ("sobretítulo = seção do menu", "tela não desenha faixa").
+- **Decidido aqui, sem desenho:** no desktop, coluna de leitura de ~720px (só o hero e os setores usam a largura
+  toda); os cards de setor não são links; o mapa é o iframe do Google sem chave (a Maps Embed API fica para depois).
+- **Confirmar com a ONG:** texto resumido, arte do Sankofa e foto do casal.
+- **PR:** branch `feat/about-page`
