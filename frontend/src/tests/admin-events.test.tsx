@@ -68,7 +68,7 @@ describe('who sees the panel', () => {
     await screen.findByRole('link', { name: /^Minha conta/ })
     await user.click(screen.getByRole('button', { name: /Aa, acessibilidade/ }))
 
-    expect(within(screen.getByRole('dialog', { hidden: true })).getByRole('link', { name: 'Painel da equipe', hidden: true })).toHaveAttribute('href', '/admin')
+    expect(within(screen.getByRole('dialog', { hidden: true })).getByRole('link', { name: 'Painel', hidden: true })).toHaveAttribute('href', '/admin')
   })
 
   it('does not offer it to someone who is not staff', async () => {
@@ -78,7 +78,7 @@ describe('who sees the panel', () => {
     await screen.findByRole('link', { name: /^Minha conta/ })
     await user.click(screen.getByRole('button', { name: /Aa, acessibilidade/ }))
 
-    expect(screen.queryByText('Painel da equipe')).not.toBeInTheDocument()
+    expect(screen.queryByText('Painel')).not.toBeInTheDocument()
   })
 })
 

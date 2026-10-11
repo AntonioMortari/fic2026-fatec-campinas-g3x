@@ -120,7 +120,7 @@ export function DesktopMenu({ open, section, onClose, onOpen }: DesktopMenuProps
                   </Link>
                   {user.isStaff && (
                     <Link to="/admin" onClick={onClose} className="flex min-h-11 items-center font-semibold text-brown no-underline hover:text-blue-deep">
-                      Painel da equipe
+                      Painel
                     </Link>
                   )}
                 </section>
