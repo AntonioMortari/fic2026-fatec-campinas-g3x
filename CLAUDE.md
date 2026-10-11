@@ -188,6 +188,13 @@ versão `.html` ao lado, mais fácil de ler). Quando o documento evoluir, a v2 v
   a ausência.
 - O PR diz quais critérios de aceitação cobre e como foi verificado.
 - Antes de abrir: `npm test` e `npm run typecheck` nas duas pastas.
+- **Conformidade com o Regulamento Técnico, em TODO PR.** Antes de abrir (e de novo na entrega), rodar
+  `/regulamento` (`.claude/skills/regulamento/SKILL.md`): ele confere stack, estrutura, `docs/originais/`,
+  RNFs de segurança, qualidade, back-end, front-end, repositório, gerência de mudanças, deploy,
+  acessibilidade e as regras de autoria e de IA (seções 11.1 e 11.2), rodando os comandos em vez de
+  responder de memória. O resumo vai no corpo do PR (`.github/pull_request_template.md`). Divergência
+  que o PR não resolve é dita ao usuário, nunca omitida. `.github/` e `.claude/` são configuração, não
+  pastas do projeto: não contam para a regra de "nada novo na raiz".
 
 ## Arquitetura em uma tela
 
@@ -404,6 +411,15 @@ Atualizado em 10/10/2026.
    RNF-REP-06 exige `fic2026-[fatec]-[equipe]` — se a equipe é G3Z, o repositório precisa ser
    renomeado.
 2. Nomes e papéis da equipe no `README.md` e o revisor na tabela do `AGENTS.md`.
+   **Todas as linhas de IA estão com "Revisado por: a preencher"**, e a seção 11.2 do regulamento exige
+   que os alunos dominem e defendam cada parte do código.
+2b. **O repositório está PÚBLICO** e o RNF-REP-01 exige **privado** (conferido em 10/10/2026 pela API do
+   GitHub). Settings → General → Danger Zone → Change visibility. O acesso da banca (Read) vem depois,
+   quando a organização divulgar as contas (RNF-REP-03).
+2c. **Os 81 commits da `main` têm um autor só**, e a equipe tem 4 ou 5 integrantes. O RNF-REP-04 pede
+   histórico que evidencie o trabalho da equipe: o restante do grupo precisa commitar de verdade.
+2d. `origin/claude/amazing-carson-5lh8ry` tem 8 commits fora da `main` e o prefixo de ferramenta que
+   as convenções proíbem; decidir se apaga.
 3. Decisões abertas do Plano de Migração: a Biblioteca entra na barra no lugar de Projetos? (hoje,
    provisoriamente, não — `lib/navigation.ts`); fotos de Wil e Nathy, da sede e do símbolo Sankofa, e
    com qual autorização; chave Pix real; listas fechadas de gêneros, temas e faixas etárias; quem
