@@ -19,6 +19,7 @@ import { CancelRegistration } from './pages/CancelRegistration'
 import { Agenda } from './pages/Agenda'
 import { HomeContainer } from './pages/HomeContainer'
 import { NotFound } from './pages/NotFound'
+import { Contact } from './pages/Contact'
 
 const DEV_ONLY: RouteObject[] = import.meta.env.DEV ? [{ path: '/componentes', element: <ComponentCatalog /> }] : []
 
@@ -29,6 +30,7 @@ export const routes: RouteObject[] = [
       { path: '/', element: <HomeContainer /> },
       { path: '/agenda', element: <Agenda /> },
       { path: '/inscricao/cancelada', element: <CancelDone /> },
+      { path: '/contato', element: <Contact /> },
       { element: <RequireAuth />, children: [{ path: '/minha-conta', element: <Account /> }] },
       ...DEV_ONLY,
       { path: '*', element: <NotFound /> },

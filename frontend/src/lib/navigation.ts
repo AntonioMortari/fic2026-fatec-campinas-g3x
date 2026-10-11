@@ -88,3 +88,8 @@ export function labelForRoute(path: string): string | null {
   const known = [HOME, ...DESKTOP_NAV, ...MENU_GROUPS.flatMap((group) => group.items), SUPPORT, { label: 'Minha conta', to: '/minha-conta' }]
   return known.find((destination) => destination.to === path)?.label ?? null
 }
+
+export function isMenuRoute(current: string, shownOutsideMenu: Destination[]): boolean {
+  if (shownOutsideMenu.some((destination) => isActiveRoute(destination.to, current))) return false
+  return [...MENU_GROUPS, ...DESKTOP_MENU_GROUPS].some((group) => group.items.some((item) => isActiveRoute(item.to, current)))
+}
