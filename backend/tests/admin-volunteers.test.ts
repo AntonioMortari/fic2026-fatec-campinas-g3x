@@ -139,10 +139,10 @@ describe('GET /api/admin/volunteer-applications', () => {
   it('orders the queue: new, in contact, volunteering, ended, and the newest first inside each', async () => {
     const at = (id: string, status: string, createdAt: string) => application({ id, status, createdAt: new Date(createdAt), updatedAt: new Date(createdAt) });
     setup([
-      at('ended', 'ended', '2025-03-01T10:00:00Z'),
-      at('volunteering', 'volunteering', '2026-08-03T10:00:00Z'),
-      at('new-old', 'new', '2026-10-09T10:00:00Z'),
-      at('in-contact', 'in_contact', '2026-09-12T10:00:00Z'),
+      at('ended', 'ended', '2026-10-12T10:00:00Z'),
+      at('volunteering', 'volunteering', '2026-10-10T10:00:00Z'),
+      at('new-old', 'new', '2026-10-01T10:00:00Z'),
+      at('in-contact', 'in_contact', '2026-10-08T10:00:00Z'),
       at('new-today', 'new', '2026-10-11T10:00:00Z'),
     ]);
 
