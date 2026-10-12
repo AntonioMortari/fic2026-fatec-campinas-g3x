@@ -1,9 +1,12 @@
 import { Event } from '../models';
 import { ApiError } from '../utils/api-error';
+import { deleteImageFile, saveImageFile } from '../utils/event-image-storage';
 import { detectImageMime } from '../utils/image-signature';
 import { countRegistrations, toPublicEvent, type EventImage, type PublicEvent } from './events.service';
 
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+
+const IMAGE_COLUMNS = ['imageFile', 'imageMime', 'imageAlt', 'imageAuthorizedAt', 'imageUpdatedAt'] as const;
 
 export interface AdminEvent extends PublicEvent {
   requiresCpf: boolean;
@@ -99,32 +102,42 @@ const imageError = (status: number, code: string, message: string) =>
   new ApiError(status, code, message, [{ location: 'body', field: 'data', message }]);
 
 export async function setEventImage(id: string, input: ImageInput, now: Date = new Date()): Promise<AdminEvent> {
-  if (!(await Event.count({ where: { id } }))) throw notFound();
+  const current = await Event.findByPk(id, { attributes: ['id', 'imageFile'] });
+  if (!current) throw notFound();
   if (input.data.length > MAX_IMAGE_BYTES) {
     throw imageError(413, 'image_too_large', 'A foto passou de 4 MB. Escolha uma menor.');
   }
   const mime = detectImageMime(input.data);
   if (!mime) throw imageError(400, 'invalid_image', 'O arquivo não é uma foto JPG, PNG, GIF ou WebP.');
 
-  await Event.update(
-    { imageData: input.data, imageMime: mime, imageAlt: input.alt, imageAuthorizedAt: now, imageUpdatedAt: now },
-    { where: { id }, fields: ['imageData', 'imageMime', 'imageAlt', 'imageAuthorizedAt', 'imageUpdatedAt'] },
-  );
+  const file = await saveImageFile(input.data, mime);
+  try {
+    await Event.update(
+      { imageFile: file, imageMime: mime, imageAlt: input.alt, imageAuthorizedAt: now, imageUpdatedAt: now },
+      { where: { id }, fields: [...IMAGE_COLUMNS] },
+    );
+  } catch (error) {
+    await deleteImageFile(file);
+    throw error;
+  }
+  await deleteImageFile(current.imageFile);
   return getAdminEvent(id);
 }
 
 export async function removeEventImage(id: string): Promise<AdminEvent> {
-  if (!(await Event.count({ where: { id } }))) throw notFound();
+  const current = await Event.findByPk(id, { attributes: ['id', 'imageFile'] });
+  if (!current) throw notFound();
   await Event.update(
-    { imageData: null, imageMime: null, imageAlt: null, imageAuthorizedAt: null, imageUpdatedAt: null },
-    { where: { id }, fields: ['imageData', 'imageMime', 'imageAlt', 'imageAuthorizedAt', 'imageUpdatedAt'] },
+    { imageFile: null, imageMime: null, imageAlt: null, imageAuthorizedAt: null, imageUpdatedAt: null },
+    { where: { id }, fields: [...IMAGE_COLUMNS] },
   );
+  await deleteImageFile(current.imageFile);
   return getAdminEvent(id);
 }
 
 export async function findEventImageForStaff(id: string): Promise<Event> {
-  const event = await Event.findOne({ attributes: ['id', 'imageData', 'imageMime', 'imageUpdatedAt'], where: { id } });
+  const event = await Event.findOne({ attributes: ['id', 'imageFile', 'imageMime', 'imageUpdatedAt'], where: { id } });
   if (!event) throw notFound();
-  if (!event.imageData) throw new ApiError(404, 'image_not_found', 'Esta atividade não tem foto.');
+  if (!event.imageFile) throw new ApiError(404, 'image_not_found', 'Esta atividade não tem foto.');
   return event;
 }

@@ -34,11 +34,13 @@ services:
       DB_PASSWORD: atelie-dev
       JWT_SECRET: chave-de-desenvolvimento-local-nao-usar-em-producao
       JWT_EXPIRES_IN: 1h
+      UPLOADS_DIR: /uploads
     ports:
       - "3333:3333"
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - uploads-data:/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -59,3 +61,4 @@ services:
 
 volumes:
   mysql-data:
+  uploads-data:

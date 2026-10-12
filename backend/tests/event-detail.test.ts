@@ -202,7 +202,7 @@ describe('admin form: "sem inscrição pelo site" clears what only makes sense w
     await request(app)
       .put(`/api/admin/events/${EVENT_ID}`)
       .set(auth)
-      .send({ ...VALID, published: true, imageData: 'AAAA', imageMime: 'image/png', imageAlt: 'x', imageAuthorizedAt: '2026-01-01', imageUpdatedAt: '2026-01-01' });
+      .send({ ...VALID, published: true, imageFile: 'x.png', imageMime: 'image/png', imageAlt: 'x', imageAuthorizedAt: '2026-01-01', imageUpdatedAt: '2026-01-01' });
 
     const written = Object.keys(update.mock.calls[0]![0] as object);
     expect(written.filter((key) => key.startsWith('image') || key === 'published')).toEqual([]);

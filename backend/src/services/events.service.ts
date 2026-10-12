@@ -138,8 +138,8 @@ export async function findPublishedEvent(id: string): Promise<Event | null> {
 
 export async function findPublishedEventImage(id: string): Promise<Event | null> {
   const event = await Event.findOne({
-    attributes: ['id', 'imageData', 'imageMime', 'imageUpdatedAt'],
+    attributes: ['id', 'imageFile', 'imageMime', 'imageUpdatedAt'],
     where: { id, published: true },
   });
-  return event?.imageData ? event : null;
+  return event?.imageFile ? event : null;
 }

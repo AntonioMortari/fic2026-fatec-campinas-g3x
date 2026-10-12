@@ -71,5 +71,5 @@ export async function deleteImage(req: Request, res: Response): Promise<void> {
 }
 
 export async function getImage(req: Request, res: Response): Promise<void> {
-  sendEventImage(req, res, await findEventImageForStaff(req.params.id as string), 'private, no-store');
+  await sendEventImage(res, await findEventImageForStaff(req.params.id as string), 'private, no-store');
 }

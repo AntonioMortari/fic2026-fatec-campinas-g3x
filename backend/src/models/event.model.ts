@@ -14,7 +14,7 @@ export class Event extends Model<InferAttributes<Event>, InferCreationAttributes
   declare requiresCpf: CreationOptional<boolean>;
   declare registrationOnSite: CreationOptional<boolean>;
   declare published: CreationOptional<boolean>;
-  declare imageData: CreationOptional<Buffer | null>;
+  declare imageFile: CreationOptional<string | null>;
   declare imageMime: CreationOptional<string | null>;
   declare imageAlt: CreationOptional<string | null>;
   declare imageAuthorizedAt: CreationOptional<Date | null>;
@@ -37,7 +37,7 @@ Event.init(
     requiresCpf: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     registrationOnSite: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
     published: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-    imageData: { type: DataTypes.BLOB('medium'), allowNull: true },
+    imageFile: { type: DataTypes.STRING(60), allowNull: true },
     imageMime: { type: DataTypes.STRING(20), allowNull: true },
     imageAlt: { type: DataTypes.STRING(300), allowNull: true },
     imageAuthorizedAt: { type: DataTypes.DATE, allowNull: true },
@@ -45,9 +45,5 @@ Event.init(
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,
   },
-  {
-    sequelize,
-    tableName: 'events',
-    defaultScope: { attributes: { exclude: ['imageData'] } },
-  },
+  { sequelize, tableName: 'events' },
 );

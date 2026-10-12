@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto';
+import fs from 'node:fs';
 import request from 'supertest';
 import { createApp } from '../../src/app';
 import { migrator } from '../../src/database/migrate';
+import { STORED_NAME_PATTERN, uploadsDir } from '../../src/utils/event-image-storage';
 import { Event, RefreshToken, Registration, sequelize, User } from '../../src/models';
 
 const app = createApp();
@@ -106,7 +108,7 @@ describe('the photo round trip against a real MySQL', () => {
     expect(Buffer.compare(served.body as Buffer, bytes)).toBe(0);
   });
 
-  it('takes a photo of exactly 4 MB, which fits a MEDIUMBLOB and the packet limit', async () => {
+  it('takes a photo of exactly 4 MB, which goes through the body limit and the disk', async () => {
     const headers = await staff();
     const id = await createEvent(headers);
     const big = Buffer.concat([PNG, Buffer.alloc(4 * 1024 * 1024 - PNG.length, 7)]);
@@ -179,7 +181,7 @@ describe('the photo round trip against a real MySQL', () => {
     await request(app).put(`/api/admin/events/${id}/image`).set(headers).send(upload(PNG));
 
     const removed = await request(app).delete(`/api/admin/events/${id}/image`).set(headers);
-    const [row] = (await sequelize.query('SELECT image_data, image_mime, image_alt, image_authorized_at, image_updated_at FROM events WHERE id = ?', {
+    const [row] = (await sequelize.query('SELECT image_file, image_mime, image_alt, image_authorized_at, image_updated_at FROM events WHERE id = ?', {
       replacements: [id],
       type: 'SELECT',
     })) as Record<string, unknown>[];
@@ -225,7 +227,7 @@ describe('the photo round trip against a real MySQL', () => {
     await request(app)
       .put(`/api/admin/events/${id}`)
       .set(headers)
-      .send({ ...EVENT, title: 'Novo título', imageData: 'AAAA', imageMime: 'text/html', imageAlt: 'trocada', imageUpdatedAt: '2000-01-01' });
+      .send({ ...EVENT, title: 'Novo título', imageFile: 'x.png', imageMime: 'text/html', imageAlt: 'trocada', imageUpdatedAt: '2000-01-01' });
 
     const served = await getBytes(`/api/events/${id}/image`);
     expect(Buffer.compare(served.body as Buffer, PNG)).toBe(0);
@@ -235,7 +237,7 @@ describe('the photo round trip against a real MySQL', () => {
 });
 
 describe('the CHECK that makes the photo all or nothing', () => {
-  const photo = { image_data: PNG, image_mime: 'image/png', image_alt: 'Descrição', image_authorized_at: new Date(), image_updated_at: new Date() };
+  const photo = { image_file: `${randomUUID()}.png`, image_mime: 'image/png', image_alt: 'Descrição', image_authorized_at: new Date(), image_updated_at: new Date() };
 
   it('takes an event without photo and an event with the whole photo', async () => {
     await insertRaw({});
@@ -248,6 +250,8 @@ describe('the CHECK that makes the photo all or nothing', () => {
     ['without the declaration', { image_authorized_at: null }],
     ['without the version date', { image_updated_at: null }],
     ['without a type', { image_mime: null }],
+    ['with a file name outside the generated pattern', { image_file: '../../etc/passwd' }],
+    ['with an extension outside the four', { image_file: `${randomUUID()}.svg` }],
     ['with a type outside the four', { image_mime: 'image/svg+xml' }],
   ])('refuses bytes %s, by direct insert', async (_label, patch) => {
     await expect(insertRaw({ ...photo, ...patch })).rejects.toThrow(/events_image_all_or_nothing/);
@@ -258,42 +262,89 @@ describe('the CHECK that makes the photo all or nothing', () => {
   });
 });
 
-describe('the bytes never ride along with lists, calendar, report or the panel', () => {
-  it('does not select image_data anywhere but the two image routes', async () => {
+describe('what lists and the panel carry about the photo', () => {
+  it('has no bytes column any more, and answers only { url, alt } in every response', async () => {
     const headers = await staff();
     const id = await createEvent(headers, { startsAt: '2030-11-20T15:00' });
     await request(app).put(`/api/admin/events/${id}/image`).set(headers).send(upload(PNG));
-    await Registration.create({ eventId: id, name: 'Ana', email: 'a@x.com', consentedAt: new Date() } as never);
+    const [stored] = (await sequelize.query('SELECT image_file FROM events WHERE id = ?', { replacements: [id], type: 'SELECT' })) as { image_file: string }[];
+    const columns = (await sequelize.query("SHOW COLUMNS FROM events LIKE 'image_data'", { type: 'SELECT' })) as unknown[];
 
-    const { statements } = await recordingSql(async () => {
-      await request(app).get('/api/events?period=upcoming');
-      await request(app).get('/api/events?period=past');
-      await request(app).get(`/api/events/${id}`);
-      await request(app).get(`/api/events/${id}/calendar.ics`);
-      await request(app).get('/api/admin/events').set(headers);
-      await request(app).get(`/api/admin/events/${id}`).set(headers);
-      await request(app).get(`/api/admin/events/${id}/registrations`).set(headers);
-      await request(app).get(`/api/admin/events/${id}/attendance`).set(headers);
-      await request(app).get('/api/admin/report').set(headers);
-      await request(app).put(`/api/admin/events/${id}`).set(headers).send(EVENT);
-      await request(app).patch(`/api/admin/events/${id}/publication`).set(headers).send({ published: true });
-    });
+    const bodies = [
+      (await request(app).get('/api/events?period=upcoming')).text,
+      (await request(app).get(`/api/events/${id}`)).text,
+      (await request(app).get('/api/admin/events').set(headers)).text,
+      (await request(app).get(`/api/admin/events/${id}`).set(headers)).text,
+    ];
 
-    expect(statements.length).toBeGreaterThan(5);
-    expect(statements.filter((sql) => /image_data/i.test(sql))).toEqual([]);
+    expect(columns).toHaveLength(0);
+    for (const text of bodies) {
+      expect(text).not.toContain(stored!.image_file);
+      expect(text).toContain('"image":{"url"');
+    }
   });
+});
 
-  it('selects it in the two image routes, and in nothing else', async () => {
+describe('the photo file on disk against a real MySQL', () => {
+  const uploaded = async (headers: Record<string, string>, id: string, data: Buffer) =>
+    request(app).put(`/api/admin/events/${id}/image`).set(headers).send(upload(data));
+  const onDisk = () => (fs.existsSync(uploadsDir()) ? fs.readdirSync(uploadsDir()).sort() : []);
+  const storedFile = async (id: string) =>
+    ((await sequelize.query('SELECT image_file FROM events WHERE id = ?', { replacements: [id], type: 'SELECT' })) as { image_file: string | null }[])[0]!.image_file;
+
+  beforeEach(() => fs.rmSync(uploadsDir(), { recursive: true, force: true }));
+  afterAll(() => fs.rmSync(uploadsDir(), { recursive: true, force: true }));
+
+  it('creates one file with a generated name and the extension of the bytes, and the row points to it', async () => {
     const headers = await staff();
     const id = await createEvent(headers);
-    await request(app).put(`/api/admin/events/${id}/image`).set(headers).send(upload(PNG));
 
-    const { statements } = await recordingSql(async () => {
-      await request(app).get(`/api/events/${id}/image`);
-      await request(app).get(`/api/admin/events/${id}/image`).set(headers);
-    });
+    await uploaded(headers, id, JPEG);
 
-    expect(statements.filter((sql) => /SELECT[^;]*image_data/i.test(sql))).toHaveLength(2);
+    const file = await storedFile(id);
+    expect(file).toMatch(STORED_NAME_PATTERN);
+    expect(file!.endsWith('.jpg')).toBe(true);
+    expect(onDisk()).toEqual([file]);
+  });
+
+  it('replacing deletes the old file and the new one is served; removing deletes it and zeroes the row', async () => {
+    const headers = await staff();
+    const id = await createEvent(headers);
+    await uploaded(headers, id, PNG);
+    const first = await storedFile(id);
+
+    await uploaded(headers, id, GIF);
+    const second = await storedFile(id);
+    expect(second).not.toBe(first);
+    expect(onDisk()).toEqual([second]);
+    expect((await getBytes(`/api/events/${id}/image`)).headers['content-type']).toBe('image/gif');
+
+    await request(app).delete(`/api/admin/events/${id}/image`).set(headers);
+    expect(onDisk()).toEqual([]);
+    expect(await storedFile(id)).toBeNull();
+    expect((await request(app).get(`/api/events/${id}/image`)).status).toBe(404);
+  });
+
+  it('a refused photo writes nothing to the disk', async () => {
+    const headers = await staff();
+    const id = await createEvent(headers);
+
+    await uploaded(headers, id, Buffer.from('só texto'));
+    await request(app).put(`/api/admin/events/${id}/image`).set(headers).send(upload(PNG, { authorized: false }));
+
+    expect(onDisk()).toEqual([]);
+  });
+
+  it('a row that points to a file that is gone answers 404 and a row outside the pattern is refused by the database', async () => {
+    const headers = await staff();
+    const id = await createEvent(headers);
+    await uploaded(headers, id, PNG);
+    fs.rmSync(uploadsDir(), { recursive: true, force: true });
+
+    expect((await request(app).get(`/api/events/${id}/image`)).status).toBe(404);
+    await expect(
+      sequelize.query("UPDATE events SET image_file = '../../etc/passwd' WHERE id = ?", { replacements: [id] }),
+    ).rejects.toThrow(/events_image_all_or_nothing/);
   });
 });
 

@@ -424,7 +424,7 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   pelo site; uma contagem de vagas que falhasse derrubava a lista inteira com 500.
 - **Depois:** rota `/agenda/:id` com os seis estados do desenho 13; `registrationStatus` calculado no servidor
   (`open`, `few_left`, `full`, `not_on_site`, `started`, `unknown`); coluna `events.registration_on_site`; foto
-  guardada no MySQL (`image_data` MEDIUMBLOB e quatro colunas de apoio, com `CHECK` de tudo-ou-nada), servida em
+  guardada em arquivo no disco do servidor (`UPLOADS_DIR`; o evento guarda `image_file` e quatro colunas de apoio, com `CHECK` de tudo-ou-nada), servida em
   `GET /api/events/:id/image` e enviada em `PUT /api/admin/events/:id/image` (JSON em base64, tipo pela assinatura
   dos bytes, até 4 MB, declaração RN07 gravada como data); `DELETE` da foto; "Ver detalhes" em todo cartão da
   agenda; no painel, foto e "Pelo site | Sem inscrição pelo site" no formulário do evento. Migration
@@ -442,8 +442,7 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   e a regra 12 não deixa); "Últimas vagas" aparece quando restam 3 ou menos (o desenho não define o limiar); a
   descrição da foto é obrigatória no servidor e no banco, como o desenho diz.
 - **Por quê:** o desenho 13 fecha uma divergência encontrada no código antigo (agenda e inscrição fechavam em
-  momentos diferentes) e dá ao evento a foto que o RF13 pedia; a foto no banco evita volume e serviço novo num deploy
-  ainda indefinido.
+  momentos diferentes) e dá ao evento a foto que o RF13 pedia; a foto fica em arquivo no servidor **por decisão do usuário** (a primeira versão a guardava em MEDIUMBLOB no MySQL, para não depender de volume num deploy ainda indefinido). O custo é de deploy: em plataforma com disco efêmero é preciso um volume persistente em `UPLOADS_DIR`, ou as fotos somem a cada deploy; o `docker-compose.yml` já monta o volume `uploads-data`. O nome do arquivo é sempre gerado pelo servidor (uuid + extensão pela assinatura dos bytes), por causa de path traversal.
 - **PR:** branch `feat/event-detail`
 
 ## 2026-10-12 — Back-end: esquemas de validação saem dos controllers
