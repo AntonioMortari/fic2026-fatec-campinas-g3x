@@ -26,6 +26,9 @@ const event: EventDetail = {
   spotsLeft: 11,
   requiresCpf: false,
   registrationsOpen: true,
+  registrationOnSite: true,
+  registrationStatus: 'open',
+  image: null,
 }
 
 const serve = (detail: EventDetail = event, extra: Handlers = {}) => {

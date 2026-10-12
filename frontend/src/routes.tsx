@@ -15,6 +15,7 @@ import { AdminRegistrants } from './pages/admin/AdminRegistrants'
 import { AdminContacts } from './pages/admin/AdminContacts'
 import { AdminVolunteers } from './pages/admin/AdminVolunteers'
 import { Auth } from './pages/Auth'
+import { EventDetail } from './pages/EventDetail'
 import { EventRegistration } from './pages/EventRegistration'
 import { ComponentCatalog } from './pages/ComponentCatalog'
 import { CancelDone } from './pages/CancelDone'
@@ -36,6 +37,7 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/', element: <HomeContainer /> },
       { path: '/agenda', element: <Agenda /> },
+      { path: '/agenda/:id', element: <EventDetail />, handle: { hideHeaderOnMobile: true } },
       { path: '/quem-somos', element: <About /> },
       { path: '/inscricao/cancelada', element: <CancelDone /> },
       { path: '/voluntariado', element: <Volunteering /> },

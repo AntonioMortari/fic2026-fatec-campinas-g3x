@@ -1,12 +1,30 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { parseApiError } from '../../lib/api-error'
+import { parseApiError, type ParsedApiError } from '../../lib/api-error'
 import { cn } from '../../lib/cn'
 import { toLocalInput } from '../../lib/dates'
 import type { AdminEvent, EventInput } from '../../types/admin-event'
 import { useFormFeedback } from '../auth/use-form-feedback'
-import { Alert, Button, Checkbox, Chevron, TextAreaField, TextField } from '../ui'
+import { Alert, Button, Checkbox, Chevron, SegmentedField, TextAreaField, TextField } from '../ui'
 import { AdminPage } from './AdminPage'
+import { EMPTY_PHOTO, type PhotoDraft } from '../../lib/photo-file'
+import { EventPhotoField } from './EventPhotoField'
+
+export type PhotoChange = { kind: 'upload'; blob: Blob; alt: string } | { kind: 'remove' } | null
+
+export interface SubmitHandlers {
+  onError: (error: unknown) => void
+  onPhotoError: (error: unknown) => void
+}
+
+const SIGN_UP_OPTIONS = [
+  { value: 'site', label: 'Pelo site' },
+  { value: 'none', label: 'Sem inscrição pelo site' },
+] as const
+const SIGN_UP_HELP = {
+  site: 'Quem visita se inscreve pelo formulário do evento, sem criar conta.',
+  none: 'A página do evento diz "Não precisa se inscrever". Use para apresentação aberta ou evento em outro espaço que cuida da própria entrada.',
+}
 
 interface Values {
   title: string
@@ -18,6 +36,7 @@ interface Values {
   ageRange: string
   capacity: string
   requiresCpf: boolean
+  onSite: boolean
   description: string
 }
 
@@ -31,6 +50,7 @@ const EMPTY: Values = {
   ageRange: '',
   capacity: '',
   requiresCpf: false,
+  onSite: true,
   description: '',
 }
 
@@ -46,6 +66,7 @@ function fromEvent(event: AdminEvent): Values {
     ageRange: event.ageRange ?? '',
     capacity: event.capacity === null ? '' : String(event.capacity),
     requiresCpf: event.requiresCpf,
+    onSite: event.registrationOnSite,
     description: event.description ?? '',
   }
 }
@@ -62,16 +83,17 @@ function toInput(values: Values): EventInput {
     location: values.location,
     ageRange: values.ageRange,
     // Text that is not a number goes as text so the server refuses it; NaN would be sent as null, meaning "no limit".
-    capacity: capacity === '' ? null : Number.isFinite(number) ? number : capacity,
-    requiresCpf: values.requiresCpf,
+    capacity: !values.onSite || capacity === '' ? null : Number.isFinite(number) ? number : capacity,
+    requiresCpf: values.onSite && values.requiresCpf,
+    registrationOnSite: values.onSite,
   }
 }
 
 // The form is one column of numbered sections on the desktop (design 9c) and one section per screen on the phone (10d).
 const SECTIONS = [
-  { title: 'O que é', next: 'Quando e onde', fields: ['title', 'category', 'description'] },
+  { title: 'O que é', next: 'Quando e onde', fields: ['title', 'category', 'description', 'data', 'alt', 'authorized'] },
   { title: 'Quando e onde', next: 'Inscrições', fields: ['startsAt', 'endsAt', 'location'] },
-  { title: 'Inscrições', next: '', fields: ['ageRange', 'capacity', 'requiresCpf'] },
+  { title: 'Inscrições', next: '', fields: ['ageRange', 'registrationOnSite', 'capacity', 'requiresCpf'] },
 ] as const
 
 function stepOfField(field: string): number {
@@ -82,13 +104,18 @@ function stepOfField(field: string): number {
 interface EventFormProps {
   event?: AdminEvent
   saving: boolean
-  onSubmit: (input: EventInput, onError: (error: unknown) => void) => void
+  onSubmit: (input: EventInput, photo: PhotoChange, handlers: SubmitHandlers) => void
   header: ReactNode
+  photoNotice?: string
+  initialPhotoAlt?: string
 }
 
-export function EventForm({ event, saving, onSubmit, header }: EventFormProps) {
+export function EventForm({ event, saving, onSubmit, header, photoNotice, initialPhotoAlt = '' }: EventFormProps) {
   const [values, setValues] = useState<Values>(() => (event ? fromEvent(event) : EMPTY))
   const [step, setStep] = useState(0)
+  const [photo, setPhoto] = useState<PhotoDraft>({ ...EMPTY_PHOTO, alt: initialPhotoAlt })
+  const [photoErrors, setPhotoErrors] = useState<{ alt?: string; authorized?: string }>({})
+  const [photoFailure, setPhotoFailure] = useState<ParsedApiError | null>(null)
   const { formRef, alertRef, ...feedback } = useFormFeedback()
   const hasFieldErrors = Object.keys(feedback.fields).length > 0
   const last = step === SECTIONS.length - 1
@@ -97,15 +124,47 @@ export function EventForm({ event, saving, onSubmit, header }: EventFormProps) {
     setValues((current) => ({ ...current, [key]: value }))
   }
 
+  function updatePhoto(next: PhotoDraft) {
+    setPhoto(next)
+    setPhotoErrors({})
+  }
+
+  useEffect(() => {
+    if (Object.keys(photoErrors).length > 0) formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
+  }, [photoErrors, formRef])
+
   function handleSubmit(submitEvent: FormEvent) {
     submitEvent.preventDefault()
     feedback.clear()
-    onSubmit(toInput(values), (error) => {
-      const fields = Object.keys(parseApiError(error).fields)
-      if (fields.length > 0) setStep(Math.min(...fields.map(stepOfField)))
-      feedback.fail(error)
+    setPhotoFailure(null)
+
+    if (photo.blob) {
+      const errors = {
+        ...(photo.alt.trim() ? {} : { alt: 'Descreva a foto para quem não a enxerga.' }),
+        ...(photo.authorized ? {} : { authorized: 'Para subir a foto, confirme que existe autorização de uso de imagem.' }),
+      }
+      if (Object.keys(errors).length > 0) {
+        setStep(0)
+        setPhotoErrors(errors)
+        return
+      }
+    }
+
+    const change: PhotoChange = photo.blob ? { kind: 'upload', blob: photo.blob, alt: photo.alt.trim() } : photo.removed ? { kind: 'remove' } : null
+    onSubmit(toInput(values), change, {
+      onError: (error) => {
+        const fields = Object.keys(parseApiError(error).fields)
+        if (fields.length > 0) setStep(Math.min(...fields.map(stepOfField)))
+        feedback.fail(error)
+      },
+      onPhotoError: (error) => {
+        setStep(0)
+        setPhotoFailure(parseApiError(error))
+      },
     })
   }
+
+  const photoFields: Record<string, string | undefined> = { ...photoErrors, ...(photoFailure?.fields ?? {}) }
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex min-h-dvh flex-col desktop:min-h-[calc(100dvh-4.5rem)]">
@@ -127,6 +186,12 @@ export function EventForm({ event, saving, onSubmit, header }: EventFormProps) {
 
       <AdminPage className="flex flex-1 flex-col gap-6 desktop:max-w-[calc(45rem+6rem)] desktop:gap-7">
         {header}
+
+        {(photoNotice || photoFailure) && (
+          <Alert tone="error">
+            O evento foi salvo, mas a foto não subiu: {photoFailure?.message ?? photoNotice} Escolha a foto e salve de novo.
+          </Alert>
+        )}
 
         {feedback.error && (
           <Alert ref={alertRef} tone="error">
@@ -152,6 +217,7 @@ export function EventForm({ event, saving, onSubmit, header }: EventFormProps) {
             onChange={(e) => set('description', e.target.value)}
             error={feedback.fields.description}
           />
+          <EventPhotoField event={event} draft={photo} onChange={updatePhoto} errors={{ data: feedback.fields.data ?? photoFields.data, alt: photoFields.alt ?? feedback.fields.alt, authorized: photoFields.authorized ?? feedback.fields.authorized }} />
         </Section>
 
         <Section index={1} step={step} title={SECTIONS[1].title}>
@@ -188,23 +254,39 @@ export function EventForm({ event, saving, onSubmit, header }: EventFormProps) {
             onChange={(e) => set('ageRange', e.target.value)}
             error={feedback.fields.ageRange}
           />
-          <TextField
-            label="Limite de vagas"
-            name="capacity"
-            inputMode="numeric"
-            hint="Opcional. Em branco, a atividade não tem limite."
-            value={values.capacity}
-            onChange={(e) => set('capacity', e.target.value)}
-            error={feedback.fields.capacity}
+          <SegmentedField
+            legend="Inscrição"
+            name="registrationOnSite"
+            options={[...SIGN_UP_OPTIONS]}
+            value={values.onSite ? 'site' : 'none'}
+            onChange={(next) => set('onSite', next === 'site')}
+            error={feedback.fields.registrationOnSite}
           />
-          <Checkbox
-            label="Pedir CPF na inscrição"
-            name="requiresCpf"
-            hint="Marque só se a atividade exige documento."
-            checked={values.requiresCpf}
-            onChange={(e) => set('requiresCpf', e.target.checked)}
-            error={feedback.fields.requiresCpf}
-          />
+          <p className="m-0 -mt-2 text-[0.84375rem] leading-[1.45] text-brown-600">{SIGN_UP_HELP[values.onSite ? 'site' : 'none']}</p>
+          {values.onSite && (
+            <div className="grid grid-cols-1 gap-3.5 desktop:grid-cols-2 desktop:gap-4">
+              <TextField
+                label="Vagas"
+                name="capacity"
+                inputMode="numeric"
+                hint="Em branco = sem limite."
+                value={values.capacity}
+                onChange={(e) => set('capacity', e.target.value)}
+                error={feedback.fields.capacity}
+              />
+              <fieldset className="m-0 flex flex-col gap-1.5 border-0 p-0">
+                <legend className="mb-1.5 p-0 text-[0.9375rem] font-semibold">CPF</legend>
+                <Checkbox
+                  label="Este evento exige CPF"
+                  name="requiresCpf"
+                  hint="Só quando a instituição parceira pede (RN06)."
+                  checked={values.requiresCpf}
+                  onChange={(e) => set('requiresCpf', e.target.checked)}
+                  error={feedback.fields.requiresCpf}
+                />
+              </fieldset>
+            </div>
+          )}
         </Section>
 
         <p className="m-0 text-small text-brown-400">Salvar não publica o evento: quem publica é o botão da lista.</p>

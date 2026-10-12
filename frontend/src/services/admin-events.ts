@@ -95,3 +95,30 @@ export function useMarkAttendance(eventId: string | undefined) {
       ]),
   })
 }
+
+export function useAdminEventPhoto(url: string | undefined) {
+  return useQuery({
+    queryKey: [...KEY, 'photo', url],
+    queryFn: async () => (await api.get<Blob>(String(url).replace(/^\/api/, ''), { responseType: 'blob' })).data,
+    enabled: Boolean(url),
+    staleTime: Infinity,
+    retry: false,
+  })
+}
+
+export function useSetEventPhoto() {
+  const refresh = useRefreshAfterChange()
+  return useMutation({
+    mutationFn: async ({ id, data, alt }: { id: string; data: string; alt: string }) =>
+      (await api.put<{ event: AdminEvent }>(`/admin/events/${id}/image`, { data, alt, authorized: true })).data.event,
+    onSuccess: refresh,
+  })
+}
+
+export function useRemoveEventPhoto() {
+  const refresh = useRefreshAfterChange()
+  return useMutation({
+    mutationFn: async (id: string) => (await api.delete<{ event: AdminEvent }>(`/admin/events/${id}/image`)).data.event,
+    onSuccess: refresh,
+  })
+}

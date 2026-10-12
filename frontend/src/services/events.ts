@@ -23,6 +23,11 @@ export function calendarUrl(eventId: string): string {
   return `${api.defaults.baseURL ?? ''}/events/${eventId}/calendar.ics`
 }
 
+export function imageSrc(url: string): string {
+  const base = api.defaults.baseURL ?? ''
+  return /^https?:\/\//.test(base) ? new URL(url, base).href : url
+}
+
 export function useEvent(id: string | undefined) {
   return useQuery({
     queryKey: ['events', 'detail', id],

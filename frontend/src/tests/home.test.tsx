@@ -13,6 +13,9 @@ const EVENT = {
   ageRange: 'Livre',
   capacity: null,
   spotsLeft: null,
+  registrationOnSite: true,
+  registrationStatus: 'open' as const,
+  image: null,
 }
 
 describe('home page (UX/UI analysis 2a and 6a)', () => {
@@ -76,12 +79,22 @@ describe('home page (UX/UI analysis 2a and 6a)', () => {
     expect(within(section).getByText('Contação de história', { selector: 'span.hidden' })).toBeInTheDocument()
   })
 
-  it('says the spots are over, with no link, when none is left', () => {
-    renderWithRouter(<Home nextEvent={{ ...EVENT, capacity: 5, spotsLeft: 0 }} />)
+  it('says the spots are over, with no sign-up link but the way to the details, when none is left', () => {
+    renderWithRouter(<Home nextEvent={{ ...EVENT, capacity: 5, spotsLeft: 0, registrationStatus: 'full' }} />)
     const section = screen.getByRole('region', { name: 'Próxima atividade' })
 
     expect(within(section).queryByRole('link', { name: 'Quero me inscrever' })).not.toBeInTheDocument()
     expect(within(section).getAllByText('Vagas esgotadas').length).toBeGreaterThan(0)
+    expect(within(section).getByRole('link', { name: 'Ver detalhes' })).toHaveAttribute('href', '/agenda/cafu-e-o-cafe')
+  })
+
+  it.each(['not_on_site', 'unknown'] as const)('does not offer the sign-up link when the status is %s, only the details', (registrationStatus) => {
+    renderWithRouter(<Home nextEvent={{ ...EVENT, registrationStatus }} />)
+    const section = screen.getByRole('region', { name: 'Próxima atividade' })
+
+    expect(within(section).queryByRole('link', { name: 'Quero me inscrever' })).not.toBeInTheDocument()
+    expect(within(section).queryByText('Vagas esgotadas')).not.toBeInTheDocument()
+    expect(within(section).getByRole('link', { name: 'Ver detalhes' })).toHaveAttribute('href', '/agenda/cafu-e-o-cafe')
   })
 
   it('keeps at most one applique on the screen', () => {

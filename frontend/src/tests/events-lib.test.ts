@@ -14,6 +14,9 @@ function event(overrides: Partial<EventSummary> = {}): EventSummary {
     ageRange: null,
     capacity: null,
     spotsLeft: null,
+    registrationOnSite: true,
+    registrationStatus: 'open',
+    image: null,
     ...overrides,
   }
 }
