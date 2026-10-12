@@ -416,3 +416,11 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   - no celular o cartão "Solicitar uma atividade" não repete os botões (estão na barra fixa), e no desktop a ficha e o pedido formam um cartão só; para isso a ordem do código difere da ordem visual no celular.
 - **Por quê:** RF38 é o caminho de quem chega querendo pedir uma atividade; o contato é o objetivo da página.
 - **PR:** branch `feat/schools-page`
+
+## 2026-10-12 — Back-end: esquemas de validação saem dos controllers
+- **Artefato:** Arquitetura (organização do back-end)
+- **Antes:** os esquemas Zod ficavam exportados dentro de cada controller, que passava a ter duas responsabilidades (validar e responder), e as rotas importavam o esquema do controller.
+- **Depois:** `backend/src/validators/<módulo>.validator.ts`, um por módulo, mais `fields.validator.ts` com os campos compartilhados (nome, telefone, tipo de pessoa). A rota importa o esquema e o passa ao `validate`; o controller importa só o tipo. O fluxo `routes → middlewares → controllers → services → models` não muda.
+- **Comportamento:** nenhum. Mudança de lugar, sem alterar mensagem, regra ou rota; os 504 testes unitários e os 163 de integração (MySQL real) passam como antes.
+- **Por quê:** responsabilidade única do controller e dependência no sentido certo (a rota não precisa do controller para obter a validação).
+- **PR:** branch `refactor/backend-validators`

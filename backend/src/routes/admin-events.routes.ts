@@ -1,20 +1,16 @@
 import { Router } from 'express';
 import {
-  adminEventParams,
-  attendanceBody,
-  attendanceParams,
   create,
   downloadRegistrations,
-  eventBody,
   getAttendance,
   getEvent,
   getRegistrations,
   listEvents,
   markAttendance,
-  publicationBody,
   setPublication,
   update,
 } from '../controllers/admin-events.controller';
+import { adminEventParams, attendanceBody, attendanceParams, eventBody, publicationBody } from '../validators/admin-events.validator';
 import { authenticate } from '../middlewares/authenticate';
 import { requireStaff } from '../middlewares/require-staff';
 import { validate } from '../middlewares/validate';

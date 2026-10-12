@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { login, loginBody, logout, me, refresh, register, registerBody } from '../controllers/auth.controller';
+import { login, logout, me, refresh, register } from '../controllers/auth.controller';
+import { loginBody, registerBody } from '../validators/auth.validator';
 import { authenticate } from '../middlewares/authenticate';
 import { requireXhr } from '../middlewares/require-xhr';
 import { validate } from '../middlewares/validate';

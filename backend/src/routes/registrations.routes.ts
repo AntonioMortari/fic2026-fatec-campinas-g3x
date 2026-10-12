@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { cancel, cancelParams, previewCancellation } from '../controllers/registrations.controller';
+import { cancel, previewCancellation } from '../controllers/registrations.controller';
+import { cancelParams } from '../validators/registrations.validator';
 import { validate } from '../middlewares/validate';
 
 // Open on purpose: nobody has to sign in to give up a spot (RF15 works without an account). The personal link, a random

@@ -206,7 +206,11 @@ versão `.html` ao lado, mais fácil de ler). Quando o documento evoluir, a v2 v
   `middlewares/error-handler.ts`. O Express 5 encaminha Promise rejeitada sozinho — sem try/catch
   repetido nas rotas. Erro inesperado nunca devolve mensagem interna.
 - **Validação** em `middlewares/validate.ts` com Zod, para `body`, `query` e `params`. O que chega ao
-  controller é a versão interpretada pelo esquema.
+  controller é a versão interpretada pelo esquema. **Os esquemas moram em `validators/<módulo>.validator.ts`**
+  (um arquivo por módulo, nunca um só para a aplicação; os campos que mais de um módulo usa — nome, telefone e
+  tipo de pessoa — ficam em `validators/fields.validator.ts`). A rota importa o esquema e o passa ao `validate`;
+  o controller só importa o **tipo** (`import type`) para tipar o que já chega validado. Esquema Zod dentro do
+  controller não entra.
 - **Autenticação** em `middlewares/authenticate.ts` (JWT Bearer, HS256 fixo). O token carrega só o
   `sub`; papéis são lidos do banco a cada requisição que precisar deles.
 - **Variáveis de ambiente** validadas em `config/env.ts`: falta de segredo impede a API de subir.
@@ -310,7 +314,7 @@ versão `.html` ao lado, mais fácil de ler). Quando o documento evoluir, a v2 v
   nem dado nenhum (a tela não precisa de nada, e um endpoint aberto que ecoa o que recebe é um jeito de ler o que
   outros mandaram). O consentimento é obrigatório (`z.literal(true)`, o texto do desenho não promete nada que a ONG não
   tenha dito) e gravado como **data** (`contacts.consented_at`), nunca como booleano. O telefone reaproveita
-  `phoneField` de `auth.controller.ts` (a mesma frase do "falta um dígito" de `/minha-conta/dados`). O limite é **30
+  `phoneField` de `validators/fields.validator.ts` (a mesma frase do "falta um dígito" de `/minha-conta/dados`). O limite é **30
   mensagens por hora por conexão** (`utils/origin.ts`, o mesmo HMAC do IP das inscrições; o IP nunca é gravado): cabe
   uma turma de escola saindo por um IP só e ainda barra um script. Mensagem recusada pela validação **não gasta** o
   limite. **Não existe leitura, listagem nem apagar**: a fila de atendimento da equipe é o RF29, outro card. Mesma
