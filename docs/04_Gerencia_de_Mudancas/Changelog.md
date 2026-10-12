@@ -404,3 +404,15 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Por quê:** o formulário de contato (RF07) estava ligado a uma tabela que ninguém podia ler. Sem esta tela, uma
   escola que escreve não é respondida, e a ONG lê WhatsApp e telefone todos os dias, não o painel do banco.
 - **PR:** branch `feat/admin-contacts`
+
+## 2026-10-12 — Para escolas (RF38, desenhos 11h e 11i)
+- **Artefato:** Protótipos · Requisitos (RF38)
+- **Antes:** `/para-escolas` levava ao 404 (menu "Mais", folha do celular, banner da home e cartão da agenda).
+- **Depois:** página estática `/para-escolas` conforme os desenhos 11h (celular, com barra fixa de WhatsApp e e-mail acima da barra inferior) e 11i (desktop, hero em duas colunas e cartão lateral com a ficha e o pedido). Textos do desenho; dados em `lib/schools.ts`; contatos de `lib/contacts.ts`; foto `sector-literary.jpg`, já pública. A seção "Onde já estivemos" some inteira se a lista estiver vazia.
+- **Diferenças em relação ao desenho e por quê:**
+  - o desenho põe aplique no botão do WhatsApp **e** sombra ocre na foto, o que excede "no máximo um aplique por tela" do guia; foi mantido como no desenho, a confirmar com quem desenha;
+  - a nota do desenho diz que o formulário traria a origem "Para escolas" para a fila (10l), mas não existe coluna de origem em `contacts` e a tela da equipe escreve sempre "CONTATO"; nada foi criado, a decidir pelo grupo;
+  - "Ver o catálogo completo" leva a `/projetos`, que ainda não existe (404, como os demais links do menu);
+  - no celular o cartão "Solicitar uma atividade" não repete os botões (estão na barra fixa), e no desktop a ficha e o pedido formam um cartão só; para isso a ordem do código difere da ordem visual no celular.
+- **Por quê:** RF38 é o caminho de quem chega querendo pedir uma atividade; o contato é o objetivo da página.
+- **PR:** branch `feat/schools-page`
