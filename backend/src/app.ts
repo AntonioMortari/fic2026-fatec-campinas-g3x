@@ -5,6 +5,7 @@ import swaggerUi from 'swagger-ui-express';
 import { env } from './config/env';
 import { openApiDocument } from './docs/openapi';
 import { errorHandler, notFound } from './middlewares/error-handler';
+import { isImageUpload } from './middlewares/image-upload-parser';
 import { routes } from './routes';
 
 export function createApp() {
@@ -14,7 +15,8 @@ export function createApp() {
   app.set('trust proxy', env.TRUST_PROXY);
   app.use(helmet());
   app.use(cors({ origin: env.CORS_ORIGINS, credentials: true, exposedHeaders: ['Content-Disposition'] }));
-  app.use(express.json({ limit: '100kb' }));
+  const defaultJson = express.json({ limit: '100kb' });
+  app.use((req, res, next) => (isImageUpload(req) ? next() : defaultJson(req, res, next)));
 
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
   app.use('/api', routes);
