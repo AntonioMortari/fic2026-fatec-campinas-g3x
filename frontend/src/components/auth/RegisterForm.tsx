@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { maskPhone } from '../../lib/format-phone'
 import { PERSON_TYPE_LABELS } from '../../lib/person-type'
 import { useRegister, type AuthResult, type PersonType, type RegisterInput } from '../../services/auth'
 import { Alert, Button, Checkbox, FieldMessages, PasswordField, SelectField, TextField } from '../ui'
@@ -50,6 +51,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: (result: AuthResult) =>
         name="name"
         autoComplete="name"
         required
+        maxLength={120}
         value={values.name}
         onChange={(event) => set('name', event.target.value)}
         error={feedback.fields.name}
@@ -63,6 +65,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: (result: AuthResult) =>
         autoCapitalize="none"
         required
         hint="É por aqui que respondemos você."
+        maxLength={254}
         value={values.email}
         onChange={(event) => set('email', event.target.value)}
         error={feedback.fields.email}
@@ -74,8 +77,9 @@ export function RegisterForm({ onSuccess }: { onSuccess: (result: AuthResult) =>
         autoComplete="tel"
         inputMode="tel"
         hint="Opcional. Com DDD, como (11) 95396-8344."
+        maxLength={15}
         value={values.phone}
-        onChange={(event) => set('phone', event.target.value)}
+        onChange={(event) => set('phone', maskPhone(event.target.value))}
         error={feedback.fields.phone}
       />
       <SelectField

@@ -4,7 +4,7 @@ import { useFormFeedback } from '../components/auth/use-form-feedback'
 import { ActionBar, Alert, Button, SegmentedField, TextField } from '../components/ui'
 import { useAuth } from '../contexts/useAuth'
 import { CONTACTS } from '../lib/contacts'
-import { formatPhone } from '../lib/format-phone'
+import { formatPhone, maskPhone } from '../lib/format-phone'
 import { PERSON_TYPE_SHORT_LABELS } from '../lib/person-type'
 import { useUpdateProfile, type AuthUser, type PersonType } from '../services/auth'
 
@@ -47,7 +47,7 @@ function Form({ user }: { user: AuthUser }) {
           {summary}
         </Alert>
       )}
-      <TextField label="Nome" name="name" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} error={feedback.fields.name} />
+      <TextField label="Nome" name="name" maxLength={120} autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} error={feedback.fields.name} />
       <TextField
         label="Telefone"
         labelNote="com DDD"
@@ -55,8 +55,9 @@ function Form({ user }: { user: AuthUser }) {
         name="phone"
         autoComplete="tel"
         inputMode="tel"
+        maxLength={15}
         value={phone}
-        onChange={(event) => setPhone(event.target.value)}
+        onChange={(event) => setPhone(maskPhone(event.target.value))}
         error={feedback.fields.phone}
       />
       <SegmentedField legend="Você é" name="personType" options={OPTIONS} value={personType} onChange={setPersonType} error={feedback.fields.personType} />

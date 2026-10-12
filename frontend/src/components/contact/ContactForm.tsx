@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { maskPhone } from '../../lib/format-phone'
 import { useSendContact } from '../../services/contacts'
 import { useFormFeedback } from '../auth/use-form-feedback'
 import { Alert, Button, Checkbox, TextAreaField, TextField } from '../ui'
@@ -50,7 +51,7 @@ export function ContactForm({ onSent }: { onSent: () => void }) {
         </Alert>
       )}
       <div className="flex flex-col gap-4 desktop:grid desktop:grid-cols-2 desktop:gap-4">
-        <TextField label="Seu nome" name="name" autoComplete="name" required value={values.name} onChange={(e) => set('name', e.target.value)} error={feedback.fields.name} />
+        <TextField label="Seu nome" name="name" autoComplete="name" required maxLength={120} value={values.name} onChange={(e) => set('name', e.target.value)} error={feedback.fields.name} />
         <TextField
           label="E-mail"
           type="email"
@@ -60,6 +61,7 @@ export function ContactForm({ onSent }: { onSent: () => void }) {
           autoCapitalize="none"
           required
           hint="É por aqui que respondemos."
+          maxLength={254}
           value={values.email}
           onChange={(e) => set('email', e.target.value)}
           error={feedback.fields.email}
@@ -72,8 +74,9 @@ export function ContactForm({ onSent }: { onSent: () => void }) {
           autoComplete="tel"
           inputMode="tel"
           hint="Com DDD, como (11) 95396-8344."
+          maxLength={15}
           value={values.phone}
-          onChange={(e) => set('phone', e.target.value)}
+          onChange={(e) => set('phone', maskPhone(e.target.value))}
           error={feedback.fields.phone}
         />
         <TextField
@@ -82,6 +85,7 @@ export function ContactForm({ onSent }: { onSent: () => void }) {
           name="institution"
           autoComplete="organization"
           hint="Escola, empresa, coletivo, imprensa."
+          maxLength={160}
           value={values.institution}
           onChange={(e) => set('institution', e.target.value)}
           error={feedback.fields.institution}
@@ -94,6 +98,7 @@ export function ContactForm({ onSent }: { onSent: () => void }) {
         rows={3}
         className="[&_textarea]:min-h-29.5 desktop:[&_textarea]:min-h-37"
         hint="Conte o que você precisa. Não tem forma certa."
+        maxLength={5000}
         value={values.message}
         onChange={(e) => set('message', e.target.value)}
         error={feedback.fields.message}
