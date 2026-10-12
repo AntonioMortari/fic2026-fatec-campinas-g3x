@@ -188,3 +188,19 @@ describe('formatPhone', () => {
     expect(formatPhone('123')).toBe('123')
   })
 })
+
+describe('input masks', () => {
+  it('limits phone to 11 digits and formats as typed', async () => {
+    const { maskPhone } = await import('../lib/format-phone')
+    expect(maskPhone('199999999999999999999999999')).toBe('(19) 99999-9999')
+    expect(maskPhone('1')).toBe('(1')
+    expect(maskPhone('1135')).toBe('(11) 35')
+    expect(maskPhone('1135681234')).toBe('(11) 3568-1234')
+  })
+
+  it('limits cpf to 11 digits and formats as typed', async () => {
+    const { maskCpf } = await import('../lib/format-phone')
+    expect(maskCpf('123456789012345')).toBe('123.456.789-01')
+    expect(maskCpf('1234')).toBe('123.4')
+  })
+})

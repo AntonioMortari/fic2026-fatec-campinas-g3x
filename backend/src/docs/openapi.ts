@@ -212,6 +212,39 @@ export const openApiDocument = {
           ended: { type: 'integer', minimum: 0 },
         },
       },
+      AdminContact: {
+        type: 'object',
+        description: 'Nunca traz o hash de origem nem a data de consentimento.',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          status: { type: 'string', enum: ['new', 'in_contact', 'done'] },
+          name: { type: 'string' },
+          email: { type: 'string' },
+          phone: { type: ['string', 'null'], description: 'Só os dígitos.' },
+          institution: { type: ['string', 'null'] },
+          message: { type: 'string' },
+          staffNote: { type: ['string', 'null'], description: 'Nota interna: só a equipe vê.' },
+          createdAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      ContactCounts: {
+        type: 'object',
+        required: ['all', 'new', 'in_contact', 'done'],
+        properties: {
+          all: { type: 'integer', minimum: 0 },
+          new: { type: 'integer', minimum: 0 },
+          in_contact: { type: 'integer', minimum: 0 },
+          done: { type: 'integer', minimum: 0 },
+        },
+      },
+      ContactTriageRequest: {
+        type: 'object',
+        description: 'Ao menos um dos dois. Qualquer outro campo é descartado: nome, e-mail, telefone e mensagem não mudam por aqui.',
+        properties: {
+          status: { type: 'string', enum: ['new', 'in_contact', 'done'] },
+          staffNote: { type: ['string', 'null'], maxLength: 2000, description: 'Texto vazio ou null apaga a nota.' },
+        },
+      },
       ContactRequest: {
         type: 'object',
         required: ['name', 'email', 'message', 'consent'],
@@ -821,6 +854,106 @@ export const openApiDocument = {
           '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '404': { description: '`application_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '409': { description: '`live_application_exists`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/contacts': {
+      get: {
+        tags: ['Admin'],
+        summary: 'A fila de mensagens de contato (equipe, RF29)',
+        description:
+          'Filtro `status` e paginação por `page` (1 em diante) e `pageSize` (padrão 20, até 100). Ordem: nova, em contato, concluída; dentro de cada uma, a mais recente primeiro, e a página é cortada sobre essa ordem. `counts` conta por situação sem olhar o filtro, para os chips. Não há DELETE nem POST: a mensagem é registro.',
+        parameters: [
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['new', 'in_contact', 'done'] } },
+          { name: 'page', in: 'query', schema: { type: 'integer', minimum: 1, default: 1 } },
+          { name: 'pageSize', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 } },
+        ],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'A página, as contagens e a paginação',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    data: { type: 'array', items: { $ref: '#/components/schemas/AdminContact' } },
+                    counts: { $ref: '#/components/schemas/ContactCounts' },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        pageSize: { type: 'integer' },
+                        total: { type: 'integer', description: 'Quantas há no filtro atual.' },
+                        totalPages: { type: 'integer', minimum: 1 },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '400': { description: 'Filtro ou página inválidos', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/contacts/counts': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Quantas mensagens há em cada situação (equipe)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Contagens', content: { 'application/json': { schema: { type: 'object', properties: { counts: { $ref: '#/components/schemas/ContactCounts' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/contacts/export.csv': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Planilha das mensagens (equipe)',
+        description:
+          'CSV com `;`, BOM UTF-8 e CRLF, todas as mensagens do filtro (sem paginação). Células que começariam com `=`, `+`, `-` ou `@` levam um apóstrofo na frente. Colunas: Nome, Situação, Instituição, E-mail, Telefone, Mensagem, Nota interna, Recebida em.',
+        parameters: [{ name: 'status', in: 'query', schema: { type: 'string', enum: ['new', 'in_contact', 'done'] } },],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Arquivo CSV', content: { 'text/csv': { schema: { type: 'string' } } } },
+          '400': { description: 'Filtro inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/contacts/{id}': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Uma mensagem (equipe)',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'A mensagem', content: { 'application/json': { schema: { type: 'object', properties: { contact: { $ref: '#/components/schemas/AdminContact' } } } } } },
+          '400': { description: 'Identificador inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`contact_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      patch: {
+        tags: ['Admin'],
+        summary: 'Muda a situação e/ou a nota interna de uma mensagem (equipe)',
+        description: 'Grava só essas duas colunas. Qualquer passagem de situação existe, inclusive voltar atrás.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ContactTriageRequest' } } } },
+        responses: {
+          '200': { description: 'A mensagem atualizada', content: { 'application/json': { schema: { type: 'object', properties: { contact: { $ref: '#/components/schemas/AdminContact' } } } } } },
+          '400': { description: 'Corpo vazio, situação fora da lista ou nota acima de 2000 caracteres', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`contact_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },

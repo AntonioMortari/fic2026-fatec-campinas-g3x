@@ -38,6 +38,15 @@ afterEach(() => {
 });
 
 describe('POST /api/contacts', () => {
+  it('never takes the triage columns from the body: situation and internal note stay out of the row', async () => {
+    const { create } = setup();
+
+    await post({ ...VALID, status: 'done', staffNote: 'quem escreve não nota', staff_note: 'x' });
+
+    const [values] = create.mock.calls[0]!;
+    expect(Object.keys(values as object).sort()).toEqual(['consentedAt', 'email', 'institution', 'message', 'name', 'originHash', 'phone']);
+  });
+
   it('registers the message, answers 201 and needs no token', async () => {
     const { create } = setup();
 

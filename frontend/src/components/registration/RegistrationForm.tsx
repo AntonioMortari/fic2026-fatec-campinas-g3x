@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { formatPhone } from '../../lib/format-phone'
+import { formatPhone, maskCpf, maskPhone } from '../../lib/format-phone'
 import { useEventRegistration } from '../../services/events'
 import type { AuthUser } from '../../services/auth'
 import type { EventDetail } from '../../types/event'
@@ -82,6 +82,7 @@ export function RegistrationForm({ event, account, onDone }: RegistrationFormPro
         name="name"
         autoComplete="name"
         required
+        maxLength={120}
         value={values.name}
         onChange={(e) => set('name', e.target.value)}
         error={feedback.fields.name}
@@ -95,6 +96,7 @@ export function RegistrationForm({ event, account, onDone }: RegistrationFormPro
         autoCapitalize="none"
         required
         hint="Para a equipe falar com você sobre a atividade."
+        maxLength={254}
         value={values.email}
         onChange={(e) => set('email', e.target.value)}
         error={feedback.fields.email}
@@ -106,8 +108,9 @@ export function RegistrationForm({ event, account, onDone }: RegistrationFormPro
         autoComplete="tel"
         inputMode="tel"
         hint="Com DDD, como (11) 95396-8344."
+        maxLength={15}
         value={values.phone}
-        onChange={(e) => set('phone', e.target.value)}
+        onChange={(e) => set('phone', maskPhone(e.target.value))}
         error={feedback.fields.phone}
       />
       {event.requiresCpf && (
@@ -118,8 +121,9 @@ export function RegistrationForm({ event, account, onDone }: RegistrationFormPro
           autoComplete="off"
           required
           hint="Esta atividade pede o documento. Só números."
+          maxLength={14}
           value={values.cpf}
-          onChange={(e) => set('cpf', e.target.value)}
+          onChange={(e) => set('cpf', maskCpf(e.target.value))}
           error={feedback.fields.cpf}
         />
       )}
@@ -139,6 +143,7 @@ export function RegistrationForm({ event, account, onDone }: RegistrationFormPro
             name="guardianName"
             autoComplete="off"
             required
+            maxLength={120}
             value={values.guardianName}
             onChange={(e) => set('guardianName', e.target.value)}
             error={feedback.fields.guardianName}
@@ -151,8 +156,9 @@ export function RegistrationForm({ event, account, onDone }: RegistrationFormPro
             autoComplete="off"
             required
             hint="É por ele que falamos com a família no dia."
+            maxLength={15}
             value={values.guardianPhone}
-            onChange={(e) => set('guardianPhone', e.target.value)}
+            onChange={(e) => set('guardianPhone', maskPhone(e.target.value))}
             error={feedback.fields.guardianPhone}
           />
         </div>

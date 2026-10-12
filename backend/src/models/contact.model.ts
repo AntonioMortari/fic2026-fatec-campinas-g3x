@@ -1,6 +1,9 @@
 import { DataTypes, Model, type CreationOptional, type InferAttributes, type InferCreationAttributes } from 'sequelize';
 import { sequelize } from '../config/database';
 
+export const CONTACT_STATUSES = ['new', 'in_contact', 'done'] as const;
+export type ContactStatus = (typeof CONTACT_STATUSES)[number];
+
 export class Contact extends Model<InferAttributes<Contact>, InferCreationAttributes<Contact>> {
   declare id: CreationOptional<string>;
   declare name: string;
@@ -10,6 +13,8 @@ export class Contact extends Model<InferAttributes<Contact>, InferCreationAttrib
   declare message: string;
   declare consentedAt: Date;
   declare originHash: string | null;
+  declare status: CreationOptional<ContactStatus>;
+  declare staffNote: string | null;
   declare createdAt: CreationOptional<Date>;
 }
 
@@ -23,6 +28,8 @@ Contact.init(
     message: { type: DataTypes.TEXT, allowNull: false },
     consentedAt: { type: DataTypes.DATE, allowNull: false },
     originHash: { type: DataTypes.CHAR(64), allowNull: true },
+    status: { type: DataTypes.ENUM(...CONTACT_STATUSES), allowNull: false, defaultValue: 'new' },
+    staffNote: { type: DataTypes.TEXT, allowNull: true },
     createdAt: DataTypes.DATE,
   },
   { sequelize, tableName: 'contacts', updatedAt: false },
