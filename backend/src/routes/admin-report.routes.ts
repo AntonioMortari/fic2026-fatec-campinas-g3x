@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { downloadReport, getReport, reportQuery } from '../controllers/admin-report.controller';
+import { downloadReport, getReport } from '../controllers/admin-report.controller';
+import { reportQuery } from '../validators/admin-report.validator';
 import { authenticate } from '../middlewares/authenticate';
 import { requireStaff } from '../middlewares/require-staff';
 import { validate } from '../middlewares/validate';

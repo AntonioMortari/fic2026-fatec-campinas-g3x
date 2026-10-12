@@ -77,6 +77,7 @@ src/
 ├── app.ts              monta o Express (é o que os testes importam)
 ├── config/             variáveis de ambiente validadas e conexão com o banco
 ├── routes/             rotas REST, montadas sob /api
+├── validators/         esquemas Zod de entrada, um arquivo por módulo (as rotas os passam ao validate)
 ├── controllers/        lê a requisição e escreve a resposta — sem regra de negócio
 ├── services/           regras de negócio, autorização e acesso aos models
 ├── models/             models do Sequelize e suas associações

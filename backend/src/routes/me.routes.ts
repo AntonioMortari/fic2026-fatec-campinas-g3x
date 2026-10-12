@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { getMyRegistrations, profileBody, updateMe } from '../controllers/me.controller';
+import { getMyRegistrations, updateMe } from '../controllers/me.controller';
+import { profileBody } from '../validators/me.validator';
 import { authenticate } from '../middlewares/authenticate';
 import { getMyApplications } from '../controllers/volunteers.controller';
 import { validate } from '../middlewares/validate';

@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { apply, applicationBody, getAreas } from '../controllers/volunteers.controller';
+import { apply, getAreas } from '../controllers/volunteers.controller';
+import { applicationBody } from '../validators/volunteers.validator';
 import { authenticate } from '../middlewares/authenticate';
 import { validate } from '../middlewares/validate';
 

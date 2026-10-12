@@ -1,13 +1,8 @@
 import type { Request, Response } from 'express';
-import { z } from 'zod';
+import type { z } from 'zod';
 import { buildReport, reportCsv } from '../services/report.service';
 import { slugify } from '../utils/ics';
-
-// A query string is text: the offset is read as a whole number no bigger than zero (the future has nothing to report).
-export const reportQuery = z.object({
-  period: z.enum(['month', 'quarter', 'semester'], { error: 'Escolha mês, trimestre ou semestre.' }).default('month'),
-  offset: z.coerce.number({ error: 'Período inválido.' }).int('Período inválido.').min(-240, 'Período inválido.').max(0, 'Ainda não há o que relatar no futuro.').default(0),
-});
+import type { reportQuery } from '../validators/admin-report.validator';
 
 export async function getReport(req: Request, res: Response): Promise<void> {
   const { period, offset } = req.query as unknown as z.output<typeof reportQuery>;

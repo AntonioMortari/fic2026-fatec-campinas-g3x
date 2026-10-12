@@ -1,15 +1,12 @@
 import { Router } from 'express';
 import {
-  contactFilters,
-  contactListQuery,
-  contactParams,
   downloadAdminContacts,
   getAdminContact,
   getAdminContactCounts,
   listAdminContacts,
   triageAdminContact,
-  triageBody,
 } from '../controllers/admin-contacts.controller';
+import { contactFilters, contactListQuery, contactParams, triageBody } from '../validators/admin-contacts.validator';
 import { authenticate } from '../middlewares/authenticate';
 import { requireStaff } from '../middlewares/require-staff';
 import { validate } from '../middlewares/validate';

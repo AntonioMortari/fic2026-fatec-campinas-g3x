@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { contactBody, createContact } from '../controllers/contacts.controller';
+import { createContact } from '../controllers/contacts.controller';
+import { contactBody } from '../validators/contacts.validator';
 import { validate } from '../middlewares/validate';
 
 export const contactsRoutes = Router();

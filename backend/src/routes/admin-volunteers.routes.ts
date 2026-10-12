@@ -1,15 +1,12 @@
 import { Router } from 'express';
 import {
-  applicationFilters,
-  applicationParams,
-  areaFilter,
   downloadAdminApplications,
   getAdminApplication,
   getAdminCounts,
   listAdminApplications,
   setAdminApplicationStatus,
-  statusBody,
 } from '../controllers/volunteers.controller';
+import { applicationFilters, applicationParams, areaFilter, statusBody } from '../validators/volunteers.validator';
 import { authenticate } from '../middlewares/authenticate';
 import { requireStaff } from '../middlewares/require-staff';
 import { validate } from '../middlewares/validate';
