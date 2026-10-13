@@ -440,3 +440,12 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   toda); os cards de setor não são links; o mapa é o iframe do Google sem chave (a Maps Embed API fica para depois).
 - **Confirmar com a ONG:** texto resumido, arte do Sankofa e foto do casal.
 - **PR:** branch `feat/about-page`
+
+## 2026-10-13 — Deploy: Dockerfiles de produção
+- **Artefato:** Arquitetura (deploy)
+- **Antes:** o deploy era "a definir"; o `backend/Dockerfile` tinha o estágio `production` sem migrations, health check nem pasta de fotos, e o front só tinha o estágio de desenvolvimento.
+- **Depois:** `backend/Dockerfile` roda `npm run db:migrate:prod` (migrations compiladas) antes de `node dist/server.js`, com `HEALTHCHECK` em `/api/health` e `/uploads` para as fotos; `frontend/Dockerfile` ganhou os estágios `build` (com `VITE_API_URL` como argumento de build) e `production` (nginx com fallback de SPA, cache de `/assets` e cabeçalhos).
+- **Comportamento da aplicação:** nenhum; só empacotamento. O `docker-compose.yml` de desenvolvimento não mudou.
+- **Não verificado:** o `docker build` completo (o `npm ci` dentro do contêiner não alcança o registro do npm neste ambiente) e o Coolify em si.
+- **Por quê:** RNF-DEP-01/02 (aplicação em nuvem, com acesso público) e RNF-REP-02 (o deploy avaliado é o da `main`).
+- **PR:** branch `chore/deploy`
