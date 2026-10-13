@@ -24,7 +24,7 @@ navegador baixa — **nunca coloque segredo aqui**.
 
 | Variável | Descrição |
 |---|---|
-| `VITE_API_URL` | endereço da API, ex.: `http://localhost:3333/api` |
+| `VITE_API_URL` | endereço da API, ex.: `http://localhost:3333/api`. Em produção é uma variável de **build** (o Vite a embute no JavaScript): no `docker build`, `--build-arg VITE_API_URL=...` |
 
 ## Execução
 
