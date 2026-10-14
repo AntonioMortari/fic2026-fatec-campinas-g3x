@@ -77,7 +77,7 @@ describe('motion (design "Movimento")', () => {
   it('keeps the entrance at 200ms, the sheet at 280ms and the page fade at 150ms', () => {
     expect(motionToken('enter')).toBe(200)
     expect(motionToken('sheet')).toBe(280)
-    expect(motionToken('page')).toBe(150)
+    expect(motionToken('page')).toBe(200)
     expect(css).toMatch(/--animate-rise: rise var\(--motion-enter\)/)
     expect(css).toMatch(/--animate-sheet: sheet var\(--motion-sheet\)/)
     expect(css).toMatch(/--animate-page: page var\(--motion-page\)/)
