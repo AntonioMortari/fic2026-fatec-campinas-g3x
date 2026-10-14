@@ -99,6 +99,7 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
   return (
     <dialog
       ref={dialog}
+      data-sheet
       aria-labelledby="menu-title"
       onClose={onClose}
       onClick={(event) => {
@@ -106,7 +107,7 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
       }}
       className={cn(
         'm-0 mt-auto h-[calc(100dvh-4rem)] max-h-none w-full max-w-none border-0 border-t-[1.5px] border-brown bg-card p-0 text-brown',
-        'backdrop:bg-scrim open:animate-sheet',
+        'backdrop:bg-scrim',
       )}
     >
       <div className="flex h-full flex-col">

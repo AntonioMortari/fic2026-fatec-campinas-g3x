@@ -29,12 +29,13 @@ export function AdminMenu({ open, onClose, bottomBar }: AdminMenuProps) {
   return (
     <dialog
       ref={dialog}
+      data-sheet
       aria-labelledby="admin-menu-title"
       onClose={onClose}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
-      className="m-0 mt-auto h-[calc(100dvh-4rem)] max-h-none w-full max-w-none border-0 border-t border-brown bg-card p-0 text-brown backdrop:bg-scrim open:animate-sheet desktop:hidden"
+      className="m-0 mt-auto h-[calc(100dvh-4rem)] max-h-none w-full max-w-none border-0 border-t border-brown bg-card p-0 text-brown backdrop:bg-scrim desktop:hidden"
     >
       <div className="flex h-full flex-col">
         <div aria-hidden="true" className="flex justify-center pt-2.5 pb-1">
