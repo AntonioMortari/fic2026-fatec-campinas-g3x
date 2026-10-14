@@ -1,4 +1,4 @@
-import { Link, Outlet, useMatches, useSearchParams } from 'react-router-dom'
+import { Link, Outlet, useLocation, useMatches, useSearchParams } from 'react-router-dom'
 import { CONTACTS } from '../../lib/contacts'
 import { cn } from '../../lib/cn'
 import { labelForRoute } from '../../lib/navigation'
@@ -10,6 +10,7 @@ import { SkipLink } from './SkipLink'
 import { useRouteFocus } from './useRouteFocus'
 
 export function FocusedLayout() {
+  const { pathname } = useLocation()
   const [searchParams] = useSearchParams()
   const handles = useMatches().map((match) => match.handle as RouteHandle | undefined)
   const defaultBack = handles.map((handle) => handle?.backTo).findLast(Boolean)
@@ -58,7 +59,7 @@ export function FocusedLayout() {
           wide ? 'max-w-xl desktop:flex desktop:max-w-page desktop:items-center desktop:px-8 desktop:py-10' : 'max-w-xl',
         )}
       >
-        <div className="w-full">
+        <div key={pathname} className="w-full animate-page">
           <Outlet />
         </div>
       </main>

@@ -72,7 +72,7 @@
   --ease-out-soft: cubic-bezier(0.2, 0, 0, 1);
   --motion-press: 90ms;
   --motion-micro: 150ms;
-  --motion-page: 150ms;
+  --motion-page: 200ms;
   --motion-enter: 200ms;
   --motion-menu: 180ms;
   --motion-sheet: 280ms;
@@ -82,7 +82,7 @@
 
   --animate-rise: rise var(--motion-enter) var(--ease-out-soft) both;
   --animate-sheet: sheet var(--motion-sheet) var(--ease-out-soft) both;
-  --animate-page: page var(--motion-page) ease-out both;
+  --animate-page: page var(--motion-page) var(--ease-out-soft) backwards;
   --animate-drop: drop var(--motion-menu) var(--ease-out-soft) both;
   --animate-drop-out: drop-out var(--motion-micro) var(--ease-out-soft) forwards;
   --animate-page-out: page-out var(--motion-micro) ease-in forwards;
@@ -101,6 +101,7 @@
   @keyframes page {
     from {
       opacity: 0;
+      transform: translateY(8px);
     }
   }
 
