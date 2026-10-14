@@ -13,6 +13,7 @@ import { AdminHome } from './pages/admin/AdminHome'
 import { AdminReport } from './pages/admin/AdminReport'
 import { AdminRegistrants } from './pages/admin/AdminRegistrants'
 import { AdminContacts } from './pages/admin/AdminContacts'
+import { AdminNews } from './pages/admin/AdminNews'
 import { AdminVolunteers } from './pages/admin/AdminVolunteers'
 import { Auth } from './pages/Auth'
 import { EventRegistration } from './pages/EventRegistration'
@@ -69,6 +70,9 @@ export const routes: RouteObject[] = [
       { path: '/admin/eventos/:id/presenca', element: <AdminAttendance />, handle: { hideHeaderOnMobile: true } },
       { path: '/admin/contatos', element: <AdminContacts /> },
       { path: '/admin/contatos/:id', element: <AdminContacts />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/noticias', element: <AdminNews /> },
+      { path: '/admin/noticias/nova', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/noticias/:id/editar', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/voluntarios', element: <AdminVolunteers /> },
       { path: '/admin/voluntarios/:id', element: <AdminVolunteers />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
     ],

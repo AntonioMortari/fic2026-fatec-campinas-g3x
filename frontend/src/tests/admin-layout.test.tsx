@@ -88,8 +88,8 @@ describe("the panel's own frame (screen 2c)", () => {
     await user.click(within(screen.getByRole('navigation', { name: 'Atalhos do painel' })).getByRole('button', { name: 'Mais' }))
     const menu = screen.getByRole('dialog', { name: 'Painel' })
 
-    expect(within(menu).getAllByRole('heading', { level: 3, hidden: true }).map((heading) => heading.textContent)).toEqual(['Pessoas', 'Gestão', 'Conta', 'Leitura'])
-    for (const missing of ['Atividades', 'Publicações', 'Galeria', 'Biblioteca', 'Configurações', 'Notícias']) {
+    expect(within(menu).getAllByRole('heading', { level: 3, hidden: true }).map((heading) => heading.textContent)).toEqual(['Pessoas', 'Conteúdo', 'Gestão', 'Conta', 'Leitura'])
+    for (const missing of ['Atividades', 'Publicações', 'Galeria', 'Biblioteca', 'Configurações']) {
       expect(within(menu).queryByRole('link', { name: missing, hidden: true })).not.toBeInTheDocument()
     }
   })
@@ -111,11 +111,11 @@ describe("the desktop frame of the panel (screen 7j)", () => {
     await screen.findByRole('heading', { name: 'Eventos e presença', level: 1 })
     const side = screen.getByRole('navigation', { name: 'Seções do painel' })
 
-    expect(within(side).getAllByRole('link').map((link) => link.textContent)).toEqual(['Início', 'Eventos e presença', 'Mensagens', 'Voluntários', 'Relatório'])
-    expect(within(side).getAllByRole('region').map((group) => group.getAttribute('aria-label'))).toEqual(['Agenda', 'Pessoas', 'Gestão'])
+    expect(within(side).getAllByRole('link').map((link) => link.textContent)).toEqual(['Início', 'Eventos e presença', 'Mensagens', 'Voluntários', 'Notícias', 'Relatório'])
+    expect(within(side).getAllByRole('region').map((group) => group.getAttribute('aria-label'))).toEqual(['Agenda', 'Pessoas', 'Conteúdo', 'Gestão'])
     expect(within(side).getByRole('link', { name: 'Eventos e presença' })).toHaveAttribute('aria-current', 'page')
     expect(within(side).getByRole('link', { name: 'Início' })).not.toHaveAttribute('aria-current')
-    for (const missing of ['Atividades', 'Pessoas', 'Conteúdo', 'Biblioteca', 'Configurações']) {
+    for (const missing of ['Atividades', 'Pessoas', 'Biblioteca', 'Configurações']) {
       expect(within(side).queryByRole('link', { name: missing })).not.toBeInTheDocument()
     }
   })
