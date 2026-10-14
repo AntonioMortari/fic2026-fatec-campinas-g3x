@@ -1,7 +1,7 @@
 import { useId, useMemo, useState } from 'react'
 import { EventList } from '../components/agenda/EventList'
 import { SchoolsPromo } from '../components/agenda/SchoolsPromo'
-import { Button, ChipFilter, Container, EmptyState, PageHeader, TabList, panelId, tabId } from '../components/ui'
+import { Button, ChipFilter, Container, EmptyState, PageHeader, TabList, panelId, tabId, LoadingState } from '../components/ui'
 import { CONTACTS } from '../lib/contacts'
 import { ALL_CATEGORIES, categoryOptions, filterByCategory, isFilterUseful } from '../lib/events'
 import { useEvents } from '../services/events'
@@ -66,7 +66,7 @@ export function Agenda() {
         tabIndex={-1}
         className="desktop:col-start-2 desktop:row-start-3 desktop:pt-6"
       >
-        {isPending && <p role="status" className="m-0 text-brown-400">Carregando a agenda…</p>}
+        {isPending && <LoadingState label="Carregando a agenda…" shape="cards" count={3} />}
 
         {isError && (
           <EmptyState
@@ -102,7 +102,7 @@ export function Agenda() {
           <EmptyState title="Ainda não há registro de atividades passadas por aqui" />
         )}
 
-        {events && events.length > 0 && <EventList events={visible} period={period} nextEventId={events[0]?.id} />}
+        {events && events.length > 0 && <EventList key={`${period}-${category}`} events={visible} period={period} nextEventId={events[0]?.id} />}
       </div>
     </Container>
   )

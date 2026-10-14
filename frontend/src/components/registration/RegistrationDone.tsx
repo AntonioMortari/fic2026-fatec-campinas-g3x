@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { scrollToStart } from '../../lib/motion'
 import { calendarUrl } from '../../services/events'
 import type { EventDetail } from '../../types/event'
 import { Button, PageHeader } from '../ui'
@@ -12,8 +14,15 @@ interface RegistrationDoneProps {
 }
 
 export function RegistrationDone({ event, name, cancelCode, onAnother }: RegistrationDoneProps) {
+  const container = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    container.current?.focus({ preventScroll: true })
+    scrollToStart()
+  }, [])
+
   return (
-    <div className="flex flex-col gap-5">
+    <div ref={container} tabIndex={-1} className="flex animate-rise flex-col gap-5 outline-none">
       <PageHeader title="Inscrição registrada" lead={<>Guardamos o lugar de <strong>{name}</strong> nesta atividade.</>} className="pt-0" />
       <EventSummaryCard event={event} />
       <div className="flex flex-col gap-2.5">

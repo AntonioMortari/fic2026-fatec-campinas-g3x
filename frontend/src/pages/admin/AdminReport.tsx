@@ -5,7 +5,7 @@ import { Swatch } from '../../components/report/Bar'
 import { EventList, EventTable } from '../../components/report/EventRows'
 import { Totals } from '../../components/report/Totals'
 import { AdminPage } from '../../components/admin/AdminPage'
-import { ActionBar, BackLink, Button, EmptyState, PageHeader, useToast } from '../../components/ui'
+import { ActionBar, BackLink, Button, EmptyState, PageHeader, useToast, LoadingState } from '../../components/ui'
 import { listLabel } from '../../lib/report'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/use-media-query'
 import { downloadReportCsv, useReport } from '../../services/report'
@@ -90,7 +90,7 @@ export function AdminReport() {
           desktop={desktop}
         />
 
-        {report.isPending && <p role="status" className="m-0">Carregando o relatório…</p>}
+        {report.isPending && <LoadingState label="Carregando o relatório…" shape="block" count={3} />}
         {report.isError && !data && (
           <EmptyState
             tone="error"

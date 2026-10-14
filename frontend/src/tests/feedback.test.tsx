@@ -2,7 +2,7 @@ import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Layout } from '../components/layout/Layout'
 import { ActionBar, BackLink, Button, ToastProvider, useToast } from '../components/ui'
-import { TOAST_DURATION_MS } from '../components/ui/toast-context'
+import { TOAST_DURATION_MS, TOAST_EXIT_MS } from '../components/ui/toast-context'
 import { renderRoute, renderWithRouter } from './render'
 
 describe('Button loading state', () => {
@@ -50,6 +50,8 @@ describe('toast', () => {
     act(() => screen.getByRole('button', { name: 'Marcar' }).click())
     expect(screen.getByRole('status')).not.toBeEmptyDOMElement()
     act(() => vi.advanceTimersByTime(TOAST_DURATION_MS))
+    expect(screen.getByRole('status')).not.toBeEmptyDOMElement()
+    act(() => vi.advanceTimersByTime(TOAST_EXIT_MS))
     expect(screen.getByRole('status')).toBeEmptyDOMElement()
     vi.useRealTimers()
   })

@@ -3,7 +3,7 @@ import { dateParts } from '../../lib/dates'
 import { formatTimeRange } from '../../lib/events'
 import { useMyRegistrations } from '../../services/events'
 import type { MyRegistration } from '../../types/my-registration'
-import { Button, Card, EmptyState } from '../ui'
+import { Button, Card, EmptyState, LoadingState } from '../ui'
 
 function RegistrationItem({ registration }: { registration: MyRegistration }) {
   const { event, name, attendanceRecorded, cancelCode } = registration
@@ -37,7 +37,7 @@ function Group({ title, items }: { title: string; items: MyRegistration[] }) {
       <h4 className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-brown-400">
         {title} ({items.length})
       </h4>
-      <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+      <ul className="enter-list m-0 flex list-none flex-col gap-2.5 p-0">
         {items.map((registration) => (
           <RegistrationItem key={registration.id} registration={registration} />
         ))}
@@ -56,7 +56,7 @@ export function MyRegistrations() {
       <h3 id="my-registrations" className="m-0 text-item font-bold">
         Minhas inscrições
       </h3>
-      {isPending && <p role="status" className="m-0">Carregando suas inscrições…</p>}
+      {isPending && <LoadingState label="Carregando suas inscrições…" shape="cards" count={1} />}
       {isError && (
         <EmptyState
           tone="error"

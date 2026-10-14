@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { VolunteerDetail } from '../../components/admin/VolunteerDetail'
 import { VolunteerFilters } from '../../components/admin/VolunteerFilters'
 import { VolunteerRow } from '../../components/admin/VolunteerRow'
-import { Button, Chevron, EmptyState, useToast } from '../../components/ui'
+import { Button, Chevron, EmptyState, useToast, LoadingState } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/use-media-query'
 import { STATUS_ORDER } from '../../lib/volunteering'
@@ -97,9 +97,7 @@ export function AdminVolunteers() {
         />
 
         {list.isPending && (
-          <p role="status" className="m-0">
-            Carregando as candidaturas…
-          </p>
+          <LoadingState label="Carregando as candidaturas…" shape="rows" count={4} />
         )}
         {list.isError && <ErrorCard title="Não conseguimos carregar as candidaturas" onRetry={() => void list.refetch()} />}
         {list.data && rows.length === 0 && (
@@ -109,7 +107,7 @@ export function AdminVolunteers() {
           />
         )}
         {rows.length > 0 && (
-          <ul aria-label="Candidaturas" className="m-0 list-none border-t border-line p-0 desktop:-mt-3.5 desktop:border-t-0">
+          <ul aria-label="Candidaturas" className="enter-list m-0 list-none border-t border-line p-0 desktop:-mt-3.5 desktop:border-t-0">
             {rows.map((row) => (
               <VolunteerRow key={row.id} application={row} to={`${LIST_PATH}/${row.id}${suffix}`} selected={row.id === detailId} />
             ))}
@@ -131,9 +129,7 @@ export function AdminVolunteers() {
           <span className="mr-3 border border-brown px-2 py-0.5 text-[0.6875rem] font-bold tracking-[0.1em] uppercase">Equipe</span>
         </div>
         {detail.isPending && detailId && !application && (
-          <p role="status" className="m-0 p-4">
-            Carregando a candidatura…
-          </p>
+          <LoadingState label="Carregando a candidatura…" shape="lines" count={5} className="p-4" />
         )}
         {detail.isError && !application && (
           <div className="p-4 desktop:p-8">

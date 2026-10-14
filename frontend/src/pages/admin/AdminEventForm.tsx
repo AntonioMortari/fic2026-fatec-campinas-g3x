@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { EventForm } from '../../components/admin/EventForm'
 import { isMissingEvent } from '../../lib/api-error'
 import { AdminPage } from '../../components/admin/AdminPage'
-import { BackLink, Button, EmptyState, useToast } from '../../components/ui'
+import { BackLink, Button, EmptyState, useToast, LoadingState } from '../../components/ui'
 import { useAdminEvent, useSaveEvent } from '../../services/admin-events'
 import type { EventInput } from '../../types/admin-event'
 import { NotFound } from '../NotFound'
@@ -40,7 +40,7 @@ export function AdminEventForm() {
         <BackLink to="/admin/eventos" label="Eventos e presença" tone="link" />
       </div>
       <h1 className="m-0 sr-only text-[2.125rem] leading-[1.2] font-bold desktop:not-sr-only">{id ? 'Editar evento' : 'Novo evento'}</h1>
-      {id && existing.isPending && <p role="status" className="m-0">Carregando o evento…</p>}
+      {id && existing.isPending && <LoadingState label="Carregando o evento…" shape="lines" count={6} />}
       {id && existing.isError && (
         <EmptyState
           tone="error"

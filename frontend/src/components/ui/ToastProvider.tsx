@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
-import { TOAST_DURATION_MS, ToastContext, type ToastOptions } from './toast-context'
+import { prefersReducedMotion } from '../../lib/motion'
+import { TOAST_DURATION_MS, TOAST_EXIT_MS, ToastContext, type ToastOptions } from './toast-context'
 
 interface Toast extends ToastOptions {
   id: number
@@ -9,18 +10,29 @@ interface Toast extends ToastOptions {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<Toast | null>(null)
+  const [leaving, setLeaving] = useState(false)
   const nextId = useRef(0)
 
   const show = useCallback((message: string, options: ToastOptions = {}) => {
     nextId.current += 1
+    setLeaving(false)
     setToast({ id: nextId.current, message, ...options })
   }, [])
 
   useEffect(() => {
     if (!toast) return
-    const timer = window.setTimeout(() => setToast(null), TOAST_DURATION_MS)
+    const timer = window.setTimeout(() => {
+      if (prefersReducedMotion()) return setToast(null)
+      setLeaving(true)
+    }, TOAST_DURATION_MS)
     return () => window.clearTimeout(timer)
   }, [toast])
+
+  useEffect(() => {
+    if (!leaving) return
+    const timer = window.setTimeout(() => setToast(null), TOAST_EXIT_MS)
+    return () => window.clearTimeout(timer)
+  }, [leaving])
 
   return (
     <ToastContext.Provider value={show}>
@@ -30,7 +42,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             className={cn(
-              'pointer-events-auto flex w-full max-w-xl animate-rise items-center justify-between gap-3 px-3.5 py-3 text-[0.90625rem] text-cream shadow-[4px_4px_0_var(--color-ochre)]',
+              leaving ? 'pointer-events-none animate-sink' : 'pointer-events-auto animate-rise',
+              'flex w-full max-w-xl items-center justify-between gap-3 px-3.5 py-3 text-[0.90625rem] text-cream shadow-[4px_4px_0_var(--color-ochre)]',
               toast.tone === 'error' ? 'bg-error' : 'bg-brown',
             )}
           >

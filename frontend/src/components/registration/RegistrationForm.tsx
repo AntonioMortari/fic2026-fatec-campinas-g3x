@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { formatPhone, maskCpf, maskPhone } from '../../lib/format-phone'
+import { revealElement } from '../../lib/motion'
 import { useEventRegistration } from '../../services/events'
 import type { AuthUser } from '../../services/auth'
 import type { EventDetail } from '../../types/event'
@@ -44,6 +45,11 @@ export function RegistrationForm({ event, account, onDone }: RegistrationFormPro
   const registration = useEventRegistration(event.id)
   const { formRef, alertRef, ...feedback } = useFormFeedback()
   const hasFieldErrors = Object.keys(feedback.fields).length > 0
+  const guardianGroup = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (values.isMinor && guardianGroup.current) revealElement(guardianGroup.current)
+  }, [values.isMinor])
 
   function set<K extends keyof Values>(key: K, value: Values[K]) {
     setValues((current) => ({ ...current, [key]: value }))
@@ -137,7 +143,7 @@ export function RegistrationForm({ event, account, onDone }: RegistrationFormPro
         />
       </div>
       {values.isMinor && (
-        <div className="flex flex-col gap-4 border-l-[3px] border-line-strong pl-4">
+        <div ref={guardianGroup} className="flex scroll-mb-32 scroll-mt-20 animate-rise flex-col gap-4 border-l-[3px] border-line-strong pl-4">
           <TextField
             label="Nome do responsável"
             name="guardianName"

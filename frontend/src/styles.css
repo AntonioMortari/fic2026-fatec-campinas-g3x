@@ -38,6 +38,7 @@
   --color-line: rgb(43 32 25 / 0.25);
   --color-line-strong: rgb(43 32 25 / 0.4);
   --color-scrim: rgb(43 32 25 / 0.55);
+  --color-skeleton: rgb(43 32 25 / 0.09);
 
   --font-sans: "Bitter", Georgia, "Times New Roman", serif;
   --font-serif: "Bitter", Georgia, "Times New Roman", serif;
@@ -69,12 +70,26 @@
   --shadow-focus: 0 0 0 3px var(--color-blue);
 
   --ease-out-soft: cubic-bezier(0.2, 0, 0, 1);
-  --animate-rise: rise 200ms var(--ease-out-soft) both;
-  --animate-sheet: sheet 280ms var(--ease-out-soft) both;
-  --animate-page: page 150ms ease-out both;
-  --animate-drop: drop 180ms var(--ease-out-soft) both;
-  --animate-drop-out: drop-out 150ms var(--ease-out-soft) forwards;
-  --animate-page-out: page-out 150ms ease-in forwards;
+  --motion-press: 90ms;
+  --motion-micro: 150ms;
+  --motion-page: 150ms;
+  --motion-enter: 200ms;
+  --motion-menu: 180ms;
+  --motion-sheet: 280ms;
+  --motion-sheet-out: 200ms;
+  --motion-stagger: 20ms;
+  --motion-skeleton-delay: 120ms;
+
+  --animate-rise: rise var(--motion-enter) var(--ease-out-soft) both;
+  --animate-sheet: sheet var(--motion-sheet) var(--ease-out-soft) both;
+  --animate-page: page var(--motion-page) ease-out both;
+  --animate-drop: drop var(--motion-menu) var(--ease-out-soft) both;
+  --animate-drop-out: drop-out var(--motion-micro) var(--ease-out-soft) forwards;
+  --animate-page-out: page-out var(--motion-micro) ease-in forwards;
+  --animate-sink: sink var(--motion-micro) var(--ease-out-soft) forwards;
+  --animate-skeleton-in: skeleton-in var(--motion-enter) ease-out var(--motion-skeleton-delay) both;
+  --animate-skeleton-pulse: skeleton-pulse 1.6s ease-in-out infinite;
+  --animate-spin: spin 800ms linear infinite;
 
   @keyframes rise {
     from {
@@ -112,6 +127,25 @@
   @keyframes sheet {
     from {
       transform: translateY(100%);
+    }
+  }
+
+  @keyframes sink {
+    to {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  @keyframes skeleton-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes skeleton-pulse {
+    50% {
+      opacity: 0.55;
     }
   }
 
@@ -159,7 +193,7 @@
   summary,
   [role="tab"] {
     transition-property: color, background-color, border-color, box-shadow, transform, filter, opacity, text-decoration-color;
-    transition-duration: 150ms;
+    transition-duration: var(--motion-micro);
     transition-timing-function: var(--ease-out-soft);
   }
 
@@ -167,7 +201,7 @@
   button:active,
   summary:active,
   [role="tab"]:active {
-    transition-duration: 90ms;
+    transition-duration: var(--motion-press);
   }
 
   button:not(:disabled),
@@ -177,6 +211,67 @@
 
   button:not(:disabled):hover {
     filter: brightness(0.96);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+
+    :root {
+      interpolate-size: allow-keywords;
+    }
+
+    details::details-content {
+      block-size: 0;
+      overflow: clip;
+      transition:
+        block-size var(--motion-micro) var(--ease-out-soft),
+        content-visibility var(--motion-micro) allow-discrete;
+    }
+
+    details[open]::details-content {
+      block-size: auto;
+    }
+
+    dialog[data-sheet] {
+      transition:
+        transform var(--motion-sheet-out) var(--ease-out-soft),
+        display var(--motion-sheet-out) allow-discrete,
+        overlay var(--motion-sheet-out) allow-discrete;
+    }
+
+    dialog[data-sheet]:not([open]) {
+      transform: translateY(100%);
+    }
+
+    dialog[data-sheet][open] {
+      transition:
+        transform var(--motion-sheet) var(--ease-out-soft),
+        display var(--motion-sheet) allow-discrete,
+        overlay var(--motion-sheet) allow-discrete;
+
+      @starting-style {
+        transform: translateY(100%);
+      }
+    }
+
+    dialog[data-sheet]::backdrop {
+      transition:
+        opacity var(--motion-micro) ease-out,
+        display var(--motion-micro) allow-discrete,
+        overlay var(--motion-micro) allow-discrete;
+    }
+
+    dialog[data-sheet]:not([open])::backdrop {
+      opacity: 0;
+    }
+
+    dialog[data-sheet][open]::backdrop {
+      @starting-style {
+        opacity: 0;
+      }
+    }
   }
 
   :focus-visible {
@@ -208,6 +303,7 @@ html[data-contrast="high"] {
   --color-line: #000000;
   --color-line-strong: #000000;
   --color-scrim: rgb(0 0 0 / 0.7);
+  --color-skeleton: #e2e2e2;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -218,6 +314,28 @@ html[data-contrast="high"] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .enter-list > * {
+    animation-delay: 0ms !important;
+  }
+}
+
+@utility enter-list {
+  & > * {
+    animation: var(--animate-rise);
+  }
+
+  & > :nth-child(2) {
+    animation-delay: var(--motion-stagger);
+  }
+
+  & > :nth-child(3) {
+    animation-delay: calc(2 * var(--motion-stagger));
+  }
+
+  & > :nth-child(n + 4) {
+    animation-delay: calc(3 * var(--motion-stagger));
   }
 }
 
