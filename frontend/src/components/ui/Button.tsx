@@ -22,7 +22,7 @@ export type ButtonProps = InternalLinkProps | ExternalLinkProps | NativeButtonPr
 const BASE =
   'inline-flex items-center justify-center gap-2 px-5 text-center font-semibold no-underline ' +
   'border-[1.5px] border-brown select-none cursor-pointer ' +
-  'transition-[transform,box-shadow,background-color,filter] duration-150 ease-out active:duration-90 ' +
+  'transition-[transform,box-shadow,background-color,filter] duration-(--motion-micro) ease-out active:duration-(--motion-press) ' +
   'disabled:cursor-not-allowed disabled:opacity-60 aria-disabled:opacity-60'
 
 const VARIANTS: Record<ButtonVariant, string> = {
@@ -64,7 +64,19 @@ export function Button(props: ButtonProps) {
   const { type = 'button', disabled, ...button } = rest as ButtonHTMLAttributes<HTMLButtonElement>
   return (
     <button type={type} className={classes} disabled={disabled || loading} aria-busy={loading || undefined} {...button}>
-      {loading ? 'Enviando…' : children}
+      {loading ? (
+        <span className="inline-grid">
+          <span aria-hidden="true" className="invisible col-start-1 row-start-1">
+            {children}
+          </span>
+          <span className="col-start-1 row-start-1 inline-flex items-center justify-center gap-2">
+            <span aria-hidden="true" className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent" />
+            Enviando…
+          </span>
+        </span>
+      ) : (
+        children
+      )}
     </button>
   )
 }
