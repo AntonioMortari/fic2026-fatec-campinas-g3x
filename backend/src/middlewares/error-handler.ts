@@ -9,6 +9,10 @@ function isJsonParseError(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'type' in error && error.type === 'entity.parse.failed';
 }
 
+function isTooLargeError(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'type' in error && error.type === 'entity.too.large';
+}
+
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   if (error instanceof ApiError) {
     res.status(error.status).json({ error: { code: error.code, message: error.message, details: error.details } });
@@ -17,6 +21,11 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
 
   if (isJsonParseError(error)) {
     res.status(400).json({ error: { code: 'invalid_json', message: 'O corpo da requisição não é um JSON válido.' } });
+    return;
+  }
+
+  if (isTooLargeError(error)) {
+    res.status(413).json({ error: { code: 'payload_too_large', message: 'O envio é grande demais.' } });
     return;
   }
 

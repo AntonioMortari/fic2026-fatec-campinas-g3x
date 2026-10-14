@@ -32,6 +32,7 @@ alguma obrigatória faltar ou for inválida — o erro diz qual.
 | `JWT_SECRET` | sim | chave de assinatura do JWT, mínimo de 32 caracteres |
 | `JWT_EXPIRES_IN` | não | validade do token (padrão `1h`) |
 | `TRUST_PROXY` | não | quantos proxies há entre a internet e a API (padrão `0`). **No deploy, precisa ser o número certo**: com `0` atrás de um proxy todo visitante parece ter o IP do proxy e o limite de inscrições por conexão vira um balde só; alto demais, o IP pode ser forjado pelo cabeçalho `X-Forwarded-For` |
+| `UPLOADS_DIR` | não | pasta das imagens enviadas pela equipe (padrão `./uploads`, criada se não existir; fora do Git e do contexto do Docker). **Em hospedagem com disco efêmero, precisa ser um volume persistente**: sem ele as imagens somem a cada deploy. O `docker compose` já monta o volume `uploads-data` em `/uploads` |
 
 ## Execução
 
