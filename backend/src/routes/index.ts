@@ -10,6 +10,8 @@ import { adminVolunteersRoutes } from './admin-volunteers.routes';
 import { volunteerApplicationsRoutes, volunteerAreasRoutes } from './volunteers.routes';
 import { contactsRoutes } from './contacts.routes';
 import { adminContactsRoutes } from './admin-contacts.routes';
+import { galleryRoutes } from './gallery.routes';
+import { adminGalleryRoutes } from './admin-gallery.routes';
 
 export const routes = Router();
 
@@ -25,3 +27,5 @@ routes.use('/volunteer-applications', volunteerApplicationsRoutes);
 routes.use('/admin/volunteer-applications', adminVolunteersRoutes);
 routes.use('/contacts', contactsRoutes);
 routes.use('/admin/contacts', adminContactsRoutes);
+routes.use('/gallery', galleryRoutes);
+routes.use('/admin/gallery', adminGalleryRoutes);

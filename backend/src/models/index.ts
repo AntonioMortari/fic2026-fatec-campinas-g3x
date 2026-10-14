@@ -9,3 +9,4 @@ export { VolunteerApplication, VOLUNTEER_STATUSES, type VolunteerStatus } from '
 export { VolunteerApplicationArea } from './volunteer-application-area.model';
 export { VolunteerArea } from './volunteer-area.model';
 export { Contact, CONTACT_STATUSES, type ContactStatus } from './contact.model';
+export { GalleryPhoto } from './gallery-photo.model';
