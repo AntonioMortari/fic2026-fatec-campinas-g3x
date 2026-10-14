@@ -449,3 +449,19 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Não verificado:** o `docker build` completo (o `npm ci` dentro do contêiner não alcança o registro do npm neste ambiente) e o Coolify em si.
 - **Por quê:** RNF-DEP-01/02 (aplicação em nuvem, com acesso público) e RNF-REP-02 (o deploy avaliado é o da `main`).
 - **PR:** branch `chore/deploy`
+
+## 2026-10-14 — Movimento sutil: do desenho para tokens e padrões reutilizáveis
+- **Artefato:** Protótipos
+- **Antes:** a seção "Movimento" do desenho (toque 90ms, entrada 200ms, folha 280ms, página 150ms,
+  "reduzido mantém a mudança de estado, sem animação") estava implementada em cada tela, com
+  milissegundos escritos à mão; carregamento era uma linha de texto, a folha do menu não tinha saída,
+  o aviso sumia de uma vez e a rolagem (erro de formulário, "voltar", passos) era sempre instantânea.
+- **Depois:** durações e curva viraram tokens (`--motion-*` em `frontend/src/styles.css`); entram o
+  esqueleto de carregamento (só depois de 120ms, com a altura reservada), a entrada escalonada de
+  listas, a rolagem suave e restaurada, a saída da folha e do aviso, a altura do `<details>` e o
+  botão "Enviando…" com largura fixa. `prefers-reduced-motion` desliga tudo num bloco só. Os números
+  do desenho não mudaram; a saída da folha (200ms) é nova e mais curta que a entrada (280ms).
+- **Por quê:** a agenda deslocava o conteúdo em 0,108 de CLS ao carregar, a tela não dizia o que
+  acontecia entre o toque e a resposta, e quem voltava para a agenda pelo botão do navegador reaparecia no topo da lista.
+  Ajuste de implementação: não altera a proposta aprovada nem nenhum critério de aceitação.
+- **PR:** branch `feat/subtle-motion`
