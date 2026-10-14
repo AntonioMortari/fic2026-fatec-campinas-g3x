@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { isMissingEvent } from '../lib/api-error'
+import { scrollToStart } from '../lib/motion'
 import { LoadingSession } from '../components/auth/LoadingSession'
 import { EventSummaryCard } from '../components/registration/EventSummaryCard'
 import { RegistrationDone } from '../components/registration/RegistrationDone'
@@ -46,6 +47,7 @@ export function EventRegistration() {
         onAnother={() => {
           setRound((current) => current + 1)
           setDone(null)
+          scrollToStart()
         }}
       />
     )

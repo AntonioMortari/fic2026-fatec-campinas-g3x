@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { AreaOverview } from '../components/volunteering/AreaOverview'
 import { OrderedSteps } from '../components/volunteering/OrderedSteps'
-import { Button, Container, EmptyState, PageHeader } from '../components/ui'
+import { Button, Container, EmptyState, PageHeader, LoadingState } from '../components/ui'
 import { ADULT_NOTE, APPLICATION_PATH, HOW_IT_WORKS_STEPS } from '../lib/volunteering'
 import { useVolunteerAreas } from '../services/volunteering'
 
@@ -38,9 +38,7 @@ export function Volunteering() {
             </h2>
             <p className="m-0 mb-0.5 text-[0.9375rem] leading-[1.2] text-brown-400">Escolha uma ou mais áreas. Muita gente atua em duas.</p>
             {areas.isPending && (
-              <p role="status" className="m-0 text-brown-400">
-                Carregando as áreas…
-              </p>
+              <LoadingState label="Carregando as áreas…" shape="cards" count={2} />
             )}
             {areas.isError && (
               <EmptyState

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { BackBar } from '../components/layout/BackBar'
-import { Button, Container, EmptyState } from '../components/ui'
+import { Button, Container, EmptyState, LoadingState } from '../components/ui'
 import { cn } from '../lib/cn'
 import { APPLICATION_PATH, PERSON_STATUS_LABELS, findLive, isLive, joinAreas, listDate } from '../lib/volunteering'
 import { useMyVolunteerApplications } from '../services/volunteering'
@@ -31,7 +31,7 @@ export function MyVolunteerApplications() {
       <Container className="pb-10">
         <div className="flex max-w-xl flex-col gap-5">
           <h1 className="m-0 pt-5.5 text-[1.75rem] leading-[1.15] font-bold text-pretty desktop:pt-4 desktop:text-h1-desktop">Minhas candidaturas ao voluntariado</h1>
-          {isPending && <p role="status" className="m-0">Carregando suas candidaturas…</p>}
+          {isPending && <LoadingState label="Carregando suas candidaturas…" shape="cards" count={2} />}
           {isError && (
             <EmptyState
               tone="error"
@@ -48,7 +48,7 @@ export function MyVolunteerApplications() {
             <EmptyState title="Você ainda não se candidatou" text="Escolha as áreas em que quer ajudar e conte um pouco de você." />
           )}
           {data && data.length > 0 && (
-            <ul aria-label="Candidaturas" className="m-0 list-none border-t border-brown p-0">
+            <ul aria-label="Candidaturas" className="enter-list m-0 list-none border-t border-brown p-0">
               {data.map((application) => (
                 <Row key={application.id} application={application} />
               ))}
