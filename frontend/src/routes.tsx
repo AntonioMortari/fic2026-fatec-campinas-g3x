@@ -26,6 +26,7 @@ import { MyVolunteerApplications } from './pages/MyVolunteerApplications'
 import { VolunteerApplicationPage } from './pages/VolunteerApplication'
 import { Volunteering } from './pages/Volunteering'
 import { Contact } from './pages/Contact'
+import { Gallery } from './pages/Gallery'
 import { Schools } from './pages/Schools'
 
 const DEV_ONLY: RouteObject[] = import.meta.env.DEV ? [{ path: '/componentes', element: <ComponentCatalog /> }] : []
@@ -48,6 +49,7 @@ export const routes: RouteObject[] = [
       },
       { path: '/contato', element: <Contact /> },
       { path: '/para-escolas', element: <Schools /> },
+      { path: '/galeria', element: <Gallery /> },
       ...DEV_ONLY,
       { path: '*', element: <NotFound /> },
     ],
