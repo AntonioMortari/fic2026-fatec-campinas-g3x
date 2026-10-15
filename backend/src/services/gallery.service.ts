@@ -6,6 +6,7 @@ export interface PublicPhoto {
   alt: string;
   caption: string | null;
   url: string;
+  publishedAt: string;
 }
 
 export interface PublicAlbum {
@@ -36,8 +37,9 @@ export async function listPublicAlbums(): Promise<PublicAlbum[]> {
   for (const row of rows) {
     const key = albumKey(row.album);
     const album = albums.get(key) ?? { name: row.album, latest: 0, photos: [] };
-    album.latest = Math.max(album.latest, (row.publishedAt ?? row.createdAt).getTime());
-    album.photos.push({ id: row.id, alt: row.alt, caption: row.caption, url: publicPhotoUrl(row) });
+    const onAir = row.publishedAt ?? row.createdAt;
+    album.latest = Math.max(album.latest, onAir.getTime());
+    album.photos.push({ id: row.id, alt: row.alt, caption: row.caption, url: publicPhotoUrl(row), publishedAt: onAir.toISOString() });
     albums.set(key, album);
   }
   return [...albums.values()].sort((a, b) => b.latest - a.latest).map(({ name, photos }) => ({ name, photos }));

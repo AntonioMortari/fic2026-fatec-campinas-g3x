@@ -1,5 +1,5 @@
 import { greeting, todayLabel } from '../lib/dates'
-import { ALL_CATEGORIES, categoryOptions, eventMeta, filterByCategory, formatTimeRange, groupByMonth, isFilterUseful } from '../lib/events'
+import { ALL_CATEGORIES, categoryOptions, eventMeta, homeEventMeta, filterByCategory, formatTimeRange, groupByMonth, isFilterUseful } from '../lib/events'
 import type { EventSummary } from '../types/event'
 
 function event(overrides: Partial<EventSummary> = {}): EventSummary {
@@ -55,6 +55,28 @@ describe('eventMeta', () => {
 
   it('says nothing about spots when the event has no limit', () => {
     expect(eventMeta(event({ capacity: null, spotsLeft: null }))).not.toMatch(/vaga/i)
+  })
+})
+
+describe('homeEventMeta', () => {
+  it('on the desktop starts with the weekday, writes the range in words and says how many spots are left', () => {
+    const meta = homeEventMeta(event({ location: 'Sede, Vila Romero', ageRange: 'Livre', capacity: 18, spotsLeft: 12, endsAt: '2026-10-17T18:30:00.000Z' }), 'long')
+
+    expect(meta).toBe('Sábado, 14h às 15h30 · Sede, Vila Romero · Livre · Restam 12 vagas')
+  })
+
+  it('uses the singular, and says nothing of spots when there is no limit or none is left', () => {
+    expect(homeEventMeta(event({ capacity: 5, spotsLeft: 1, location: 'Sede' }), 'long')).toBe('Sábado, 14h · Sede · Resta 1 vaga')
+    expect(homeEventMeta(event({ capacity: null, spotsLeft: null, location: 'Sede' }), 'long')).toBe('Sábado, 14h · Sede')
+    expect(homeEventMeta(event({ capacity: 5, spotsLeft: 0, location: 'Sede' }), 'long')).toBe('Sábado, 14h · Sede')
+  })
+
+  it('on the phone is the start time, the place and the age range, with no weekday (the badge has it) and no spots', () => {
+    expect(homeEventMeta(event({ location: 'Sede, Vila Romero', ageRange: 'Livre', capacity: 18, spotsLeft: 12, endsAt: '2026-10-17T18:30:00.000Z' }), 'short')).toBe('14h · Sede, Vila Romero · Livre')
+  })
+
+  it('names the weekday in the São Paulo calendar, not in the device one', () => {
+    expect(homeEventMeta(event({ startsAt: '2026-10-18T01:30:00.000Z', location: 'Sede' }), 'long')).toBe('Sábado, 22h30 · Sede')
   })
 })
 

@@ -14,7 +14,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-const photo = (id: string, caption: string | null = null) => ({ id, alt: `Descrição ${id}`, caption, url: `/api/gallery/${id}/image?v=1` })
+const photo = (id: string, caption: string | null = null) => ({ id, alt: `Descrição ${id}`, caption, url: `/api/gallery/${id}/image?v=1`, publishedAt: '2026-10-01T12:00:00.000Z' })
 const ALBUMS: GalleryAlbum[] = [
   { name: 'II Festa Preta', photos: [photo('p1', 'Lançamento.')] },
   { name: 'Cabaça', photos: [photo('p2'), photo('p3', 'Teatro.')] },

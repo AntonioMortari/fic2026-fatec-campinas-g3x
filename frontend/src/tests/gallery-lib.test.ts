@@ -9,13 +9,14 @@ import {
   FILTER_SLUGS,
   flattenAlbums,
   numericDate,
+  recentPhotos,
   STATE_ORDER,
   stepIndex,
   swipeStep,
 } from '../lib/gallery'
 import type { AdminPhoto, GalleryAlbum } from '../types/gallery'
 
-const album = (name: string, ids: string[]): GalleryAlbum => ({ name, photos: ids.map((id) => ({ id, alt: `alt ${id}`, caption: null, url: `/api/gallery/${id}/image` })) })
+const album = (name: string, ids: string[]): GalleryAlbum => ({ name, photos: ids.map((id) => ({ id, alt: `alt ${id}`, caption: null, url: `/api/gallery/${id}/image`, publishedAt: '2026-10-01T12:00:00.000Z' })) })
 
 describe('the gallery helpers', () => {
   it('counts photos with the singular the design uses', () => {
@@ -67,5 +68,31 @@ describe('the gallery helpers', () => {
 
   it('keeps the new-photo screen inside the gallery of the panel', () => {
     expect(ADMIN_GALLERY_NEW_PATH.startsWith(`${ADMIN_GALLERY_PATH}/`)).toBe(true)
+  })
+})
+
+describe('the most recent photos for the home', () => {
+  const photo = (id: string, publishedAt: string) => ({ id, alt: `alt ${id}`, caption: null, url: `/api/gallery/${id}/image`, publishedAt })
+
+  it('takes the ones that went on air last, across albums, newest first, each with its album name', () => {
+    const albums: GalleryAlbum[] = [
+      { name: 'A', photos: [photo('a1', '2026-10-01T12:00:00.000Z'), photo('a2', '2026-10-10T12:00:00.000Z')] },
+      { name: 'B', photos: [photo('b1', '2026-10-05T12:00:00.000Z'), photo('b2', '2026-10-06T12:00:00.000Z')] },
+    ]
+
+    expect(recentPhotos(albums, 3).map((item) => `${item.album}:${item.id}`)).toEqual(['A:a2', 'B:b2', 'B:b1'])
+  })
+
+  it('does not take more than asked, and takes what there is when there are fewer', () => {
+    const albums: GalleryAlbum[] = [{ name: 'A', photos: [photo('a1', '2026-10-01T12:00:00.000Z')] }]
+
+    expect(recentPhotos(albums, 5)).toHaveLength(1)
+    expect(recentPhotos([], 5)).toEqual([])
+  })
+
+  it('keeps the address and the description, and nothing the home does not show', () => {
+    const [first] = recentPhotos([{ name: 'A', photos: [{ ...photo('a1', '2026-10-01T12:00:00.000Z'), caption: 'Legenda' }] }], 1)
+
+    expect(first).toEqual({ id: 'a1', alt: 'alt a1', url: '/api/gallery/a1/image', album: 'A' })
   })
 })

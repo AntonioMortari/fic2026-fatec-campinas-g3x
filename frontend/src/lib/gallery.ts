@@ -20,6 +20,21 @@ export function flattenAlbums(albums: GalleryAlbum[]): ViewerPhoto[] {
   return albums.flatMap((album) => album.photos.map((photo) => ({ ...photo, album: album.name })))
 }
 
+export interface HomePhoto {
+  id: string
+  url: string
+  alt: string
+  album: string
+}
+
+// The home shows the photos that went on air last, whatever album they are in (design 14a: "as 5 fotos publicadas mais recentes").
+export function recentPhotos(albums: GalleryAlbum[], count = 5): HomePhoto[] {
+  return flattenAlbums(albums)
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
+    .slice(0, count)
+    .map(({ id, url, alt, album }) => ({ id, url, alt, album }))
+}
+
 // The viewer goes round: before the first photo is the last one, after the last is the first (design 11c).
 export function stepIndex(index: number, step: number, total: number): number {
   return total === 0 ? 0 : (((index + step) % total) + total) % total
