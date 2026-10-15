@@ -32,6 +32,7 @@ function storedEvent(overrides: Record<string, unknown> = {}) {
     ageRange: null,
     capacity: 30,
     requiresCpf: false,
+    registrationOnSite: true,
     published: true,
     ...overrides,
   } as unknown as Event;
@@ -292,10 +293,41 @@ describe('what cannot be signed up for', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
-  it('stays open while an event that already started has not ended', async () => {
-    setup({ event: storedEvent({ startsAt: new Date('2026-10-10T14:00:00Z'), endsAt: new Date('2026-10-10T17:00:00Z') }) });
+  it('closes when the event has started even if it has not ended', async () => {
+    const { create } = setup({ event: storedEvent({ startsAt: new Date('2026-10-10T14:00:00Z'), endsAt: new Date('2099-10-10T17:00:00Z') }) });
 
-    expect((await post()).status).toBe(201);
+    const response = await post();
+
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe('registrations_closed');
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('refuses with 409 when the event is not signed up for on the site, and writes nothing', async () => {
+    const { create } = setup({ event: storedEvent({ registrationOnSite: false, capacity: null }) });
+
+    const response = await post();
+
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe('registrations_not_offered');
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('closes at the exact instant the event starts, and still takes one millisecond before', async () => {
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'setTimeout', 'setInterval', 'queueMicrotask'] });
+    try {
+      const start = new Date('2026-11-20T18:00:00Z');
+      setup({ event: storedEvent({ startsAt: start }) });
+      jest.setSystemTime(new Date(start.getTime() - 1));
+      expect((await post()).status).toBe(201);
+
+      jest.setSystemTime(start);
+      const response = await post();
+      expect(response.status).toBe(409);
+      expect(response.body.error.code).toBe('registrations_closed');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('answers 400 for an id that is not a uuid', async () => {

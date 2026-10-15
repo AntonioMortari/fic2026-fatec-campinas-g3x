@@ -16,6 +16,9 @@ function event(overrides: Partial<EventSummary> = {}): EventSummary {
     ageRange: 'Livre',
     capacity: 18,
     spotsLeft: 18,
+    registrationOnSite: true,
+    registrationStatus: 'open',
+    image: null,
     ...overrides,
   }
 }
@@ -86,15 +89,41 @@ describe('agenda page (UX/UI analysis 2b and 6b)', () => {
     expect(screen.getAllByRole('link', { name: /^(Quero me inscrever|Inscrever)/ })).toHaveLength(4)
   })
 
-  it('shows "Vagas esgotadas" instead of the registration link when no spot is left, on the highlight and on the rows', async () => {
-    await openAgenda({ upcoming: [event({ spotsLeft: 0 }), event({ id: 'b', title: 'Banzo', capacity: 5, spotsLeft: 0, startsAt: '2026-11-20T18:00:00.000Z' }), event({ id: 'c', title: 'Aberta', spotsLeft: 3, startsAt: '2026-11-21T18:00:00.000Z' })] })
+  it('shows the "Esgotado" badge and no registration link when no spot is left, on the highlight and on the rows, keeping the way to the details', async () => {
+    await openAgenda({
+      upcoming: [
+        event({ spotsLeft: 0, registrationStatus: 'full' }),
+        event({ id: 'b', title: 'Banzo', capacity: 5, spotsLeft: 0, registrationStatus: 'full', startsAt: '2026-11-20T18:00:00.000Z' }),
+        event({ id: 'c', title: 'Aberta', spotsLeft: 3, registrationStatus: 'few_left', startsAt: '2026-11-21T18:00:00.000Z' }),
+      ],
+    })
     const [featured, soldOutRow, openRow] = screen.getAllByRole('article')
 
-    expect(within(featured!).getByText('Vagas esgotadas', { selector: 'span.font-semibold' })).toBeInTheDocument()
+    expect(within(featured!).getByText('Esgotado')).toBeInTheDocument()
     expect(within(featured!).queryByRole('link', { name: /Quero me inscrever/ })).not.toBeInTheDocument()
+    expect(within(featured!).getByRole('link', { name: /^Ver detalhes/ })).toHaveAttribute('href', '/agenda/3b3a6c52-6b0e-4d0b-9c58-1d2a5f1c9a10')
+    expect(within(soldOutRow!).getByText('Esgotado')).toBeInTheDocument()
     expect(within(soldOutRow!).queryByRole('link', { name: /Inscrever/ })).not.toBeInTheDocument()
-    expect(within(soldOutRow!).getAllByText('Vagas esgotadas').length).toBeGreaterThan(0)
+    expect(within(soldOutRow!).getByRole('link', { name: 'Ver detalhes de Banzo' })).toHaveAttribute('href', '/agenda/b')
     expect(within(openRow!).getByRole('link', { name: 'Inscrever em Aberta' })).toBeInTheDocument()
+  })
+
+  it('puts "Ver detalhes" in every card, and "Inscrever" beside it only when the sign-up is open (design 13c)', async () => {
+    await openAgenda({
+      upcoming: [
+        event({ id: 'a' }),
+        event({ id: 'b', title: 'Aberta', startsAt: '2026-10-20T18:00:00.000Z' }),
+        event({ id: 'c', title: 'Sem inscrição', registrationOnSite: false, registrationStatus: 'not_on_site', capacity: null, spotsLeft: null, startsAt: '2026-10-21T18:00:00.000Z' }),
+        event({ id: 'd', title: 'Sem contagem', registrationStatus: 'unknown', spotsLeft: null, startsAt: '2026-10-22T18:00:00.000Z' }),
+        event({ id: 'e', title: 'Esgotada', registrationStatus: 'full', spotsLeft: 0, startsAt: '2026-10-23T18:00:00.000Z' }),
+      ],
+    })
+    const articles = screen.getAllByRole('article')
+
+    expect(articles).toHaveLength(5)
+    for (const article of articles) expect(within(article).getAllByRole('link', { name: /^Ver detalhes/ })).toHaveLength(1)
+    const registrable = articles.filter((article) => within(article).queryByRole('link', { name: /^(Quero me inscrever|Inscrever)/ }))
+    expect(registrable.map((article) => within(article).getByRole('heading').textContent)).toEqual(['Cafú e o Café', 'Aberta'])
   })
 
   it('shows "Local a confirmar" when the place is not set, never an invented one', async () => {
@@ -154,7 +183,7 @@ describe('agenda page (UX/UI analysis 2b and 6b)', () => {
 
     const article = await screen.findByRole('article')
     expect(within(article).getByRole('heading', { name: 'Oficina de abril' })).toBeInTheDocument()
-    expect(within(article).queryByRole('link')).not.toBeInTheDocument()
+    expect(within(article).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['/agenda/p'])
     expect(within(article).queryByText(/vagas/)).not.toBeInTheDocument()
     expect(document.querySelectorAll('[class*="shadow-applique"]')).toHaveLength(0)
     expect(screen.queryByText('Brasil Negreiro')).not.toBeInTheDocument()

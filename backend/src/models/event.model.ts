@@ -12,7 +12,13 @@ export class Event extends Model<InferAttributes<Event>, InferCreationAttributes
   declare ageRange: string | null;
   declare capacity: number | null;
   declare requiresCpf: CreationOptional<boolean>;
+  declare registrationOnSite: CreationOptional<boolean>;
   declare published: CreationOptional<boolean>;
+  declare imageFile: CreationOptional<string | null>;
+  declare imageMime: CreationOptional<string | null>;
+  declare imageAlt: CreationOptional<string | null>;
+  declare imageAuthorizedAt: CreationOptional<Date | null>;
+  declare imageUpdatedAt: CreationOptional<Date | null>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 }
@@ -29,7 +35,13 @@ Event.init(
     ageRange: { type: DataTypes.STRING(80), allowNull: true },
     capacity: { type: DataTypes.INTEGER, allowNull: true },
     requiresCpf: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    registrationOnSite: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
     published: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    imageFile: { type: DataTypes.STRING(60), allowNull: true },
+    imageMime: { type: DataTypes.STRING(20), allowNull: true },
+    imageAlt: { type: DataTypes.STRING(300), allowNull: true },
+    imageAuthorizedAt: { type: DataTypes.DATE, allowNull: true },
+    imageUpdatedAt: { type: DataTypes.DATE(3), allowNull: true },
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,
   },

@@ -4,7 +4,7 @@ import { ContactDetail } from '../../components/admin/ContactDetail'
 import { ContactFilters } from '../../components/admin/ContactFilters'
 import { ContactPager } from '../../components/admin/ContactPager'
 import { ContactRow } from '../../components/admin/ContactRow'
-import { Button, Chevron, EmptyState, useToast } from '../../components/ui'
+import { Button, Chevron, EmptyState, useToast, LoadingState } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { CONTACTS_PATH, CONTACT_STATUS_ORDER, parsePage } from '../../lib/contacts-admin'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/use-media-query'
@@ -100,9 +100,7 @@ export function AdminContacts() {
         <ContactFilters status={filters.status} counts={list.data?.counts} onStatus={setStatus} />
 
         {list.isPending && (
-          <p role="status" className="m-0">
-            Carregando as mensagens…
-          </p>
+          <LoadingState label="Carregando as mensagens…" shape="rows" count={4} />
         )}
         {list.isError && !list.data && <ErrorCard title="Não conseguimos carregar as mensagens" onRetry={() => void list.refetch()} />}
         {list.data && rows.length === 0 && (
@@ -112,7 +110,7 @@ export function AdminContacts() {
           />
         )}
         {rows.length > 0 && (
-          <ul aria-label="Mensagens" className="m-0 list-none border-t border-line p-0 desktop:-mt-3.5 desktop:border-t-0">
+          <ul aria-label="Mensagens" className="enter-list m-0 list-none border-t border-line p-0 desktop:-mt-3.5 desktop:border-t-0">
             {rows.map((row) => (
               <ContactRow key={row.id} contact={row} to={`${CONTACTS_PATH}/${row.id}${suffix}`} selected={row.id === detailId} />
             ))}
@@ -145,9 +143,7 @@ export function AdminContacts() {
           <span className="mr-3 border border-brown px-2 py-0.5 text-[0.6875rem] font-bold tracking-[0.1em] uppercase">Painel</span>
         </div>
         {detail.isPending && detailId && !contact && (
-          <p role="status" className="m-0 p-4">
-            Carregando a mensagem…
-          </p>
+          <LoadingState label="Carregando a mensagem…" shape="lines" count={5} className="p-4" />
         )}
         {detail.isError && !contact && (
           <div className="p-4 desktop:p-8">

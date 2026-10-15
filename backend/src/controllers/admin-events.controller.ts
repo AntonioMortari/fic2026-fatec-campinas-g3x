@@ -3,7 +3,10 @@ import type { z } from 'zod';
 import {
   createEvent,
   getAdminEvent,
+  findEventImageForStaff,
   listAdminEvents,
+  removeEventImage,
+  setEventImage,
   setEventPublished,
   updateEvent,
   type EventInput,
@@ -11,7 +14,8 @@ import {
 import { listAttendance, setAttendance } from '../services/attendance.service';
 import { listRegistrations, registrationsCsv } from '../services/admin-registrations.service';
 import { slugify } from '../utils/ics';
-import type { attendanceBody, publicationBody } from '../validators/admin-events.validator';
+import { sendEventImage } from './events.controller';
+import type { attendanceBody, imageBody, publicationBody } from '../validators/admin-events.validator';
 
 export async function listEvents(_req: Request, res: Response): Promise<void> {
   res.json({ data: await listAdminEvents() });
@@ -55,4 +59,17 @@ export async function getAttendance(req: Request, res: Response): Promise<void> 
 export async function markAttendance(req: Request, res: Response): Promise<void> {
   const { attended } = req.body as z.output<typeof attendanceBody>;
   res.json({ registration: await setAttendance(req.params.id as string, req.params.registrationId as string, attended) });
+}
+
+export async function putImage(req: Request, res: Response): Promise<void> {
+  const { data, alt } = req.body as z.output<typeof imageBody>;
+  res.json({ event: await setEventImage(req.params.id as string, { data, alt }) });
+}
+
+export async function deleteImage(req: Request, res: Response): Promise<void> {
+  res.json({ event: await removeEventImage(req.params.id as string) });
+}
+
+export async function getImage(req: Request, res: Response): Promise<void> {
+  await sendEventImage(res, await findEventImageForStaff(req.params.id as string), 'private, no-store');
 }

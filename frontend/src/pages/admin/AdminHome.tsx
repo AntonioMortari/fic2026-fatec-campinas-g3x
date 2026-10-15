@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AdminPage } from '../../components/admin/AdminPage'
-import { Button, Chevron, DateBadge, EmptyState } from '../../components/ui'
+import { Button, Chevron, DateBadge, EmptyState, LoadingState } from '../../components/ui'
 import { useAuth } from '../../contexts/useAuth'
 import { greeting, shortDate, todayLabel } from '../../lib/dates'
 import { eventMeta } from '../../lib/events'
@@ -118,7 +118,7 @@ export function AdminHome() {
         </h1>
       </header>
 
-      {isPending && <p role="status" className="m-0">Carregando o painel…</p>}
+      {isPending && <LoadingState label="Carregando o painel…" shape="cards" count={2} />}
       {isError && (
         <EmptyState
           tone="error"

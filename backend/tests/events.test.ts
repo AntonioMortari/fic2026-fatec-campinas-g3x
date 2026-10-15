@@ -16,6 +16,9 @@ function fakeEvent(overrides: Partial<Record<string, unknown>> = {}) {
     location: 'Sede, Vila Romero',
     ageRange: 'Livre',
     capacity: 18,
+    registrationOnSite: true,
+    imageUpdatedAt: null,
+    imageAlt: null,
     published: true,
     ...overrides,
   } as unknown as Event;
@@ -45,6 +48,9 @@ describe('GET /api/events', () => {
       ageRange: 'Livre',
       capacity: 18,
       spotsLeft: 18,
+      registrationOnSite: true,
+      registrationStatus: 'open',
+      image: null,
     });
     const options = findAll.mock.calls[0]![0]!;
     expect(options.where).toMatchObject({ published: true });
@@ -61,7 +67,7 @@ describe('GET /api/events', () => {
     const options = findAll.mock.calls[0]![0]!;
     expect(options.order).toEqual([['startsAt', 'DESC']]);
     expect(options.limit).toBe(5);
-    expect(options.where).toMatchObject({ published: true, [Op.or]: expect.any(Array) });
+    expect(options.where).toMatchObject({ published: true, startsAt: { [Op.lte]: expect.any(Date) } });
   });
 
   it('never exposes fields outside the public shape', async () => {
@@ -70,7 +76,7 @@ describe('GET /api/events', () => {
     const response = await request(app).get('/api/events');
 
     expect(Object.keys(response.body.data[0]).sort()).toEqual(
-      ['ageRange', 'capacity', 'category', 'description', 'endsAt', 'id', 'location', 'spotsLeft', 'startsAt', 'title'].sort(),
+      ['ageRange', 'capacity', 'category', 'description', 'endsAt', 'id', 'image', 'location', 'registrationOnSite', 'registrationStatus', 'spotsLeft', 'startsAt', 'title'].sort(),
     );
   });
 

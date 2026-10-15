@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { MyRegistrations } from '../components/account/MyRegistrations'
 import { ParticipationItem } from '../components/account/ParticipationItem'
 import { useSignOut } from '../components/auth/useSignOut'
-import { Alert, Button, Card, Container, EmptyState, PageHeader } from '../components/ui'
+import { Alert, Button, Card, Container, EmptyState, PageHeader, LoadingState, Skeleton } from '../components/ui'
 import { CONTACTS } from '../lib/contacts'
 import { formatPhone } from '../lib/format-phone'
 import { PERSON_TYPE_SHORT_LABELS } from '../lib/person-type'
@@ -66,7 +66,12 @@ export function Account() {
         leadClassName="text-[0.9375rem] text-brown-400"
       />
       <div className="flex max-w-xl flex-col gap-5">
-        {me.isPending && <p role="status" className="m-0">Carregando seus dados…</p>}
+        {me.isPending && (
+          <LoadingState label="Carregando seus dados…" className="gap-5">
+            <Skeleton className="h-73 w-full" />
+            <Skeleton className="h-13 w-full" />
+          </LoadingState>
+        )}
         {me.isError && (
           <EmptyState
             tone="error"

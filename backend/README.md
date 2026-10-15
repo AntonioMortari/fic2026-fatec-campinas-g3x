@@ -31,6 +31,7 @@ alguma obrigatória faltar ou for inválida — o erro diz qual.
 | `DB_NAME`, `DB_USER`, `DB_PASSWORD` | sim | banco e credenciais |
 | `JWT_SECRET` | sim | chave de assinatura do JWT, mínimo de 32 caracteres |
 | `JWT_EXPIRES_IN` | não | validade do token (padrão `1h`) |
+| `UPLOADS_DIR` | não | pasta das fotos dos eventos, relativa ao backend ou absoluta (padrão `./uploads`, criada se não existir; fora do Git e do contexto do Docker). **Em hospedagem com disco efêmero, precisa ser um volume persistente**: sem ele as fotos somem a cada deploy. O `docker compose` já monta o volume `uploads-data` em `/uploads` |
 | `TRUST_PROXY` | não | quantos proxies há entre a internet e a API (padrão `0`). **No deploy, precisa ser o número certo**: com `0` atrás de um proxy todo visitante parece ter o IP do proxy e o limite de inscrições por conexão vira um balde só; alto demais, o IP pode ser forjado pelo cabeçalho `X-Forwarded-For` |
 | `UPLOADS_DIR` | não | pasta das imagens enviadas pela equipe (padrão `./uploads`, criada se não existir). Em hospedagem com disco efêmero, aponte para um volume persistente: do contrário as imagens somem a cada deploy |
 
@@ -97,9 +98,10 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 | Rota | O que faz |
 |---|---|
 | `GET /api/health` | API e banco respondendo |
-| `GET /api/events?period=upcoming\|past&limit=` | eventos **publicados**; `upcoming` do mais próximo ao mais distante, `past` do mais recente ao mais antigo |
-| `GET /api/events/:id` | um evento publicado, com `requiresCpf`, `spotsLeft` e `registrationsOpen` (o que o formulário de inscrição precisa) |
-| `POST /api/events/:id/registrations` | inscreve alguém, **com ou sem conta** (RF15). Com token, liga a inscrição à conta; token ruim dá 401. Vaga conferida no banco com a linha do evento travada; CPF só se o evento pede; responsável obrigatório para menor; 409 `event_full`/`registrations_closed`/`already_registered`; 429 acima de 5 pessoas por e-mail no evento ou de 30 inscrições por hora vindas da mesma conexão (o IP nunca é gravado, só um HMAC) |
+| `GET /api/events?period=upcoming\|past&limit=` | eventos **publicados**; `upcoming` (ainda não começaram) do mais próximo ao mais distante, `past` (já começaram) do mais recente ao mais antigo |
+| `GET /api/events/:id` | um evento publicado, com `requiresCpf`, `spotsLeft`, `registrationsOpen`, `registrationOnSite`, `registrationStatus` (`open`, `few_left`, `full`, `not_on_site`, `started`, `unknown`) e `image` |
+| `GET /api/events/:id/image` | a foto de um evento **publicado** e com foto (404 igual para rascunho e sem foto); `nosniff`, cache de 1 h e ETag |
+| `POST /api/events/:id/registrations` | inscreve alguém, **com ou sem conta** (RF15). Com token, liga a inscrição à conta; token ruim dá 401. Vaga conferida no banco com a linha do evento travada; CPF só se o evento pede; responsável obrigatório para menor; 409 `event_full`/`registrations_closed` (já começou)/`registrations_not_offered`/`already_registered`; 429 acima de 5 pessoas por e-mail no evento ou de 30 inscrições por hora vindas da mesma conexão (o IP nunca é gravado, só um HMAC) |
 | `GET /api/events/:id/calendar.ics` | o evento como arquivo de calendário; 404 se não existe ou não está publicado |
 | `POST /api/auth/register` | cria a conta e já devolve `{ token, user }` (201). 400 sem maioridade (RN01), sem consentimento ou sem ao menos uma forma de participar; 409 `email_taken` se o e-mail já existe |
 | `POST /api/auth/login` | `{ token, user }`; 401 `invalid_credentials` com a mesma frase para e-mail inexistente e senha errada |
@@ -107,6 +109,7 @@ O fluxo de uma requisição é sempre `routes → middlewares → controller →
 | `POST /api/auth/logout` | apaga o cookie de renovação no banco e no navegador; sempre 204. Exige `X-Requested-With` |
 | `GET /api/admin/events` · `GET /api/admin/events/:id` | **só equipe**: todos os eventos, rascunhos incluídos |
 | `POST /api/admin/events` · `PUT /api/admin/events/:id` | **só equipe**: cria (sempre rascunho) e corrige um evento. Data e hora como `2026-11-20T15:00`, lidas no horário de São Paulo; limite de vagas e `requiresCpf` opcionais. Não aceitam `published` |
+| `PUT /api/admin/events/:id/image` · `DELETE …` · `GET …` | **só equipe**: sobe/troca a foto (`{ data (base64), alt, authorized: true }`, até 4 MB, tipo pelos bytes, parser de 6 MB só aqui), remove e lê a foto de qualquer evento. Salvar o evento nunca mexe na foto |
 | `PATCH /api/admin/events/:id/publication` | **só equipe**: `{ "published": true \| false }`, o único caminho que publica ou tira do ar. Não existe `DELETE` |
 | `GET /api/admin/events/:id/registrations` · `.csv` | **só equipe** (RF16): inscritos com contato, CPF, responsável e autorização de imagem; a planilha usa `;`, BOM UTF-8 e neutraliza fórmulas. Só leitura, sem cache |
 | `GET /api/admin/report` · `/report/csv` | **só equipe** (RF30–32): números do período (`period` = `month`/`quarter`/`semester`, `offset` 0, -1…) e as atividades, com veio / faltou / sem conferir; contagem que falhou vem `null`, nunca 0. Só números, sem dado pessoal; as canceladas ficam de fora |
