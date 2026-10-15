@@ -3,28 +3,24 @@ import { AboutHero } from '../components/about/AboutHero'
 import { AudienceStatement } from '../components/about/AudienceStatement'
 import { FoundersSection } from '../components/about/FoundersSection'
 import { LocationSection } from '../components/about/LocationSection'
-import { MissionSection } from '../components/about/MissionSection'
 import { SankofaSection } from '../components/about/SankofaSection'
 import { SectionIndex } from '../components/about/SectionIndex'
 import { SectorsSection } from '../components/about/SectorsSection'
+import { DESKTOP_QUERY, useMediaQuery } from '../lib/use-media-query'
 
-const READING_COLUMN = 'desktop:mx-auto desktop:max-w-[45rem]'
-
+// Designs 15a (desktop) and 15b (phone). Some blocks have two texts, the full one of the ONG on the desktop and the shorter one on
+// the phone, and the index lives in a different place, so the page chooses once and passes the choice down.
 export function About() {
+  const desktop = useMediaQuery(DESKTOP_QUERY)
   return (
     <>
-      <AboutHero />
-      <SectionIndex />
-      <div className={READING_COLUMN}>
-        <SankofaSection />
-        <FoundersSection />
-        <MissionSection />
-      </div>
+      <AboutHero desktop={desktop} index={desktop ? <SectionIndex variant="chips" /> : null} />
+      {!desktop && <SectionIndex variant="bar" />}
+      <SankofaSection desktop={desktop} />
+      <FoundersSection desktop={desktop} />
       <SectorsSection />
-      <div className={READING_COLUMN}>
-        <AudienceStatement />
-        <LocationSection />
-      </div>
+      <AudienceStatement />
+      <LocationSection desktop={desktop} />
       <AboutCallToAction />
     </>
   )
