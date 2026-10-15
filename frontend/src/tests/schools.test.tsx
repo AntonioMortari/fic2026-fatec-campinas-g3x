@@ -40,6 +40,13 @@ describe('the schools page (RF38, designs 11h and 11i)', () => {
     ])
   })
 
+  it('lets a long word of the spec sheet break, so the longest line does not push the page sideways at the largest text size', () => {
+    renderRoute('/para-escolas')
+
+    const sheet = within(screen.getByRole('region', { name: 'Formato e duração' }))
+    for (const detail of sheet.getAllByRole('definition')) expect(detail).toHaveClass('break-words')
+  })
+
   it('lists the three things the school provides', () => {
     renderRoute('/para-escolas')
 
