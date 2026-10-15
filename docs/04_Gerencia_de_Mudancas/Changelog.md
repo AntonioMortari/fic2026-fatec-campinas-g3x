@@ -494,6 +494,15 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   Ajuste de implementação: não altera a proposta aprovada nem nenhum critério de aceitação.
 - **PR:** branch `feat/subtle-motion`
 
+## 2026-10-16 — Seed de conteúdo: notícias e galeria na primeira subida
+- **Artefato:** Arquitetura (seed e imagens) · Requisitos (RF04, RF05, RN07)
+- **Antes:** o site subia vazio: "Ainda não publicamos nenhum álbum" na galeria e nenhuma notícia, até a equipe publicar à mão.
+- **Depois:** `npm run db:seed:content` (e o `docker compose up`, depois da seed de contas) publica **4 notícias e 6 fotos**, todas tiradas do material que a ONG enviou (portfólio, currículo, fichas técnicas, cartazes e o formulário da FATEC); nada foi inventado. Notícias: Cafú e o Café no CCSP (2/11/2024), contação na IX FELIZS (22/9/2023), Leilão Solidário (campanha, 20/11/2021) e o quadro The Wall (19/3/2021), cada uma com a data que o cartaz ou o jornal dá. Galeria: álbuns "Ateliê Afro Cultural" (2), "Cafú e o Café" (1) e "Brasil Negreiro: Imaginário em Liberdade" (3).
+- **Regras de segurança da seed:** só roda se **não há nenhuma notícia nem foto** (um reinício nunca traz de volta o que a equipe apagou); `--force` acrescenta só o que falta (por título e por álbum + descrição); lê todos os arquivos antes de gravar o primeiro; apaga o arquivo se a linha é recusada. Em produção ela é opcional: `SEED_CONTENT=true` no contêiner (o `Dockerfile` copia `seed-content/` para junto do `dist/`).
+- **Decisões que precisam de confirmação da ONG:** (1) **a declaração de autorização de uso de imagem (RN07) é gravada pela própria seed**, com a data da execução, porque a galeria só publica foto autorizada. As 6 fotos mostram só Wil Oliveira (adulto, idealizador) e foram entregues pela ONG para o site, mas a **autorização por escrito dele (e do fotógrafo, quando houver) precisa ser guardada**; se não for dada, apague as fotos em `/admin/galeria`. (2) **Fotos com crianças ficaram de fora de propósito** (regra 12), mesmo as boas: a de fantoches, as de oficinas e a do Dia das Crianças. (3) Os cartazes e a imagem do jornal não viraram imagem de notícia: têm marcas de terceiros (Globo, Folha, patrocinadores). (4) Notícias de eventos passados dizem "estava na programação" quando só há o cartaz, porque o material não prova que aconteceu como anunciado.
+- **Por quê:** pedido do grupo de popular o site na primeira subida com conteúdo real.
+- **PR:** branch `feat/content-seed`
+
 ## 2026-10-14 — Galeria (RF05, desenhos 11a, 11c, 11d e 11j–11m)
 - **Artefato:** Protótipos · Requisitos (RF05, RN07) · Arquitetura (nova tabela, rotas e armazenamento de imagens)
 - **Antes:** o link "Galeria" do menu levava ao 404 e não havia como a equipe subir, publicar ou apagar fotos.
