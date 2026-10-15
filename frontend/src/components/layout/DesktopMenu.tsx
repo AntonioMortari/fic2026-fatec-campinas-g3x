@@ -130,7 +130,7 @@ export function DesktopMenu({ open, section, onClose, onOpen }: DesktopMenuProps
                   Fale com a gente
                 </h3>
                 <p className="m-0 text-[1.25rem] leading-[1.2] font-bold">{CONTACTS.phoneDisplay}</p>
-                <p className="m-0 text-small text-brown-600">WhatsApp, seg a sáb, 9h–18h</p>
+                <p className="m-0 text-small text-brown-600">WhatsApp e ligação</p>
               </section>
               <a
                 href={CONTACTS.whatsapp}

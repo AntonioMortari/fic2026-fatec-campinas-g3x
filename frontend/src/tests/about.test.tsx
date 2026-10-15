@@ -17,7 +17,7 @@ describe('About page', () => {
 
     const index = screen.getByRole('navigation', { name: 'Nesta página' })
     const links = within(index).getAllByRole('link')
-    expect(links.map((link) => link.getAttribute('href'))).toEqual(['#sankofa', '#quem-idealizou', '#setores', '#onde-estamos'])
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(['#sankofa', '#quem-idealizou', '#missao', '#setores', '#onde-estamos'])
     expect(within(index).getByRole('link', { name: 'Sankofa' })).toHaveAttribute('aria-current', 'location')
   })
 
@@ -25,7 +25,7 @@ describe('About page', () => {
     renderRoute('/quem-somos')
 
     expect(screen.getByRole('navigation', { name: 'Nesta página' })).toHaveClass('top-15', 'desktop:top-19')
-    for (const id of ['sankofa', 'quem-idealizou', 'setores', 'onde-estamos']) {
+    for (const id of ['sankofa', 'quem-idealizou', 'missao', 'setores', 'onde-estamos']) {
       expect(document.getElementById(id)).toHaveClass('scroll-mt-32', 'desktop:scroll-mt-40')
     }
   })
@@ -39,7 +39,29 @@ describe('About page', () => {
     expect(screen.getByRole('heading', { name: 'Wil Oliveira e Nathália (Nathy) Monteiro' })).toBeInTheDocument()
     expect(screen.getByText('Foto de Wil e Nathy')).toBeInTheDocument()
     expect(screen.getByText('Janeiro de 2020')).toBeInTheDocument()
+    expect(screen.getByText('O ateliê ganha sede na Casa Verde, segundo a Folha de S.Paulo.')).toBeInTheDocument()
     for (const id of ['sankofa', 'quem-idealizou']) expect(document.getElementById(id)).toHaveClass('scroll-mt-32')
+  })
+
+  it('shows the mission and the values in the ONG\'s own words, as the values the form lists', () => {
+    renderRoute('/quem-somos')
+
+    const section = document.getElementById('missao')!
+    expect(within(section).getByRole('heading', { level: 2, name: 'Missão e valores' })).toBeInTheDocument()
+    expect(within(section).getByText(/promover a valorização da cultura e da memória afro-brasileira por meio da arte, da educação e das vivências artísticas culturais/)).toBeInTheDocument()
+    expect(within(section).getByText(/construção de uma sociedade mais justa, consciente e antirracista/)).toBeInTheDocument()
+    expect(within(section).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      'ancestralidade',
+      'respeito à diversidade',
+      'valorização da cultura e da memória afro-brasileira',
+      'respeito como instrumento de transformação social',
+      'equidade',
+      'ética',
+      'coletividade',
+      'afeto',
+      'inclusão',
+      'fortalecimento da identidade, da autoestima e do pertencimento',
+    ])
   })
 
   it('shows the three sectors with their photos and the audience statement', () => {

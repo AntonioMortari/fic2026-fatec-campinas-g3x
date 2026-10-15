@@ -16,6 +16,7 @@ export function Footer() {
         <p className="m-0 desktop:flex-1">
           {CONTACTS.address}
           <span className="hidden desktop:inline"> · {CONTACTS.phoneDisplay}</span>
+          <span className="block desktop:inline"> · CNPJ {CONTACTS.cnpj}</span>
         </p>
         <ul className="m-0 flex list-none flex-wrap gap-x-4 p-0 desktop:gap-x-5">
           <li>

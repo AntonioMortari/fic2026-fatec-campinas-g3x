@@ -8,7 +8,7 @@ import { useAuth } from '../contexts/useAuth'
 import { labelForRoute } from '../lib/navigation'
 import { safeRedirect } from '../lib/safe-redirect'
 
-const BENEFITS = ['Veja se sua candidatura foi aceita', 'Acompanhe as doações que você ofereceu', 'Receba os avisos da equipe para voluntários']
+const BENEFITS = ['Veja se sua candidatura foi aceita', 'Veja as atividades em que você se inscreveu', 'Altere seus dados quando precisar']
 
 export function Auth() {
   const [searchParams] = useSearchParams()
@@ -35,7 +35,7 @@ export function Auth() {
           Sua conta<span className="hidden desktop:inline"> no Ateliê</span>
         </h1>
         <p className="m-0 text-[0.9375rem] leading-[1.4] text-brown-600 desktop:text-[1.125rem] desktop:leading-[1.42]">
-          Para acompanhar sua candidatura ao voluntariado e suas doações.
+          Para acompanhar sua candidatura ao voluntariado e suas inscrições nas atividades.
           <span className="desktop:hidden"> Inscrição em evento não precisa de conta.</span>
         </p>
         <ol className="m-0 hidden list-none border-t border-line p-0 desktop:block">

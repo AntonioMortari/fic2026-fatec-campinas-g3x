@@ -35,7 +35,7 @@ describe('the schools page (RF38, designs 11h and 11i)', () => {
     expect(sheet.getAllByRole('definition').map((detail) => detail.textContent)).toEqual([
       'Crianças, jovens e adultos, de todas as etnias e faixas etárias',
       'Livre',
-      '50 minutos na maioria das atividades; algumas a combinar',
+      '50 minutos na maioria das atividades; Eu Griot, 1h30; Batuque na Cozinha e Brincadeiras Encantadas na Mata, a combinar',
       'Adaptável a qualquer espaço',
     ])
   })
@@ -57,9 +57,18 @@ describe('the schools page (RF38, designs 11h and 11i)', () => {
     const items = within(screen.getByRole('region', { name: 'Onde já estivemos' })).getAllByRole('listitem')
     expect(items).toHaveLength(11)
     expect(items[0]).toHaveTextContent(/^SESC Interlagos$/)
+    expect(items[1]).toHaveTextContent(/^Paço Cultural Santo Amaro$/)
     expect(items[2]).toHaveTextContent('Fábricas de CulturaJaçanã')
+    expect(items[3]).toHaveTextContent(/^Casa de Cultura Santo Amaro$/)
     expect(items[7]).toHaveTextContent('AmbevAção de Dia das Crianças, Campinas · 2021')
     expect(items[10]).toHaveTextContent('(Re)Existência do Povo NegroSESC')
+  })
+
+  it('names only places the ONG\'s material gives: no "SESC Santo Amaro", no "São Rafael", no park the posters do not name', () => {
+    renderRoute('/para-escolas')
+
+    const text = within(screen.getByRole('region', { name: 'Onde já estivemos' })).getByRole('list').textContent
+    for (const unsupported of ['SESC Santo Amaro', 'São Rafael', 'Bosque Maia']) expect(text).not.toContain(unsupported)
   })
 
   it('omits the whole "Onde já estivemos" section when the list is empty', () => {

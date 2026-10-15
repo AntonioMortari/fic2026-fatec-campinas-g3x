@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn'
 const SKILLS = ['Contação de histórias', 'Dança', 'Música', 'Atuação', 'Escrita']
 
 const MILESTONES = [
-  { title: 'Janeiro de 2020', text: 'O ateliê ganha sede na Casa Verde.', marker: 'bg-ochre' },
+  { title: 'Janeiro de 2020', text: 'O ateliê ganha sede na Casa Verde, segundo a Folha de S.Paulo.', marker: 'bg-ochre' },
   {
     title: 'Rede nacional',
     text: 'O casal participa do Caldeirão do Huck, na Rede Globo, na véspera do Dia Internacional Contra a Discriminação Racial.',

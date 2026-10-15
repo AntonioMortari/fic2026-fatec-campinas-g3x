@@ -35,6 +35,14 @@ describe('home page (UX/UI analysis 2a and 6a)', () => {
     expect(links.map((link) => link.getAttribute('href'))).toEqual(['/quem-somos', '/agenda', '/voluntariado', '/doar'])
   })
 
+  it('says what "Apoiar" is for with the needs the ONG listed in the form, not goods nobody asked for', () => {
+    renderRoute('/')
+    const section = screen.getByRole('region', { name: 'Por onde começar' })
+
+    expect(within(section).getByText('Recursos para manter as atividades, a equipe e os materiais.')).toBeInTheDocument()
+    expect(within(section).queryByText(/instrumentos/)).not.toBeInTheDocument()
+  })
+
   it('shows the three sectors with described photos', () => {
     renderRoute('/')
     const section = screen.getByRole('region', { name: 'O que fazemos' })

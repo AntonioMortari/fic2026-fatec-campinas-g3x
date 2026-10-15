@@ -4,7 +4,7 @@ const PATHS = [
   { number: '01', tone: 'ochre', title: 'Conhecer', description: 'Nossa história e os três setores.', to: '/quem-somos' },
   { number: '02', tone: 'blue', title: 'Participar', description: 'Oficinas e vivências. Inscrição sem cadastro.', to: '/agenda' },
   { number: '03', tone: 'brown', title: 'Ser voluntário', description: 'Cinco áreas, do pedagógico ao acervo.', to: '/voluntariado' },
-  { number: '04', tone: 'ochre', title: 'Apoiar', description: 'Livros, instrumentos, materiais e recursos.', to: '/doar' },
+  { number: '04', tone: 'ochre', title: 'Apoiar', description: 'Recursos para manter as atividades, a equipe e os materiais.', to: '/doar' },
 ] as const
 
 export function StartingPoints({ wide }: { wide: boolean }) {

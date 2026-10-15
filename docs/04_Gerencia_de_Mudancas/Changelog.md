@@ -494,6 +494,14 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   Ajuste de implementação: não altera a proposta aprovada nem nenhum critério de aceitação.
 - **PR:** branch `feat/subtle-motion`
 
+## 2026-10-16 — Textos do site conferidos com o material da ONG
+- **Artefato:** Protótipos (telas 2a, 3f, 5b, 8a e 11h) · Requisitos (conteúdo)
+- **Antes:** alguns textos vinham dos desenhos e não constavam do material que a ONG enviou: "SESC Santo Amaro" e "Casa de Cultura São Rafael" nos locais de "Para escolas", "seg a sáb, 9h–18h" no menu, "Livros, instrumentos, materiais" em "Apoiar", "50 minutos na maioria" sem as exceções, e uma tela de entrar que prometia acompanhar doações e receber avisos da equipe, que não existem. A missão, os valores e o CNPJ, que a ONG escreveu no formulário, não apareciam.
+- **Depois:** (1) locais trocados por "Paço Cultural Santo Amaro" e "Casa de Cultura Santo Amaro" (currículo de Wil Oliveira) e "II Festa Preta" sem o parque, que os cartazes não nomeiam; (2) duração com as exceções (Eu Griot, 1h30; Batuque na Cozinha e Brincadeiras Encantadas na Mata, a combinar); (3) o horário saiu do menu ("WhatsApp e ligação"); (4) "Apoiar" diz "Recursos para manter as atividades, a equipe e os materiais", que é o que a ONG lista como dificuldade; (5) a tela de entrar só promete candidatura, inscrições e alterar os dados; (6) **seção "Missão e valores" em Quem somos e CNPJ no rodapé**, nas palavras da ONG (**fora do desenho 5b, a confirmar com quem desenha**); (7) "Janeiro de 2020" cita a Folha de S.Paulo.
+- **Não alterado, por não ter fonte melhor:** a classificação "Livre" vale para as contações (Cafú e o Café, Catirina e Nego Dito, A Cabaça e o Canto Ancestral, Eu Griot); o material não diz a de Banzo, Brasil Negreiro nem Memória Negra. A grafia do nome da idealizadora varia no material ("Nathy", "Nati", "Nathália"; um PDF traz "Nathi Nunes"): o site usa "Nathália (Nathy) Monteiro", como a Folha.
+- **Por quê:** a regra 8 (nunca inventar conteúdo) e a conferência pedida pelo grupo contra a pasta de informações da ONG.
+- **PR:** branch `feat/content-seed`
+
 ## 2026-10-16 — Seed de conteúdo: notícias e galeria na primeira subida
 - **Artefato:** Arquitetura (seed e imagens) · Requisitos (RF04, RF05, RN07)
 - **Antes:** o site subia vazio: "Ainda não publicamos nenhum álbum" na galeria e nenhuma notícia, até a equipe publicar à mão.

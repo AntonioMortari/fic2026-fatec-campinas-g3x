@@ -30,6 +30,8 @@ describe('desktop menu panel (design 8a)', () => {
     for (const href of links) expect(inHeader.has(href as string)).toBe(false)
     expect(within(menu).getByRole('link', { name: /Galeria\s*Fotos das oficinas e saraus/ })).toHaveAttribute('href', '/galeria')
     expect(within(menu).getByRole('link', { name: /WhatsApp/ })).toHaveAttribute('href', 'https://wa.me/5511953968344')
+    expect(within(menu).getByText('(11) 95396-8344')).toBeInTheDocument()
+    expect(within(menu).queryByText(/9h/)).not.toBeInTheDocument()
     expect(within(menu).getByRole('button', { name: /Alto contraste/ })).toBeInTheDocument()
   })
 
@@ -131,10 +133,11 @@ describe('focused layout and sign-in screen (designs 3f and 8b)', () => {
 
     expect(within(list).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       '1Veja se sua candidatura foi aceita',
-      '2Acompanhe as doações que você ofereceu',
-      '3Receba os avisos da equipe para voluntários',
+      '2Veja as atividades em que você se inscreveu',
+      '3Altere seus dados quando precisar',
     ])
-    expect(screen.getByText('Para acompanhar sua candidatura ao voluntariado e suas doações.', { exact: false })).toBeInTheDocument()
+    expect(screen.getByText('Para acompanhar sua candidatura ao voluntariado e suas inscrições nas atividades.', { exact: false })).toBeInTheDocument()
+    expect(screen.queryByText(/doaç/i)).not.toBeInTheDocument()
   })
 
   it('tells the visitor that signing up for an event needs no account', () => {
