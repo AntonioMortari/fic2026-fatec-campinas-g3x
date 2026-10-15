@@ -41,7 +41,16 @@ describe('the content seed against a real MySQL', () => {
     expect(titles[0]).toContain('Cafú e o Café');
 
     const albums = (await request(app).get('/api/gallery')).body.data as { name: string; photos: { alt: string }[] }[];
-    expect(albums.map((album) => album.name)).toEqual(['Ateliê Afro Cultural', 'Cafú e o Café', 'Brasil Negreiro: Imaginário em Liberdade']);
+    expect(albums.map((album) => album.name)).toEqual([
+      'Ateliê Afro Cultural',
+      'Brasil Negreiro: Imaginário em Liberdade',
+      'Banzo',
+      'A Cabaça e o Canto Ancestral',
+      'Catirina e Nego Dito',
+      'Brincadeiras Encantadas na Mata',
+      'Eu Griot',
+      'Cafú e o Café',
+    ]);
     expect(albums.flatMap((album) => album.photos)).toHaveLength(SEED_PHOTOS.length);
   });
 
