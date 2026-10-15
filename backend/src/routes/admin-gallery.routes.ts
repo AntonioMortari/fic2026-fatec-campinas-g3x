@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { getImage, getPhotoForStaff, listPhotosForStaff, remove, setPublication, upload } from '../controllers/admin-gallery.controller';
+import { getImage, getPhotoForStaff, listPhotosForStaff, remove, setPublication, update, upload } from '../controllers/admin-gallery.controller';
 import { authenticate } from '../middlewares/authenticate';
 import { parseImageUpload } from '../middlewares/image-upload-parser';
 import { requireStaff } from '../middlewares/require-staff';
 import { validate } from '../middlewares/validate';
-import { adminGalleryParams, publicationBody, uploadBody } from '../validators/admin-gallery.validator';
+import { adminGalleryParams, publicationBody, textBody, uploadBody } from '../validators/admin-gallery.validator';
 
-// There is no PUT: a photo cannot be edited, only replaced by uploading another and deleting this one (design 11j).
+// `PUT /:id` rewrites the text only (album, description, caption). The image is never replaced: to change it, upload another and delete this one.
 export const adminGalleryRoutes = Router();
 
 adminGalleryRoutes.use(authenticate, requireStaff);
@@ -18,6 +18,7 @@ adminGalleryRoutes.use((_req, res, next) => {
 adminGalleryRoutes.get('/', listPhotosForStaff);
 adminGalleryRoutes.post('/', parseImageUpload, validate({ body: uploadBody }), upload);
 adminGalleryRoutes.get('/:id', validate({ params: adminGalleryParams }), getPhotoForStaff);
+adminGalleryRoutes.put('/:id', validate({ params: adminGalleryParams, body: textBody }), update);
 adminGalleryRoutes.patch('/:id/publication', validate({ params: adminGalleryParams, body: publicationBody }), setPublication);
 adminGalleryRoutes.get('/:id/image', validate({ params: adminGalleryParams }), getImage);
 adminGalleryRoutes.delete('/:id', validate({ params: adminGalleryParams }), remove);

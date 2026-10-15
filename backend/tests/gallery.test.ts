@@ -138,6 +138,7 @@ describe('the staff guard on every admin gallery route', () => {
     ['get', '/api/admin/gallery'],
     ['post', '/api/admin/gallery'],
     ['get', `/api/admin/gallery/${PHOTO_ID}`],
+    ['put', `/api/admin/gallery/${PHOTO_ID}`],
     ['patch', `/api/admin/gallery/${PHOTO_ID}/publication`],
     ['get', `/api/admin/gallery/${PHOTO_ID}/image`],
     ['delete', `/api/admin/gallery/${PHOTO_ID}`],
@@ -410,10 +411,79 @@ describe('admin gallery: deleting', () => {
   });
 });
 
-describe('what the gallery does not have', () => {
-  it('has no way to edit a photo or to set published through anything but its own route', async () => {
+describe('admin gallery: editing the text', () => {
+  const edit = (body: Record<string, unknown>) => request(app).put(`/api/admin/gallery/${PHOTO_ID}`).set(auth).send(body);
+  const text = { album: 'II Festa Preta (2026)', alt: 'Duas pessoas tocam tambor.', caption: 'Roda de abertura.' };
+
+  it('writes only album, alt and caption, and answers the photo as the list does', async () => {
     asStaff();
-    expect((await request(app).put(`/api/admin/gallery/${PHOTO_ID}`).set(auth).send({ published: true })).status).toBe(404);
+    const stored = row();
+    jest.spyOn(GalleryPhoto, 'findByPk').mockResolvedValue(stored);
+
+    const response = await edit(text);
+
+    expect(response.status).toBe(200);
+    expect(stored.update.mock.calls[0]).toEqual([text, { fields: ['album', 'alt', 'caption'] }]);
+    expect(response.body.photo).toMatchObject({ id: PHOTO_ID, album: text.album, alt: text.alt, caption: text.caption, state: 'live' });
+    expect(response.headers['cache-control']).toBe('no-store');
+  });
+
+  it('never touches the file, the declaration or the publication, whatever the body carries', async () => {
+    asStaff();
+    const stored = row({ published: false, authorizedAt: null, publishedAt: null });
+    jest.spyOn(GalleryPhoto, 'findByPk').mockResolvedValue(stored);
+    const before = filesInDir().length;
+
+    const response = await edit({ ...text, published: true, publishedAt: '2026-01-01T00:00:00Z', authorized: true, authorizedAt: '2026-01-01T00:00:00Z', imageFile: '../x.png', id: randomUUID(), data: PNG.toString('base64') });
+
+    expect(response.status).toBe(200);
+    expect(stored.update.mock.calls[0]).toEqual([text, { fields: ['album', 'alt', 'caption'] }]);
+    expect(response.body.photo).toMatchObject({ state: 'unauthorized', published: false, authorized: false, publishedAt: null });
+    expect(filesInDir()).toHaveLength(before);
+  });
+
+  it('turns a blank caption into null and collapses the spaces of the album name', async () => {
+    asStaff();
+    const stored = row({ caption: 'Antiga.' });
+    jest.spyOn(GalleryPhoto, 'findByPk').mockResolvedValue(stored);
+
+    const response = await edit({ album: '  II   Festa  Preta ', alt: ' Descrição. ', caption: '   ' });
+
+    expect(response.status).toBe(200);
+    expect(stored.update.mock.calls[0]![0]).toEqual({ album: 'II Festa Preta', alt: 'Descrição.', caption: null });
+  });
+
+  it.each([
+    ['no album', { ...text, album: '  ' }, 'album'],
+    ['no description', { ...text, alt: '' }, 'alt'],
+    ['an album over the limit', { ...text, album: 'a'.repeat(121) }, 'album'],
+    ['a description over the limit', { ...text, alt: 'a'.repeat(301) }, 'alt'],
+    ['a caption over the limit', { ...text, caption: 'a'.repeat(301) }, 'caption'],
+    ['a caption that is not text', { ...text, caption: 7 }, 'caption'],
+  ])('answers 400 and writes nothing for %s', async (_name, body, field) => {
+    asStaff();
+    const findByPk = jest.spyOn(GalleryPhoto, 'findByPk').mockResolvedValue(row());
+
+    const response = await edit(body);
+
+    expect(response.status).toBe(400);
+    expect(JSON.stringify(response.body.error.details)).toContain(field);
+    expect(findByPk).not.toHaveBeenCalled();
+  });
+
+  it('answers 404 for a photo that does not exist and writes nothing', async () => {
+    asStaff();
+    jest.spyOn(GalleryPhoto, 'findByPk').mockResolvedValue(null);
+    const update = jest.spyOn(GalleryPhoto, 'update');
+
+    expect((await edit(text)).status).toBe(404);
+    expect(update).not.toHaveBeenCalled();
+  });
+});
+
+describe('what the gallery does not have', () => {
+  it('has no way to set published through anything but its own route', async () => {
+    asStaff();
     expect((await request(app).patch(`/api/admin/gallery/${PHOTO_ID}`).set(auth).send({ published: true })).status).toBe(404);
   });
 });

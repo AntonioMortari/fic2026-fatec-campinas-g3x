@@ -1363,6 +1363,36 @@ export const openApiDocument = {
           '404': { description: '`photo_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
+      put: {
+        tags: ['Admin'],
+        summary: 'Corrige o texto da foto (equipe)',
+        description: 'Reescreve só álbum, descrição e legenda. O arquivo, a declaração de autorização e a publicação não mudam por aqui, seja qual for o corpo.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['album', 'alt'],
+                properties: {
+                  album: { type: 'string', maxLength: 120 },
+                  alt: { type: 'string', maxLength: 300 },
+                  caption: { type: 'string', maxLength: 300, nullable: true },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'A foto com o texto novo', content: { 'application/json': { schema: { type: 'object', properties: { photo: { $ref: '#/components/schemas/AdminGalleryPhoto' } } } } } },
+          '400': { description: 'Texto inválido ou identificador inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`photo_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
       delete: {
         tags: ['Admin'],
         summary: 'Apaga a foto e o arquivo (equipe)',

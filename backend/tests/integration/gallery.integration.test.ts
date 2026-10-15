@@ -156,6 +156,32 @@ describe('the gallery against a real MySQL', () => {
     expect((await toggle(true)).body.photo.publishedAt).toBe(first);
   });
 
+  it('editing the text keeps the file, the declaration and the publication exactly as they were', async () => {
+    const headers = await staff();
+    const id = await upload(headers, { caption: 'Antiga.' }, true);
+    const before = (await GalleryPhoto.findByPk(id))!.toJSON();
+    const bytesBefore = fs.readFileSync(await fileOf(id));
+
+    const response = await request(app)
+      .put(`/api/admin/gallery/${id}`)
+      .set(headers)
+      .send({ album: 'II Festa Preta 🥁', alt: 'Roda de tambor, com acento: coração.', caption: null, published: false, authorized: false, imageFile: 'x.png', authorizedAt: null });
+
+    expect(response.status).toBe(200);
+    const after = (await GalleryPhoto.findByPk(id))!.toJSON();
+    expect(after).toMatchObject({ album: 'II Festa Preta 🥁', alt: 'Roda de tambor, com acento: coração.', caption: null });
+    for (const column of ['published', 'publishedAt', 'authorizedAt', 'imageFile', 'imageMime', 'imageUpdatedAt', 'createdAt'] as const) expect(after[column]).toEqual(before[column]);
+    expect(fs.readFileSync(await fileOf(id)).equals(bytesBefore)).toBe(true);
+    const pub = await request(app).get('/api/gallery');
+    expect(pub.body.data[0].name).toBe('II Festa Preta 🥁');
+  });
+
+  it('answers 404 when editing a photo that does not exist', async () => {
+    const headers = await staff();
+    const res = await request(app).put(`/api/admin/gallery/${randomUUID()}`).set(headers).send({ album: 'A', alt: 'B' });
+    expect(res.status).toBe(404);
+  });
+
   it('groups published photos by album ignoring case, and orders the albums newest first', async () => {
     const headers = await staff();
     const old = await upload(headers, { album: 'Cafú e o Café' }, true);
@@ -190,6 +216,9 @@ describe('the gallery against a real MySQL', () => {
     expect((await request(app).patch(`/api/admin/gallery/${id}/publication`).set(plain).send({ published: true })).status).toBe(403);
     expect((await request(app).get(`/api/admin/gallery/${id}/image`).set(plain)).status).toBe(403);
     expect((await request(app).delete(`/api/admin/gallery/${id}`).set(plain)).status).toBe(403);
+    expect((await request(app).put(`/api/admin/gallery/${id}`).set(plain).send({ album: 'X', alt: 'Y' })).status).toBe(403);
+    expect((await request(app).put(`/api/admin/gallery/${id}`).send({ album: 'X', alt: 'Y' })).status).toBe(401);
+    expect((await GalleryPhoto.findByPk(id))?.album).toBe('II Festa Preta');
     expect((await GalleryPhoto.findByPk(id))?.published).toBe(false);
     expect(await GalleryPhoto.count()).toBe(1);
   });

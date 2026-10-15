@@ -9,13 +9,7 @@ export const adminGalleryParams = z.object({ id: z.uuid('Foto inválida.') });
 const IMAGE_MESSAGE = 'Escolha uma foto para enviar.';
 const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
-// There is no `published` here: uploading never publishes, and a hostile body cannot smuggle it in (Zod drops unknown keys).
-export const uploadBody = z.object({
-  data: z
-    .string({ error: IMAGE_MESSAGE })
-    .min(1, IMAGE_MESSAGE)
-    .refine((value) => value.length % 4 === 0 && BASE64.test(value), IMAGE_MESSAGE)
-    .transform((value) => Buffer.from(value, 'base64')),
+const textFields = {
   album: z
     .string({ error: 'Escreva o nome do álbum.' })
     .trim()
@@ -33,7 +27,20 @@ export const uploadBody = z.object({
     .max(CAPTION_LIMIT, `A legenda passou de ${CAPTION_LIMIT} caracteres.`)
     .nullish()
     .transform((value) => value || null),
+};
+
+// There is no `published` here: uploading never publishes, and a hostile body cannot smuggle it in (Zod drops unknown keys).
+export const uploadBody = z.object({
+  data: z
+    .string({ error: IMAGE_MESSAGE })
+    .min(1, IMAGE_MESSAGE)
+    .refine((value) => value.length % 4 === 0 && BASE64.test(value), IMAGE_MESSAGE)
+    .transform((value) => Buffer.from(value, 'base64')),
+  ...textFields,
   authorized: z.boolean({ error: 'Informe se a declaração de autorização foi marcada.' }).default(false),
 });
 
 export const publicationBody = z.object({ published: z.boolean({ error: 'Informe se a foto fica no ar.' }) });
+
+// The text of a photo, and nothing else: the file, the declaration and the publication each have their own act.
+export const textBody = z.object(textFields);

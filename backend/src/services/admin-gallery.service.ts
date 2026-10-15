@@ -105,6 +105,14 @@ export async function setPhotoPublished(id: string, published: boolean, now: Dat
   return toAdminPhoto(photo);
 }
 
+export type TextInput = Pick<UploadInput, 'album' | 'alt' | 'caption'>;
+
+export async function updatePhotoText(id: string, input: TextInput): Promise<AdminPhoto> {
+  const photo = await findOrFail(id);
+  await photo.update({ album: input.album, alt: input.alt, caption: input.caption }, { fields: ['album', 'alt', 'caption'] });
+  return toAdminPhoto(photo);
+}
+
 export async function deletePhoto(id: string): Promise<void> {
   const photo = await findOrFail(id);
   await photo.destroy();
