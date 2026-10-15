@@ -202,6 +202,13 @@ describe('event detail page (design 13a and 13b)', () => {
     expect(await screen.findByRole('heading', { name: 'Página não encontrada' })).toBeInTheDocument()
   })
 
+  it('shows the 404 page when the id is not valid at all', async () => {
+    mock = mockApi({ [`GET /events/${ID}`]: () => apiError(400, 'invalid_data', 'Confira os dados enviados.', [{ field: 'id', message: 'Evento inválido.' }]) })
+    renderRoute(`/agenda/${ID}`)
+
+    expect(await screen.findByRole('heading', { name: 'Página não encontrada' })).toBeInTheDocument()
+  })
+
   it('says the load failed and tries again', async () => {
     const user = userEvent.setup()
     let fail = true

@@ -47,7 +47,10 @@ export function EventDetail() {
   return (
     <>
       <BackBar to="/agenda" label="Agenda" onDesktop={false} />
-      <Container className="flex flex-col gap-4.5 pt-0 pb-8 desktop:grid desktop:grid-cols-[minmax(0,1fr)_25rem] desktop:items-start desktop:gap-x-14 desktop:gap-y-6 desktop:pt-4 desktop:pb-20">
+      <Container
+        className="flex flex-col gap-4.5 pt-0 pb-8 desktop:grid desktop:grid-cols-[minmax(0,1fr)_25rem] desktop:items-start desktop:gap-x-14 desktop:gap-y-6 desktop:pt-4 desktop:pb-20"
+        style={{ gridTemplateRows: `repeat(${leftItems + 1}, auto) 1fr` }}
+      >
         <div className="hidden desktop:col-span-2 desktop:col-start-1 desktop:row-start-1 desktop:-mb-5 desktop:block">
           <BackLink to="/agenda" label="Agenda" tone="link" />
         </div>
@@ -68,7 +71,7 @@ export function EventDetail() {
         <aside
           aria-label="Quando, onde e inscrição"
           className="flex flex-col gap-4.5 desktop:sticky desktop:top-6 desktop:col-start-2 desktop:gap-4.5 desktop:border-[1.5px] desktop:border-brown desktop:bg-card desktop:p-6"
-          style={{ gridRow: `2 / span ${leftItems}` }}
+          style={{ gridRow: `2 / span ${leftItems + 1}` }}
         >
           <EventFacts event={detail} />
           {view.notice && <RegistrationNotice notice={view.notice} className="desktop:bg-cream" />}

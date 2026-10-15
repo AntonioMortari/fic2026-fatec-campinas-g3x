@@ -30,4 +30,5 @@ export function parseApiError(error: unknown): ParsedApiError {
 }
 
 // A route the API does not have also answers 404 ("not_found"): only an unknown event is a missing page for the person.
-export const isMissingEvent = (error: unknown) => parseApiError(error).code === 'event_not_found'
+// An id that is not even a UUID is rejected by validation (400 "invalid_data"), and for the person it is the same missing page.
+export const isMissingEvent = (error: unknown) => ['event_not_found', 'invalid_data'].includes(parseApiError(error).code)
