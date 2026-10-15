@@ -37,6 +37,28 @@ export function eventMeta(event: EventSummary, options: { withCapacity?: boolean
     .join(' · ')
 }
 
+const capitalized = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
+function weekdayName(iso: string): string {
+  return capitalized(new Intl.DateTimeFormat('pt-BR', { timeZone: TIME_ZONE, weekday: 'long' }).format(new Date(iso)))
+}
+
+const spokenRange = (event: Pick<EventSummary, 'startsAt' | 'endsAt'>) =>
+  event.endsAt ? `${formatTime(event.startsAt)} às ${formatTime(event.endsAt)}` : formatTime(event.startsAt)
+
+function spotsLeftPhrase(event: Pick<EventSummary, 'spotsLeft'>): string | null {
+  if (event.spotsLeft === null || event.spotsLeft <= 0) return null
+  return event.spotsLeft === 1 ? 'Resta 1 vaga' : `Restam ${event.spotsLeft} vagas`
+}
+
+// The line of the "next activity" card on the home. On the desktop (design 14a) it starts with the weekday and says the spots that are
+// left; on the phone (14b) the badge already says the day, and the line is the start time, the place and the age range.
+export function homeEventMeta(event: EventSummary, size: 'long' | 'short'): string {
+  const place = event.location ?? 'Local a confirmar'
+  if (size === 'short') return [formatTime(event.startsAt), place, event.ageRange].filter(Boolean).join(' · ')
+  return [`${weekdayName(event.startsAt)}, ${spokenRange(event)}`, place, event.ageRange, spotsLeftPhrase(event)].filter(Boolean).join(' · ')
+}
+
 function yearAndMonth(iso: string): { year: number; month: number } {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone: TIME_ZONE, year: 'numeric', month: 'numeric' }).formatToParts(new Date(iso))
   const value = (type: string) => Number(parts.find((part) => part.type === type)?.value)

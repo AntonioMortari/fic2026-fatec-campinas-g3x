@@ -31,7 +31,9 @@ const UPCOMING = [
 ]
 
 function serve(responses: Partial<Record<EventPeriod, EventSummary[]>>) {
-  vi.mocked(api.get).mockImplementation(async (_url, config) => {
+  vi.mocked(api.get).mockImplementation(async (url, config) => {
+    // The home also asks for the gallery and the news: for this test they are empty.
+    if (url !== '/events') return { data: { data: [] } }
     const { period } = (config?.params ?? { period: 'upcoming' }) as { period: EventPeriod }
     return { data: { data: responses[period] ?? [] } }
   })

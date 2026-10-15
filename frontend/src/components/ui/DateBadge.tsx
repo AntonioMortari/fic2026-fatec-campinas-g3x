@@ -1,7 +1,7 @@
 import { cn } from '../../lib/cn'
 import { dateParts } from '../../lib/dates'
 
-type Size = 'default' | 'large' | 'row' | 'feature' | 'next' | 'compact' | 'panel'
+type Size = 'default' | 'large' | 'row' | 'feature' | 'next' | 'compact' | 'panel' | 'home'
 
 interface DateBadgeProps {
   date: Date
@@ -18,6 +18,8 @@ const BOX: Record<Size, string> = {
   row: 'h-19 w-16 desktop:h-21 desktop:w-20',
   feature: 'h-19 w-16 desktop:h-23 desktop:w-20',
   next: 'h-17.5 w-16 desktop:h-24 desktop:w-21',
+  // The home's "next activity" card (designs 14a and 14b): 84x72 on the phone, a 104px square on the desktop, with an edge.
+  home: 'h-21 w-18 border-[1.5px] border-brown desktop:size-26',
 }
 const NUMBER: Record<Size, string> = {
   default: 'text-[1.625rem]',
@@ -27,6 +29,7 @@ const NUMBER: Record<Size, string> = {
   row: 'text-[1.625rem] desktop:text-[1.875rem]',
   feature: 'text-[1.625rem] desktop:text-[2rem]',
   next: 'text-[1.625rem] desktop:text-[2.125rem]',
+  home: 'text-[1.875rem] desktop:text-[2.375rem]',
 }
 const LABEL: Record<Size, string> = {
   default: 'text-[0.6875rem]',
@@ -36,6 +39,7 @@ const LABEL: Record<Size, string> = {
   row: 'text-[0.6875rem] desktop:text-xs',
   feature: 'text-[0.6875rem] desktop:text-xs',
   next: 'text-[0.6875rem] desktop:text-xs',
+  home: 'text-[0.6875rem] desktop:text-xs',
 }
 
 export function DateBadge({ date, highlight = false, size = 'default' }: DateBadgeProps) {
@@ -43,13 +47,13 @@ export function DateBadge({ date, highlight = false, size = 'default' }: DateBad
   return (
     <span className={cn('flex flex-none flex-col items-center justify-center text-brown', highlight ? 'bg-ochre' : 'bg-cream-dark', BOX[size])}>
       <span className="sr-only">{spoken}</span>
-      <span aria-hidden="true" className={cn('tracking-[0.1em]', size === 'panel' ? 'font-bold' : 'font-semibold', LABEL[size])}>
+      <span aria-hidden="true" className={cn('tracking-[0.1em]', size === 'panel' || size === 'home' ? 'font-bold' : 'font-semibold', LABEL[size])}>
         {weekday}
       </span>
       <span aria-hidden="true" className={cn('leading-none font-bold', NUMBER[size])}>
         {day}
       </span>
-      <span aria-hidden="true" className={cn('tracking-[0.1em]', size === 'panel' ? 'font-bold' : 'font-semibold', LABEL[size])}>
+      <span aria-hidden="true" className={cn('tracking-[0.1em]', size === 'panel' || size === 'home' ? 'font-bold' : 'font-semibold', LABEL[size])}>
         {month}
       </span>
     </span>

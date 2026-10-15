@@ -3,6 +3,7 @@ export interface GalleryPhoto {
   alt: string
   caption: string | null
   url: string
+  publishedAt: string
 }
 
 export interface GalleryAlbum {
