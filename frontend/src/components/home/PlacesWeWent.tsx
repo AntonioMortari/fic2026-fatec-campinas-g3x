@@ -12,7 +12,7 @@ export function PlacesWeWent({ venues = PAST_VENUES }: { venues?: Venue[] }) {
     <Container
       as="section"
       aria-labelledby="places-title"
-      className="flex flex-col gap-3 pt-9 desktop:grid desktop:grid-cols-[18.75rem_minmax(0,1fr)] desktop:gap-12 desktop:pt-20"
+      className="flex flex-col gap-3 pt-9 desktop:grid desktop:grid-cols-[18.75rem_minmax(0,1fr)] desktop:gap-12 desktop:pt-14"
     >
       <div className="flex flex-col gap-3">
         <h2 id="places-title" className="m-0 text-[1.5rem] leading-[1.15] font-bold desktop:text-[1.75rem] desktop:leading-[normal]">

@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { Home } from '../pages/Home'
 import { PAST_VENUES } from '../lib/schools'
+import { PressSection } from '../components/home/PressSection'
 import type { HomePhoto } from '../lib/gallery'
 import type { NewsItem } from '../types/news'
 import { renderRoute, renderWithRouter } from './render'
@@ -211,19 +212,66 @@ describe('home page: schools, where we have been and where we are', () => {
   })
 })
 
+describe('home page: in the press', () => {
+  it('shows what the ONG has been in the press, from its own material: the Folha story as the highlight and the Globo appearance beside it', () => {
+    renderRoute('/')
+    const section = screen.getByRole('region', { name: 'Na mídia' })
+
+    expect(within(section).getByText('Folha de S.Paulo')).toBeInTheDocument()
+    expect(within(section).getByText('“Como o menino que era caixa de supermercado criou um ateliê para valorizar a cultura negra”')).toBeInTheDocument()
+    expect(within(section).getByText('Rede Globo · 2021')).toBeInTheDocument()
+    expect(within(section).getByText('Caldeirão do Huck · quadro The Wall')).toBeInTheDocument()
+    expect(within(section).getByText('Participação em rede nacional')).toBeInTheDocument()
+  })
+
+  it('links each piece to its original, the ones the team gave, in a new tab', () => {
+    renderRoute('/')
+    const links = within(screen.getByRole('region', { name: 'Na mídia' })).getAllByRole('link')
+
+    expect(links.map((link) => [link.textContent?.replace(/\s+/g, ' ').trim(), link.getAttribute('href')])).toEqual([
+      ['Ler a matéria na Folha ↗ (abre em outra aba)', 'https://pitacocultural.blogfolha.uol.com.br/2021/03/30/como-o-menino-que-era-caixa-de-supermercado-criou-um-atelie-para-valorizar-a-cultura-negra/'],
+      ['Assistir no Globoplay ↗ (abre em outra aba)', 'https://globoplay.globo.com/v/9362917/'],
+    ])
+    for (const link of links) expect(link).toHaveAttribute('target', '_blank')
+  })
+
+  it('opens the original in a new tab, saying so, as soon as an address is given', () => {
+    renderWithRouter(
+      <PressSection
+        featured={{ outlet: 'Veículo', quote: 'Título da matéria', url: 'https://exemplo.com/materia', action: 'Ler a matéria' }}
+        others={[{ outlet: 'Outro', year: '2021', title: 'Programa', detail: 'Participação', url: 'https://exemplo.com/video', action: 'Assistir' }]}
+      />,
+    )
+    const section = screen.getByRole('region', { name: 'Na mídia' })
+
+    const links = within(section).getAllByRole('link')
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(['https://exemplo.com/materia', 'https://exemplo.com/video'])
+    for (const link of links) {
+      expect(link).toHaveAttribute('target', '_blank')
+      expect(link).toHaveAttribute('rel', expect.stringContaining('noreferrer'))
+      expect(link).toHaveTextContent(/abre em outra aba/)
+    }
+  })
+
+  it('disappears when there is nothing to show', () => {
+    renderWithRouter(<PressSection featured={null} others={[]} />)
+
+    expect(screen.queryByRole('region', { name: 'Na mídia' })).not.toBeInTheDocument()
+  })
+})
+
 describe('home page: what the design has and the site cannot yet', () => {
-  it('has no "Na mídia" (it needs links the ONG did not send) and no testimonials (there is no way to send or approve one)', () => {
+  it('has no testimonials (there is no way to send or approve one)', () => {
     renderRoute('/')
 
-    expect(screen.queryByRole('heading', { name: 'Na mídia' })).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Quem já participou' })).not.toBeInTheDocument()
     expect(screen.queryByText('Contar como foi')).not.toBeInTheDocument()
   })
 
-  it('keeps the order of the design: opening, next activity, where to start, what we do, story, gallery, schools, news, places, where we are', () => {
+  it('keeps the order of the design: opening, next activity, where to start, what we do, story, gallery, schools, news, press, places, where we are', () => {
     renderWithRouter(<Home nextEvent={EVENT} photos={PHOTOS} news={NEWS} />)
 
-    const names = ['Arte, memória e pertencimento', 'Próxima atividade', 'Por onde começar', 'O que fazemos', 'Nossa história', 'Da galeria', 'É de uma escola ou instituição?', 'Notícias e campanhas', 'Onde já estivemos', 'Onde estamos']
+    const names = ['Arte, memória e pertencimento', 'Próxima atividade', 'Por onde começar', 'O que fazemos', 'Nossa história', 'Da galeria', 'É de uma escola ou instituição?', 'Notícias e campanhas', 'Na mídia', 'Onde já estivemos', 'Onde estamos']
     const regions = names.map((name) => screen.getByRole('region', { name: name === names[0] ? /Arte, memória e pertencimento/ : name }))
     for (let index = 1; index < regions.length; index += 1) {
       expect(regions[index - 1]!.compareDocumentPosition(regions[index]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
