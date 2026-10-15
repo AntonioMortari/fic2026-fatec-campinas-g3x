@@ -12,6 +12,8 @@ import { contactsRoutes } from './contacts.routes';
 import { adminContactsRoutes } from './admin-contacts.routes';
 import { galleryRoutes } from './gallery.routes';
 import { adminGalleryRoutes } from './admin-gallery.routes';
+import { newsRoutes } from './news.routes';
+import { adminNewsRoutes } from './admin-news.routes';
 
 export const routes = Router();
 
@@ -29,3 +31,5 @@ routes.use('/contacts', contactsRoutes);
 routes.use('/admin/contacts', adminContactsRoutes);
 routes.use('/gallery', galleryRoutes);
 routes.use('/admin/gallery', adminGalleryRoutes);
+routes.use('/news', newsRoutes);
+routes.use('/admin/news', adminNewsRoutes);

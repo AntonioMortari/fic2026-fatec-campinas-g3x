@@ -85,7 +85,22 @@ export const openApiDocument = {
           location: { type: ['string', 'null'] },
           ageRange: { type: ['string', 'null'], example: 'Livre' },
           capacity: { type: ['integer', 'null'], minimum: 1 },
-          spotsLeft: { type: ['integer', 'null'], minimum: 0, description: 'Vagas que restam; null quando não há limite.' },
+          spotsLeft: {
+            type: ['integer', 'null'],
+            minimum: 0,
+            description: 'Vagas que restam; null quando não há limite ou quando a contagem falhou (aí `registrationStatus` é `unknown`).',
+          },
+          registrationOnSite: { type: 'boolean', description: 'Falso: evento sem inscrição pelo site.' },
+          registrationStatus: {
+            type: 'string',
+            enum: ['open', 'few_left', 'full', 'not_on_site', 'started', 'unknown'],
+            description:
+              'Calculado no servidor, na ordem do desenho 13c, vale a primeira que bater: `started` (agora ≥ início), `not_on_site`, `unknown` (a contagem falhou e há limite de vagas: nunca vira zero nem "aberta"), `full`, `few_left` (restam 3 ou menos) e `open`.',
+          },
+          image: {
+            oneOf: [{ type: 'null' }, { type: 'object', required: ['url', 'alt'], properties: { url: { type: 'string', example: '/api/events/{id}/image?v=1760270400123' }, alt: { type: 'string' } } }],
+            description: 'A foto do evento, ou null. O `?v=` é a versão: muda quando a foto é trocada, para furar o cache. Os bytes nunca vêm na lista.',
+          },
         },
       },
       EventDetail: {
@@ -96,7 +111,7 @@ export const openApiDocument = {
             required: ['requiresCpf', 'registrationsOpen'],
             properties: {
               requiresCpf: { type: 'boolean', description: 'Se a inscrição pede o CPF (RN06).' },
-              registrationsOpen: { type: 'boolean', description: 'Falso quando o evento já acabou ou as vagas acabaram.' },
+              registrationsOpen: { type: 'boolean', description: 'Falso quando o evento já começou, não tem inscrição pelo site ou as vagas acabaram.' },
             },
           },
         ],
@@ -146,6 +161,17 @@ export const openApiDocument = {
           ageRange: { type: ['string', 'null'], maxLength: 80 },
           capacity: { type: ['integer', 'null'], minimum: 1, description: 'Em branco = sem limite.' },
           requiresCpf: { type: 'boolean', default: false },
+          registrationOnSite: { type: 'boolean', default: true, description: 'Falso: o servidor grava `capacity` null e `requiresCpf` false, porque não fazem sentido sem inscrição pelo site.' },
+        },
+      },
+      EventImageInput: {
+        type: 'object',
+        required: ['data', 'alt', 'authorized'],
+        description: 'Troca a foto: a declaração e a descrição valem de novo a cada envio. O tipo vem dos primeiros bytes do arquivo, nunca do que o cliente diz.',
+        properties: {
+          data: { type: 'string', format: 'byte', description: 'O arquivo em base64. JPG, PNG, GIF ou WebP, até 4 MB depois de decodificado.' },
+          alt: { type: 'string', minLength: 1, maxLength: 300, description: 'Descrição da foto, obrigatória.' },
+          authorized: { type: 'boolean', enum: [true], description: 'Declaração de que existe autorização de uso de imagem (RN07). Gravada como data, nunca como booleano.' },
         },
       },
       Health: {
@@ -256,6 +282,68 @@ export const openApiDocument = {
           institution: { type: ['string', 'null'], maxLength: 160, description: 'Opcional: escola, empresa, coletivo, veículo de imprensa.' },
           message: { type: 'string', maxLength: 5000 },
           consent: { type: 'boolean', enum: [true], description: 'Obrigatório: concordância com o uso dos dados para responder a mensagem. Guardada como data.' },
+        },
+      },
+      NewsImage: {
+        type: ['object', 'null'],
+        properties: { url: { type: 'string', description: 'Caminho da imagem, com `?v=` para o cache.' }, alt: { type: 'string' } },
+      },
+      NewsItem: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          kind: { type: 'string', enum: ['news', 'campaign'] },
+          title: { type: 'string' },
+          excerpt: { type: 'string', description: 'O resumo; sem resumo, o primeiro parágrafo do texto.' },
+          publishedAt: { type: ['string', 'null'], format: 'date-time' },
+          image: { $ref: '#/components/schemas/NewsImage' },
+        },
+      },
+      NewsDetail: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          kind: { type: 'string', enum: ['news', 'campaign'] },
+          title: { type: 'string' },
+          summary: { type: ['string', 'null'] },
+          paragraphs: { type: 'array', items: { type: 'string' }, description: 'O texto dividido nas linhas em branco.' },
+          publishedAt: { type: ['string', 'null'], format: 'date-time' },
+          image: { $ref: '#/components/schemas/NewsImage' },
+        },
+      },
+      AdminNews: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          kind: { type: 'string', enum: ['news', 'campaign'] },
+          title: { type: 'string' },
+          summary: { type: ['string', 'null'] },
+          body: { type: 'string', description: 'O texto inteiro, com linhas em branco entre os parágrafos.' },
+          published: { type: 'boolean', description: 'Só muda por PATCH /admin/news/{id}/publication.' },
+          publishedAt: { type: ['string', 'null'], format: 'date-time', description: 'Carimbada na primeira publicação e mantida ao tirar do ar.' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+          image: { $ref: '#/components/schemas/NewsImage' },
+        },
+      },
+      NewsInput: {
+        type: 'object',
+        required: ['title', 'body'],
+        description: 'Não há campo `published`: salvar nunca publica, e um corpo com esse campo é descartado.',
+        properties: {
+          kind: { type: 'string', enum: ['news', 'campaign'], default: 'news' },
+          title: { type: 'string', maxLength: 200 },
+          summary: { type: ['string', 'null'], maxLength: 500 },
+          body: { type: 'string', maxLength: 20000 },
+        },
+      },
+      NewsImageRequest: {
+        type: 'object',
+        required: ['data', 'alt', 'authorized'],
+        properties: {
+          data: { type: 'string', description: 'A imagem em base64 (JPG, PNG, GIF ou WebP, até 4 MB), conferida pelos primeiros bytes e não pelo nome.' },
+          alt: { type: 'string', maxLength: 300, description: 'Descrição para quem não enxerga a imagem.' },
+          authorized: { type: 'boolean', enum: [true], description: 'Declaração de que há autorização de uso de imagem (RN07). Guardada como data.' },
         },
       },
       GalleryPhoto: {
@@ -422,6 +510,42 @@ export const openApiDocument = {
         responses: {
           '200': { description: 'O evento corrigido', content: { 'application/json': { schema: { type: 'object', properties: { event: { $ref: '#/components/schemas/AdminEvent' } } } } } },
           '400': { description: 'Dados inválidos', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Não existe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/events/{id}/image': {
+      parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+      get: {
+        tags: ['Admin'],
+        summary: 'A foto do evento, mesmo de um rascunho (equipe)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Os bytes, com o tipo gravado', content: { 'image/*': { schema: { type: 'string', format: 'binary' } } } },
+          '404': { description: 'Evento inexistente ou sem foto', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      put: {
+        tags: ['Admin'],
+        summary: 'Sobe ou troca a foto do evento (equipe, RN07)',
+        description:
+          'Corpo JSON com a foto em base64 (limite de 6 MB só nesta rota; o resto da API segue com 100 KB). Sem `authorized: true` a foto não sobe. O tipo é lido pela assinatura dos bytes. Salvar o evento nunca mexe na foto.',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/EventImageInput' } } } },
+        responses: {
+          '200': { description: 'O evento, com `image`', content: { 'application/json': { schema: { type: 'object', properties: { event: { $ref: '#/components/schemas/AdminEvent' } } } } } },
+          '400': { description: 'Sem declaração, sem descrição, base64 inválido, ou `invalid_image` (não é JPG, PNG, GIF nem WebP)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Não existe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '413': { description: '`image_too_large` (acima de 4 MB) ou `payload_too_large` (corpo acima de 6 MB)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      delete: {
+        tags: ['Admin'],
+        summary: 'Remove a foto do evento (equipe)',
+        description: 'Zera as cinco colunas da foto. Existe para a foto subida por engano poder sair (RN07). O evento não é apagado.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'O evento, com `image: null`', content: { 'application/json': { schema: { type: 'object', properties: { event: { $ref: '#/components/schemas/AdminEvent' } } } } } },
           '404': { description: 'Não existe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
@@ -656,7 +780,8 @@ export const openApiDocument = {
       get: {
         tags: ['Events'],
         summary: 'Lista os eventos publicados',
-        description: 'Só eventos publicados. "upcoming" vem do mais próximo ao mais distante; "past", do mais recente ao mais antigo.',
+        description:
+          'Só eventos publicados. "upcoming" são os que ainda não começaram (início depois de agora) e vêm do mais próximo ao mais distante; "past" são os que já começaram, do mais recente ao mais antigo. Se a contagem de inscritos falhar, a lista vem mesmo assim, com `registrationStatus: unknown`.',
         parameters: [
           { name: 'period', in: 'query', schema: { type: 'string', enum: ['upcoming', 'past'], default: 'upcoming' } },
           { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100 } },
@@ -689,6 +814,19 @@ export const openApiDocument = {
         },
       },
     },
+    '/events/{id}/image': {
+      get: {
+        tags: ['Events'],
+        summary: 'A foto de um evento publicado',
+        description: 'Só de evento publicado e com foto. Tipo gravado, `nosniff`, `inline`, cache de uma hora e ETag (304 quando não mudou).',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'Os bytes da foto', content: { 'image/*': { schema: { type: 'string', format: 'binary' } } } },
+          '304': { description: 'Não mudou desde o `If-None-Match`' },
+          '404': { description: 'Rascunho, inexistente ou sem foto: a mesma resposta', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
     '/events/{id}/registrations': {
       post: {
         tags: ['Events'],
@@ -704,7 +842,7 @@ export const openApiDocument = {
           '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '401': { description: 'Token enviado, mas inválido ou de conta que não existe mais', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '404': { description: 'Evento inexistente ou não publicado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-          '409': { description: '`event_full`, `registrations_closed` (evento acabou) ou `already_registered`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: '`event_full`, `registrations_closed` (o evento já começou), `registrations_not_offered` (sem inscrição pelo site) ou `already_registered`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '429': { description: '`too_many_registrations` (5 pessoas por e-mail no evento) ou `too_many_requests` (30 inscrições por hora vindas da mesma conexão)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
@@ -1014,6 +1152,151 @@ export const openApiDocument = {
           '201': { description: 'Mensagem registrada', content: { 'application/json': { schema: { type: 'object', properties: { received: { type: 'boolean', enum: [true] } } } } } },
           '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '429': { description: '`too_many_requests`: mais de 30 mensagens na última hora vindas da mesma conexão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/news': {
+      get: {
+        tags: ['News'],
+        summary: 'Lista as notícias publicadas (RF04)',
+        description: 'Aberta. Só o que está publicado, da mais recente para a mais antiga; rascunho nunca aparece. O desenho não pagina.',
+        responses: {
+          '200': { description: 'As notícias', content: { 'application/json': { schema: { type: 'object', properties: { data: { type: 'array', items: { $ref: '#/components/schemas/NewsItem' } } } } } } },
+        },
+      },
+    },
+    '/news/{id}': {
+      get: {
+        tags: ['News'],
+        summary: 'Uma notícia publicada',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'A notícia', content: { 'application/json': { schema: { type: 'object', properties: { news: { $ref: '#/components/schemas/NewsDetail' } } } } } },
+          '404': { description: '`news_not_found`: não existe ou é rascunho', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/news/{id}/image': {
+      get: {
+        tags: ['News'],
+        summary: 'A imagem de uma notícia publicada',
+        description: 'Os bytes guardados, com o tipo guardado e `nosniff`. Notícia em rascunho responde 404.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'A imagem', content: { 'image/*': { schema: { type: 'string', format: 'binary' } } } },
+          '404': { description: '`image_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/news': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Lista todas as notícias, rascunhos e publicadas (só equipe)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'As notícias', content: { 'application/json': { schema: { type: 'object', properties: { data: { type: 'array', items: { $ref: '#/components/schemas/AdminNews' } } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      post: {
+        tags: ['Admin'],
+        summary: 'Escreve uma notícia (nasce rascunho)',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/NewsInput' } } } },
+        responses: {
+          '201': { description: 'Rascunho criado', content: { 'application/json': { schema: { type: 'object', properties: { news: { $ref: '#/components/schemas/AdminNews' } } } } } },
+          '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/news/{id}': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Uma notícia, rascunho ou publicada (só equipe)',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'A notícia', content: { 'application/json': { schema: { type: 'object', properties: { news: { $ref: '#/components/schemas/AdminNews' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`news_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      put: {
+        tags: ['Admin'],
+        summary: 'Corrige o texto de uma notícia',
+        description: 'Grava só tipo, título, resumo e texto. Não publica nem tira do ar.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/NewsInput' } } } },
+        responses: {
+          '200': { description: 'A notícia corrigida', content: { 'application/json': { schema: { type: 'object', properties: { news: { $ref: '#/components/schemas/AdminNews' } } } } } },
+          '400': { description: 'Dados inválidos', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`news_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/news/{id}/publication': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Publica ou tira do ar',
+        description: 'O único caminho que muda `published`. A data de publicação é carimbada só na primeira vez e mantida ao tirar do ar.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['published'], properties: { published: { type: 'boolean' } } } } } },
+        responses: {
+          '200': { description: 'A notícia', content: { 'application/json': { schema: { type: 'object', properties: { news: { $ref: '#/components/schemas/AdminNews' } } } } } },
+          '400': { description: '`published` ausente ou não booleano', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`news_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/news/{id}/image': {
+      get: {
+        tags: ['Admin'],
+        summary: 'A imagem de uma notícia, mesmo em rascunho (só equipe)',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'A imagem', content: { 'image/*': { schema: { type: 'string', format: 'binary' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`news_not_found` ou `image_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      put: {
+        tags: ['Admin'],
+        summary: 'Sobe ou troca a imagem (opcional na notícia)',
+        description: 'JSON com a imagem em base64. Sem a declaração de autorização de imagem (RN07) a imagem é recusada. O arquivo vai para o disco do servidor, não para o banco.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/NewsImageRequest' } } } },
+        responses: {
+          '200': { description: 'A notícia com a imagem', content: { 'application/json': { schema: { type: 'object', properties: { news: { $ref: '#/components/schemas/AdminNews' } } } } } },
+          '400': { description: 'Sem declaração, sem descrição ou o arquivo não é uma imagem', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`news_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '413': { description: 'Acima de 4 MB', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      delete: {
+        tags: ['Admin'],
+        summary: 'Tira a imagem da notícia',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'A notícia sem imagem', content: { 'application/json': { schema: { type: 'object', properties: { news: { $ref: '#/components/schemas/AdminNews' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`news_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },

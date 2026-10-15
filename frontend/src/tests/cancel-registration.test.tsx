@@ -32,6 +32,9 @@ const other = (id: string, title: string, spotsLeft: number | null): EventSummar
   ageRange: null,
   capacity: null,
   spotsLeft,
+  registrationOnSite: true,
+  registrationStatus: spotsLeft === 0 ? 'full' : 'open',
+  image: null,
 })
 
 function serve(handlers: Handlers = {}) {

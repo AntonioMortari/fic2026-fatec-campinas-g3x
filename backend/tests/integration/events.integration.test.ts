@@ -54,11 +54,19 @@ describe('events against a real MySQL', () => {
     expect(past).toEqual(['passado sem fim', 'passado com fim']);
   });
 
-  it('keeps an event that already started but has not ended in the upcoming list', async () => {
+  it('moves an event that already started, but has not ended, to the past list', async () => {
     await event('em andamento', new Date(NOW.getTime() - HOUR), { endsAt: new Date(NOW.getTime() + HOUR) });
 
-    expect((await listPublishedEvents({ period: 'upcoming', now: NOW })).map((e) => e.title)).toEqual(['em andamento']);
-    expect(await listPublishedEvents({ period: 'past', now: NOW })).toEqual([]);
+    expect(await listPublishedEvents({ period: 'upcoming', now: NOW })).toEqual([]);
+    expect((await listPublishedEvents({ period: 'past', now: NOW })).map((e) => e.title)).toEqual(['em andamento']);
+  });
+
+  it('draws the line at the exact instant of the start: at the start it is past, a second after it is upcoming (the column keeps whole seconds)', async () => {
+    await event('no instante', NOW);
+    await event('um segundo depois', new Date(NOW.getTime() + 1000));
+
+    expect((await listPublishedEvents({ period: 'upcoming', now: NOW })).map((e) => e.title)).toEqual(['um segundo depois']);
+    expect((await listPublishedEvents({ period: 'past', now: NOW })).map((e) => e.title)).toEqual(['no instante']);
   });
 
   it('respects the limit and the order', async () => {

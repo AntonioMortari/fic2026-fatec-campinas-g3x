@@ -15,8 +15,10 @@ import { AdminHome } from './pages/admin/AdminHome'
 import { AdminReport } from './pages/admin/AdminReport'
 import { AdminRegistrants } from './pages/admin/AdminRegistrants'
 import { AdminContacts } from './pages/admin/AdminContacts'
+import { AdminNews } from './pages/admin/AdminNews'
 import { AdminVolunteers } from './pages/admin/AdminVolunteers'
 import { Auth } from './pages/Auth'
+import { EventDetail } from './pages/EventDetail'
 import { EventRegistration } from './pages/EventRegistration'
 import { ComponentCatalog } from './pages/ComponentCatalog'
 import { CancelDone } from './pages/CancelDone'
@@ -29,6 +31,8 @@ import { VolunteerApplicationPage } from './pages/VolunteerApplication'
 import { Volunteering } from './pages/Volunteering'
 import { Contact } from './pages/Contact'
 import { Gallery } from './pages/Gallery'
+import { News } from './pages/News'
+import { NewsDetail } from './pages/NewsDetail'
 import { Schools } from './pages/Schools'
 
 const DEV_ONLY: RouteObject[] = import.meta.env.DEV ? [{ path: '/componentes', element: <ComponentCatalog /> }] : []
@@ -39,6 +43,7 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/', element: <HomeContainer /> },
       { path: '/agenda', element: <Agenda /> },
+      { path: '/agenda/:id', element: <EventDetail />, handle: { hideHeaderOnMobile: true } },
       { path: '/quem-somos', element: <About /> },
       { path: '/inscricao/cancelada', element: <CancelDone /> },
       { path: '/voluntariado', element: <Volunteering /> },
@@ -52,6 +57,8 @@ export const routes: RouteObject[] = [
       { path: '/contato', element: <Contact /> },
       { path: '/para-escolas', element: <Schools /> },
       { path: '/galeria', element: <Gallery /> },
+      { path: '/noticias', element: <News /> },
+      { path: '/noticias/:id', element: <NewsDetail />, handle: { hideHeaderOnMobile: true } },
       ...DEV_ONLY,
       { path: '*', element: <NotFound /> },
     ],
@@ -72,6 +79,9 @@ export const routes: RouteObject[] = [
       { path: '/admin/galeria', element: <AdminGallery />, handle: { hideHeaderOnMobile: true } },
       { path: '/admin/galeria/nova', element: <AdminGallery />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/galeria/:id/apagar', element: <AdminGalleryDelete />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/noticias', element: <AdminNews /> },
+      { path: '/admin/noticias/nova', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/noticias/:id/editar', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/voluntarios', element: <AdminVolunteers /> },
       { path: '/admin/voluntarios/:id', element: <AdminVolunteers />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
     ],

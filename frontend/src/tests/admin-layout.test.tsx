@@ -89,8 +89,9 @@ describe("the panel's own frame (screen 2c)", () => {
     const menu = screen.getByRole('dialog', { name: 'Painel' })
 
     expect(within(menu).getAllByRole('heading', { level: 3, hidden: true }).map((heading) => heading.textContent)).toEqual(['Pessoas', 'Conteúdo', 'Gestão', 'Conta', 'Leitura'])
+    expect(within(menu).getByRole('link', { name: 'Notícias', hidden: true })).toHaveAttribute('href', '/admin/noticias')
     expect(within(menu).getByRole('link', { name: 'Galeria', hidden: true })).toHaveAttribute('href', '/admin/galeria')
-    for (const missing of ['Atividades', 'Publicações', 'Biblioteca', 'Configurações', 'Notícias']) {
+    for (const missing of ['Atividades', 'Publicações', 'Biblioteca', 'Configurações']) {
       expect(within(menu).queryByRole('link', { name: missing, hidden: true })).not.toBeInTheDocument()
     }
   })
@@ -112,11 +113,11 @@ describe("the desktop frame of the panel (screen 7j)", () => {
     await screen.findByRole('heading', { name: 'Eventos e presença', level: 1 })
     const side = screen.getByRole('navigation', { name: 'Seções do painel' })
 
-    expect(within(side).getAllByRole('link').map((link) => link.textContent)).toEqual(['Início', 'Eventos e presença', 'Mensagens', 'Voluntários', 'Galeria', 'Relatório'])
+    expect(within(side).getAllByRole('link').map((link) => link.textContent)).toEqual(['Início', 'Eventos e presença', 'Mensagens', 'Voluntários', 'Notícias', 'Galeria', 'Relatório'])
     expect(within(side).getAllByRole('region').map((group) => group.getAttribute('aria-label'))).toEqual(['Agenda', 'Pessoas', 'Conteúdo', 'Gestão'])
     expect(within(side).getByRole('link', { name: 'Eventos e presença' })).toHaveAttribute('aria-current', 'page')
     expect(within(side).getByRole('link', { name: 'Início' })).not.toHaveAttribute('aria-current')
-    for (const missing of ['Atividades', 'Pessoas', 'Publicações', 'Biblioteca', 'Configurações']) {
+    for (const missing of ['Atividades', 'Pessoas', 'Biblioteca', 'Configurações']) {
       expect(within(side).queryByRole('link', { name: missing })).not.toBeInTheDocument()
     }
   })

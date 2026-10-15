@@ -24,6 +24,9 @@ const draft: AdminEvent = {
   ageRange: 'Livre',
   capacity: 30,
   spotsLeft: 30,
+  registrationOnSite: true,
+  registrationStatus: 'open',
+  image: null,
   registrationCount: 0,
   requiresCpf: true,
   published: false,
@@ -215,6 +218,7 @@ describe('the event form', () => {
       ageRange: '',
       capacity: null,
       requiresCpf: false,
+      registrationOnSite: true,
     })
     expect(await screen.findByText('Rascunho salvo. Publique quando estiver pronto.')).toBeInTheDocument()
   })
@@ -227,13 +231,13 @@ describe('the event form', () => {
     await user.type(field(/^Dia/), '2030-11-20')
     await user.type(field(/^Início/), '15:00')
 
-    await user.type(field(/^Limite de vagas/), '12')
+    await user.type(field(/^Vagas/), '12')
     await user.click(screen.getByRole('button', { name: 'Salvar' }))
     await waitFor(() => expect(calls('POST /admin/events')).toHaveLength(1))
     expect(calls('POST /admin/events')[0]?.body).toMatchObject({ capacity: 12 })
 
-    await user.clear(field(/^Limite de vagas/))
-    await user.type(field(/^Limite de vagas/), 'muitas')
+    await user.clear(field(/^Vagas/))
+    await user.type(field(/^Vagas/), 'muitas')
     await user.click(screen.getByRole('button', { name: 'Salvar' }))
     await waitFor(() => expect(calls('POST /admin/events')).toHaveLength(2))
     expect(calls('POST /admin/events')[1]?.body).toMatchObject({ capacity: 'muitas' })
@@ -282,13 +286,13 @@ describe('the event form', () => {
     await user.type(await screen.findByLabelText(/^Título/), 'X')
     await user.type(field(/^Dia/), '2030-11-20')
     await user.type(field(/^Início/), '15:00')
-    await user.type(field(/^Limite de vagas/), 'muitas')
+    await user.type(field(/^Vagas/), 'muitas')
     await user.click(screen.getByRole('button', { name: 'Salvar' }))
 
-    await waitFor(() => expect(field(/^Limite de vagas/)).toHaveAttribute('aria-invalid', 'true'))
-    expect(field(/^Limite de vagas/).closest('section')).not.toHaveClass('hidden')
+    await waitFor(() => expect(field(/^Vagas/)).toHaveAttribute('aria-invalid', 'true'))
+    expect(field(/^Vagas/).closest('section')).not.toHaveClass('hidden')
     expect(field(/^Título/).closest('section')).toHaveClass('hidden')
-    expect(field(/^Limite de vagas/)).toHaveFocus()
+    expect(field(/^Vagas/)).toHaveFocus()
   })
 
   it('says the time is São Paulo time', async () => {
@@ -310,7 +314,7 @@ describe('the event form', () => {
     expect(await screen.findByLabelText(/^Título/)).toHaveValue('Oficina de turbantes')
     expect(field(/^Dia/)).toHaveValue('2030-11-20')
     expect(field(/^Início/)).toHaveValue('15:00')
-    expect(field(/^Limite de vagas/)).toHaveValue('')
+    expect(field(/^Vagas/)).toHaveValue('')
     await user.clear(field(/^Título/))
     await user.type(field(/^Título/), 'Oficina de turbantes — nova data')
     await user.click(screen.getByRole('button', { name: 'Salvar' }))
@@ -324,8 +328,8 @@ describe('the event form', () => {
     openAs(STAFF, { [`GET /admin/events/${draft.id}`]: () => ({ status: 200, data: { event: draft } }) })
     renderRoute(`/admin/eventos/${draft.id}/editar`)
 
-    expect(await screen.findByLabelText('Pedir CPF na inscrição')).toBeChecked()
-    expect(field(/^Limite de vagas/)).toHaveValue('30')
+    expect(await screen.findByLabelText('Este evento exige CPF')).toBeChecked()
+    expect(field(/^Vagas/)).toHaveValue('30')
   })
 
   it('shows the 404 for an event that does not exist', async () => {

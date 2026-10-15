@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { eventMeta } from '../../lib/events'
+import { canRegister, eventMeta } from '../../lib/events'
 import type { EventSummary } from '../../types/event'
 import { DateBadge } from '../ui'
 
@@ -29,15 +29,20 @@ export function NextActivity({ event }: { event: EventSummary }) {
             {event.title}
           </h3>
           <span className="text-small text-brown-400 desktop:text-[0.9375rem]">{eventMeta(event, { withCapacity: false, startOnly: true })}</span>
-          {event.spotsLeft === 0 ? (
-            <span className="-mb-3 inline-flex min-h-11 items-center font-semibold text-brown-400">Vagas esgotadas</span>
-          ) : (
+          {canRegister(event) ? (
             <Link
               to={`/agenda/${event.id}/inscricao`}
               className="-mt-1.5 -mb-3 inline-flex min-h-11 items-center text-[0.9375rem] font-semibold desktop:text-base"
             >
               Quero me inscrever
             </Link>
+          ) : (
+            <span className="-mb-3 flex flex-wrap items-center gap-x-3">
+              {event.registrationStatus === 'full' && <span className="inline-flex min-h-11 items-center font-semibold text-brown-400">Vagas esgotadas</span>}
+              <Link to={`/agenda/${event.id}`} className="inline-flex min-h-11 items-center text-[0.9375rem] font-semibold desktop:text-base">
+                Ver detalhes
+              </Link>
+            </span>
           )}
         </div>
       </article>

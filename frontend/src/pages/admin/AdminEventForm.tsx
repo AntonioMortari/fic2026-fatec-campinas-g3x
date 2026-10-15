@@ -1,9 +1,11 @@
-import { useNavigate, useParams } from 'react-router-dom'
-import { EventForm } from '../../components/admin/EventForm'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { EventForm, type PhotoChange, type SubmitHandlers } from '../../components/admin/EventForm'
 import { isMissingEvent } from '../../lib/api-error'
 import { AdminPage } from '../../components/admin/AdminPage'
 import { BackLink, Button, EmptyState, useToast, LoadingState } from '../../components/ui'
-import { useAdminEvent, useSaveEvent } from '../../services/admin-events'
+import { parseApiError } from '../../lib/api-error'
+import { toBase64 } from '../../lib/photo-file'
+import { useAdminEvent, useRemoveEventPhoto, useSaveEvent, useSetEventPhoto } from '../../services/admin-events'
 import type { EventInput } from '../../types/admin-event'
 import { NotFound } from '../NotFound'
 
@@ -13,21 +15,42 @@ export function AdminEventForm() {
   const toast = useToast()
   const existing = useAdminEvent(id)
   const save = useSaveEvent(id)
+  const setPhoto = useSetEventPhoto()
+  const removePhoto = useRemoveEventPhoto()
+  const { state } = useLocation() as { state: { photoNotice?: string; photoAlt?: string } | null }
 
-  function handleSubmit(input: EventInput, onError: (error: unknown) => void) {
-    save.mutate(input, {
-      onSuccess: (event) => {
-        toast(
-          id
-            ? event.published
-              ? 'Alterações salvas. O evento continua publicado.'
-              : 'Alterações salvas. O evento continua em rascunho.'
-            : 'Rascunho salvo. Publique quando estiver pronto.',
-        )
-        void navigate('/admin/eventos')
-      },
-      onError,
-    })
+  async function handleSubmit(input: EventInput, photo: PhotoChange, { onError, onPhotoError }: SubmitHandlers) {
+    let saved
+    try {
+      saved = await save.mutateAsync(input)
+    } catch (error) {
+      onError(error)
+      return
+    }
+
+    if (photo) {
+      try {
+        if (photo.kind === 'upload') await setPhoto.mutateAsync({ id: saved.id, data: await toBase64(photo.blob), alt: photo.alt })
+        else await removePhoto.mutateAsync(saved.id)
+      } catch (error) {
+        if (id) {
+          onPhotoError(error)
+        } else {
+          const state = { photoNotice: parseApiError(error).message, photoAlt: photo.kind === 'upload' ? photo.alt : '' }
+          void navigate(`/admin/eventos/${saved.id}/editar`, { state, replace: true })
+        }
+        return
+      }
+    }
+
+    toast(
+      id
+        ? saved.published
+          ? 'Alterações salvas. O evento continua publicado.'
+          : 'Alterações salvas. O evento continua em rascunho.'
+        : 'Rascunho salvo. Publique quando estiver pronto.',
+    )
+    void navigate('/admin/eventos')
   }
 
   if (id && existing.isError) {
@@ -58,5 +81,15 @@ export function AdminEventForm() {
 
   if (id && !existing.data) return <AdminPage className="desktop:max-w-[51rem]">{header}</AdminPage>
 
-  return <EventForm key={existing.data?.id ?? 'new'} event={existing.data} saving={save.isPending} onSubmit={handleSubmit} header={header} />
+  return (
+    <EventForm
+      key={existing.data?.id ?? 'new'}
+      event={existing.data}
+      saving={save.isPending || setPhoto.isPending || removePhoto.isPending}
+      onSubmit={(input, photo, handlers) => void handleSubmit(input, photo, handlers)}
+      header={header}
+      photoNotice={state?.photoNotice}
+      initialPhotoAlt={state?.photoAlt}
+    />
+)
 }
