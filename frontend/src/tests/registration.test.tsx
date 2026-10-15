@@ -302,7 +302,7 @@ describe('when the server refuses', () => {
     const user = userEvent.setup()
     let full = false
     mock = mockApi({
-      [`GET /events/${ID}`]: () => ({ status: 200, data: { event: full ? { ...event, spotsLeft: 0, registrationsOpen: false } : event } }),
+      [`GET /events/${ID}`]: () => ({ status: 200, data: { event: full ? { ...event, spotsLeft: 0, registrationsOpen: false, registrationStatus: 'full' } : event } }),
       [`POST /events/${ID}/registrations`]: () => {
         full = true
         return apiError(409, 'event_full', 'As vagas desta atividade acabaram.')
@@ -330,7 +330,7 @@ describe('when the server refuses', () => {
 
 describe('what cannot be signed up for', () => {
   it('shows "spots are over" with no form when the event is full', async () => {
-    serve({ ...event, spotsLeft: 0, registrationsOpen: false })
+    serve({ ...event, spotsLeft: 0, registrationsOpen: false, registrationStatus: 'full' })
     renderRoute(PATH)
 
     expect(await screen.findByText('As vagas desta atividade acabaram')).toBeInTheDocument()
@@ -339,10 +339,19 @@ describe('what cannot be signed up for', () => {
   })
 
   it('shows "registrations closed" with no form when the event is over', async () => {
-    serve({ ...event, registrationsOpen: false })
+    serve({ ...event, registrationsOpen: false, registrationStatus: 'started' })
     renderRoute(PATH)
 
     expect(await screen.findByText('As inscrições desta atividade já encerraram')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Confirmar inscrição' })).not.toBeInTheDocument()
+  })
+
+  it('says there is no sign-up on the site, rather than "closed", when the event takes none', async () => {
+    serve({ ...event, spotsLeft: null, registrationsOpen: false, registrationStatus: 'not_on_site' })
+    renderRoute(PATH)
+
+    expect(await screen.findByText('Este evento não tem inscrição pelo site')).toBeInTheDocument()
+    expect(screen.queryByText(/já encerraram/)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Confirmar inscrição' })).not.toBeInTheDocument()
   })
 

@@ -351,4 +351,11 @@ describe('editing a piece', () => {
 
     expect(await screen.findByText(/Página não encontrada/)).toBeInTheDocument()
   })
+
+  it('answers the 404 page for an id that is not even a UUID', async () => {
+    open({ 'GET /admin/news/zzz': () => apiError(400, 'invalid_data', 'Dados inválidos.') })
+    renderRoute('/admin/noticias/zzz/editar')
+
+    expect(await screen.findByText(/Página não encontrada/)).toBeInTheDocument()
+  })
 })

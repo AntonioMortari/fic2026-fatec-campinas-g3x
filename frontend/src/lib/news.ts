@@ -19,7 +19,8 @@ export function numericDate(iso: string): string {
 }
 
 // A route the API does not have also answers 404 ("not_found"): only an unknown piece is a missing page for the person.
-export const isMissingNews = (error: unknown) => parseApiError(error).code === 'news_not_found'
+// An id that is not even a UUID is rejected by validation (400 "invalid_data"), and for the person it is the same missing page.
+export const isMissingNews = (error: unknown) => ['news_not_found', 'invalid_data'].includes(parseApiError(error).code)
 
 export const NEWS_PATH = '/noticias'
 export const ADMIN_NEWS_PATH = '/admin/noticias'

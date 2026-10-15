@@ -183,6 +183,13 @@ describe('a piece of news (design 11f)', () => {
     expect(await screen.findByText(/Página não encontrada/)).toBeInTheDocument()
   })
 
+  it('answers the 404 page for an id that is not even a UUID', async () => {
+    open({ [`GET /news/${ID}`]: () => apiError(400, 'invalid_data', 'Dados inválidos.') })
+    renderRoute(`/noticias/${ID}`)
+
+    expect(await screen.findByText(/Página não encontrada/)).toBeInTheDocument()
+  })
+
   it('says the connection failed, rather than 404, when the API is out', async () => {
     open({ [`GET /news/${ID}`]: () => 'network-error' })
     renderRoute(`/noticias/${ID}`)

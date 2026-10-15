@@ -54,13 +54,18 @@ export function EventRegistration() {
   }
 
   if (!detail.registrationsOpen) {
-    const soldOut = detail.spotsLeft === 0
+    const noSignUp = detail.registrationStatus === 'not_on_site'
+    const title = noSignUp
+      ? 'Este evento não tem inscrição pelo site'
+      : detail.registrationStatus === 'full'
+        ? 'As vagas desta atividade acabaram'
+        : 'As inscrições desta atividade já encerraram'
     return (
       <div className="flex flex-col gap-5">
         <EventSummaryCard event={detail} showSpots={false} />
         <EmptyState
-          title={soldOut ? 'As vagas desta atividade acabaram' : 'As inscrições desta atividade já encerraram'}
-          text="Veja o que mais está marcado na agenda."
+          title={title}
+          text={noSignUp ? 'É só chegar no horário. Veja o que mais está marcado na agenda.' : 'Veja o que mais está marcado na agenda.'}
           actions={<Button to="/agenda">Ver a agenda</Button>}
         />
       </div>

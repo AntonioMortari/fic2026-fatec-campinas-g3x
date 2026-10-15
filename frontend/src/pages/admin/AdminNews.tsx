@@ -8,7 +8,7 @@ import { NewsForm, type ImageChange } from '../../components/admin/NewsForm'
 import { Button, Chevron, EmptyState, useToast } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { parseApiError } from '../../lib/api-error'
-import { ADMIN_NEWS_PATH } from '../../lib/news'
+import { ADMIN_NEWS_PATH, isMissingNews } from '../../lib/news'
 import { toBase64 } from '../../lib/photo-file'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/use-media-query'
 import {
@@ -83,7 +83,7 @@ function Editor({ id }: { id: string | undefined }) {
     )
   }
   if (id && existing.isError) {
-    if (parseApiError(existing.error).code === 'news_not_found') return <NotFound />
+    if (isMissingNews(existing.error)) return <NotFound />
     return (
       <div className="p-4 desktop:p-8">
         <ErrorCard title="Não conseguimos carregar a notícia" onRetry={() => void existing.refetch()} />
