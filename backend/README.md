@@ -55,6 +55,7 @@ Sem rodar `db:migrate` antes, a API sobe mas toda rota que lê uma tabela respon
 | `npm run test:db` | testes de integração contra um MySQL de verdade (ver abaixo) |
 | `npm run typecheck` | confere os tipos |
 | `npm run db:migrate` / `db:migrate:undo` | aplica as pendentes / desfaz a última |
+| `npm run db:migrate:prod` | aplica as pendentes a partir do código compilado (`dist/`); é o que o contêiner de produção roda antes de subir |
 | `npm run db:seed` | cria (ou restaura) as duas contas de teste; só roda em banco local e fora de produção |
 
 ### Testes de integração

@@ -9,6 +9,7 @@ import {
   DateBadge,
   EmptyState,
   ListItem,
+  LoadingState,
   PageHeader,
   PasswordField,
   SegmentedField,
@@ -254,6 +255,18 @@ export function ComponentCatalog() {
             </>
           }
         />
+      </Section>
+
+      <Section title="Carregando">
+        <p className="m-0 text-small text-brown-400">
+          O esqueleto só aparece se a resposta passar de 120ms, reserva a altura do que vem e é lido como "Carregando…". Quem pede menos movimento recebe os blocos parados.
+        </p>
+        <LoadingState label="Carregando as atividades…" shape="cards" count={1} />
+        <LoadingState label="Carregando a lista…" shape="rows" count={2} />
+        <LoadingState label="Carregando os dados…" shape="lines" count={3} />
+        <Button loading variant="applique">
+          Confirmar inscrição
+        </Button>
       </Section>
     </Container>
   )

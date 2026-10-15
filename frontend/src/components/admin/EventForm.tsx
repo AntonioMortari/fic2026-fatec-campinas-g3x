@@ -4,6 +4,7 @@ import { parseApiError, type ParsedApiError } from '../../lib/api-error'
 import { cn } from '../../lib/cn'
 import { toLocalInput } from '../../lib/dates'
 import type { AdminEvent, EventInput } from '../../types/admin-event'
+import { scrollToStart } from '../../lib/motion'
 import { useFormFeedback } from '../auth/use-form-feedback'
 import { Alert, Button, Checkbox, Chevron, SegmentedField, TextAreaField, TextField } from '../ui'
 import { AdminPage } from './AdminPage'
@@ -133,6 +134,11 @@ export function EventForm({ event, saving, onSubmit, header, photoNotice, initia
     if (Object.keys(photoErrors).length > 0) formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
   }, [photoErrors, formRef])
 
+  function goToStep(next: number) {
+    setStep(next)
+    scrollToStart()
+  }
+
   function handleSubmit(submitEvent: FormEvent) {
     submitEvent.preventDefault()
     feedback.clear()
@@ -179,7 +185,7 @@ export function EventForm({ event, saving, onSubmit, header, photoNotice, initia
         </div>
         <div aria-hidden="true" className="grid gap-1.5 px-4 pb-0" style={{ gridTemplateColumns: `repeat(${SECTIONS.length}, minmax(0, 1fr))` }}>
           {SECTIONS.map((section, index) => (
-            <span key={section.title} className={cn('h-1', index <= step ? 'bg-ochre' : 'bg-cream-dark')} />
+            <span key={section.title} className={cn('h-1 transition-colors duration-(--motion-enter)', index <= step ? 'bg-ochre' : 'bg-cream-dark')} />
           ))}
         </div>
       </div>
@@ -302,13 +308,13 @@ export function EventForm({ event, saving, onSubmit, header, photoNotice, initia
         </Button>
         <button
           type="button"
-          onClick={() => setStep(step - 1)}
+          onClick={() => goToStep(step - 1)}
           className={cn('min-h-12 cursor-pointer bg-transparent px-1 text-[0.9375rem] font-semibold text-blue-deep hover:text-brown desktop:hidden', step === 0 && 'hidden')}
         >
           Anterior
         </button>
         {!last && (
-          <Button type="button" variant="applique" className="min-h-13 flex-1 desktop:hidden" onClick={() => setStep(step + 1)}>
+          <Button type="button" variant="applique" className="min-h-13 flex-1 desktop:hidden" onClick={() => goToStep(step + 1)}>
             Próximo: {SECTIONS[step]?.next}
           </Button>
         )}
@@ -322,7 +328,7 @@ export function EventForm({ event, saving, onSubmit, header, photoNotice, initia
 
 function Section({ index, step, title, children }: { index: number; step: number; title: string; children: ReactNode }) {
   return (
-    <section aria-labelledby={`section-${index}`} className={cn('flex-col gap-4 desktop:flex desktop:gap-4.5', index === step ? 'flex' : 'hidden')}>
+    <section aria-labelledby={`section-${index}`} className={cn('flex-col gap-4 desktop:flex desktop:gap-4.5', index === step ? 'flex max-desktop:animate-rise' : 'hidden')}>
       <div className="flex flex-col gap-1 desktop:border-b desktop:border-brown desktop:pb-2">
         <p className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-ochre-deep desktop:hidden">
           Passo {index + 1} de {SECTIONS.length}

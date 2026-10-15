@@ -1,7 +1,7 @@
 import { AdminEventCard } from '../../components/admin/AdminEventCard'
 import { AdminPage } from '../../components/admin/AdminPage'
 import { AdminTitle } from '../../components/admin/AdminTitle'
-import { Button, EmptyState, useToast } from '../../components/ui'
+import { Button, EmptyState, useToast, LoadingState } from '../../components/ui'
 import { useAdminEvents, useSetPublication } from '../../services/admin-events'
 import type { AdminEvent } from '../../types/admin-event'
 
@@ -17,7 +17,7 @@ function Section({ title, events, busyId, onPublication }: {
       <h2 id={`section-${title}`} className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-brown-400">
         {title} ({events.length})
       </h2>
-      <ul className="m-0 flex list-none flex-col gap-3 p-0">
+      <ul className="enter-list m-0 flex list-none flex-col gap-3 p-0">
         {events.map((event) => (
           <AdminEventCard key={event.id} event={event} busy={busyId === event.id} onPublication={(published) => onPublication(event, published)} />
         ))}
@@ -61,7 +61,7 @@ export function AdminEvents() {
       />
 
       <div className="flex max-w-xl flex-col gap-6">
-        {isPending && <p role="status" className="m-0">Carregando os eventos…</p>}
+        {isPending && <LoadingState label="Carregando os eventos…" shape="cards" count={3} />}
         {isError && (
           <EmptyState
             tone="error"

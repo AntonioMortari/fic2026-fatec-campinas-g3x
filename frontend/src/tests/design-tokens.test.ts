@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 // Read as text: the test config turns CSS imports into empty modules.
 const css = readFileSync(join(process.cwd(), 'src/styles.css'), 'utf8')
 const theme = css.slice(css.indexOf('@theme'), css.indexOf('html[data-contrast="high"]'))
-const highContrast = css.slice(css.indexOf('html[data-contrast="high"]'), css.indexOf('@media (prefers-reduced-motion'))
+const highContrast = css.slice(css.indexOf('html[data-contrast="high"]'), css.indexOf('@media (prefers-reduced-motion: reduce)'))
 
 function token(block: string, name: string): string {
   const match = new RegExp(`--color-${name}:\\s*(#[0-9a-fA-F]{6});`).exec(block)
@@ -62,14 +62,54 @@ describe('the error color', () => {
   })
 })
 
+function motionToken(name: string): number {
+  const match = new RegExp(`--motion-${name}:\\s*(\\d+)ms;`).exec(css)
+  if (!match) throw new Error(`--motion-${name} not found`)
+  return Number(match[1])
+}
+
 describe('motion (design "Movimento")', () => {
-  it('closes the touch feedback in 90ms, which is what the design asks', () => {
-    expect(css).toMatch(/a:active,[\s\S]*?button:active,[\s\S]*?\{\s*transition-duration: 90ms;/)
+  it('closes the touch feedback in the press token, and the press token is the 90ms of the design', () => {
+    expect(css).toMatch(/a:active,[\s\S]*?button:active,[\s\S]*?\{\s*transition-duration: var\(--motion-press\);/)
+    expect(motionToken('press')).toBe(90)
   })
 
   it('keeps the entrance at 200ms, the sheet at 280ms and the page fade at 150ms', () => {
-    expect(css).toMatch(/--animate-rise: rise 200ms/)
-    expect(css).toMatch(/--animate-sheet: sheet 280ms/)
-    expect(css).toMatch(/--animate-page: page 150ms/)
+    expect(motionToken('enter')).toBe(200)
+    expect(motionToken('sheet')).toBe(280)
+    expect(motionToken('page')).toBe(200)
+    expect(css).toMatch(/--animate-rise: rise var\(--motion-enter\)/)
+    expect(css).toMatch(/--animate-sheet: sheet var\(--motion-sheet\)/)
+    expect(css).toMatch(/--animate-page: page var\(--motion-page\)/)
+  })
+
+  it('keeps micro feedback at 150ms or less, and the whole stagger of a list under a page transition', () => {
+    expect(motionToken('micro')).toBeLessThanOrEqual(150)
+    expect(motionToken('sheet-out')).toBeLessThan(motionToken('sheet'))
+    expect(motionToken('stagger') * 3 + motionToken('enter')).toBeLessThanOrEqual(280)
+  })
+
+  it('shows a skeleton only after a short delay, so a fast answer never flashes it', () => {
+    expect(motionToken('skeleton-delay')).toBeGreaterThanOrEqual(100)
+    expect(css).toMatch(/--animate-skeleton-in: skeleton-in [^;]*var\(--motion-skeleton-delay\)/)
+  })
+
+  it('turns every animation, transition and smooth scroll off when the person asks for less motion', () => {
+    const reduced = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'))
+    expect(reduced).toMatch(/animation-duration: 0\.01ms !important/)
+    expect(reduced).toMatch(/transition-duration: 0\.01ms !important/)
+    expect(reduced).toMatch(/scroll-behavior: auto !important/)
+    expect(reduced).toMatch(/\.enter-list > \* \{\s*animation-delay: 0ms !important/)
+  })
+
+  it('only opts into smooth scroll, the details height and the sheet exit when motion is welcome', () => {
+    const welcome = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference)'), css.indexOf(':focus-visible'))
+    expect(welcome).toMatch(/scroll-behavior: smooth/)
+    expect(welcome).toMatch(/details::details-content/)
+    expect(welcome).toMatch(/dialog\[data-sheet\]:not\(\[open\]\)/)
+  })
+
+  it('gives the skeleton a visible color in high contrast too', () => {
+    expect(highContrast).toMatch(/--color-skeleton:/)
   })
 })

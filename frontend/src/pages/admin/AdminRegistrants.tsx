@@ -4,7 +4,7 @@ import { isMissingEvent } from '../../lib/api-error'
 import { RegistrantCard } from '../../components/admin/RegistrantCard'
 import { AdminPage } from '../../components/admin/AdminPage'
 import { AdminTitle } from '../../components/admin/AdminTitle'
-import { BackLink, Button, EmptyState, useToast } from '../../components/ui'
+import { BackLink, Button, EmptyState, useToast, LoadingState } from '../../components/ui'
 import { dateParts } from '../../lib/dates'
 import { downloadRegistrationsCsv, useAdminRegistrations } from '../../services/admin-events'
 import { NotFound } from '../NotFound'
@@ -41,7 +41,7 @@ export function AdminRegistrants() {
       </div>
 
       <div className="flex max-w-xl flex-col gap-5">
-        {isPending && <p role="status" className="m-0">Carregando os inscritos…</p>}
+        {isPending && <LoadingState label="Carregando os inscritos…" shape="cards" count={3} />}
         {isError && (
           <EmptyState
             tone="error"
@@ -68,7 +68,7 @@ export function AdminRegistrants() {
             <Button variant="secondary" size="compact" className="min-h-12 self-start" disabled={downloading} onClick={() => void download()}>
               {downloading ? 'Preparando…' : 'Baixar planilha'}
             </Button>
-            <ul className="m-0 flex list-none flex-col gap-3 p-0">
+            <ul className="enter-list m-0 flex list-none flex-col gap-3 p-0">
               {registrations.map((registration) => (
                 <RegistrantCard key={registration.id} registration={registration} />
               ))}

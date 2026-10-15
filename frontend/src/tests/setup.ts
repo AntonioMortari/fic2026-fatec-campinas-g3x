@@ -28,3 +28,4 @@ if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.sho
   }
 }
 if (!Element.prototype.scrollIntoView) Element.prototype.scrollIntoView = function scrollIntoView() {}
+if (typeof window !== 'undefined') window.scrollTo = () => undefined

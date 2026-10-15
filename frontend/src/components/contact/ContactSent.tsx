@@ -4,7 +4,7 @@ import { Button } from '../ui'
 
 export const ContactSent = forwardRef<HTMLDivElement>(function ContactSent(_props, ref) {
   return (
-    <div ref={ref} role="status" tabIndex={-1} className="flex flex-col gap-3 border-[1.5px] border-brown bg-card p-4 outline-none focus-visible:shadow-focus">
+    <div ref={ref} role="status" tabIndex={-1} className="flex animate-rise flex-col gap-3 border-[1.5px] border-brown bg-card p-4 outline-none focus-visible:shadow-focus">
       <div className="flex items-center gap-2.5">
         <span aria-hidden="true" className="size-2.5 shrink-0 bg-ochre" />
         <h2 className="m-0 text-item font-bold">Mensagem recebida</h2>

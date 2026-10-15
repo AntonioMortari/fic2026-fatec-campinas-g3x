@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { focusAndReveal } from '../../lib/motion'
 import { parseApiError, type ParsedApiError } from '../../lib/api-error'
 
 export function useFormFeedback() {
@@ -10,7 +11,8 @@ export function useFormFeedback() {
   useEffect(() => {
     if (!error) return
     const firstInvalid = form.current?.querySelector<HTMLElement>('[aria-invalid="true"]')
-    ;(firstInvalid ?? alert.current)?.focus()
+    const target = firstInvalid ?? alert.current
+    if (target) focusAndReveal(target, firstInvalid ? 'center' : 'start')
   }, [error, attempt])
 
   return {

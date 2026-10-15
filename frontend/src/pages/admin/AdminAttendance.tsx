@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AttendanceRow } from '../../components/admin/AttendanceRow'
-import { BackLink, Button, EmptyState, useToast } from '../../components/ui'
+import { BackLink, Button, EmptyState, useToast, LoadingState } from '../../components/ui'
 import { isMissingEvent } from '../../lib/api-error'
 import { dateParts } from '../../lib/dates'
 import { displayNames, plain } from '../../lib/attendance'
@@ -79,7 +79,7 @@ export function AdminAttendance() {
                 aria-valuenow={checked}
                 className="h-1.5 bg-cream-dark"
               >
-                <div className="h-full bg-ochre" style={{ width: `${(checked / entries.length) * 100}%` }} />
+                <div className="h-full bg-ochre transition-[width] duration-(--motion-enter) ease-out" style={{ width: `${(checked / entries.length) * 100}%` }} />
               </div>
             </div>
           )}
@@ -103,7 +103,7 @@ export function AdminAttendance() {
       </div>
 
       <div className="flex flex-col gap-4 px-4 pt-2">
-        {isPending && <p role="status" className="m-0 pt-4">Carregando a lista…</p>}
+        {isPending && <LoadingState label="Carregando a lista…" shape="rows" count={6} className="pt-4" />}
         {isError && (
           <EmptyState
             tone="error"
@@ -123,7 +123,7 @@ export function AdminAttendance() {
             <h2 id="pending-heading" className={`${GROUP} text-ochre-deep`}>
               Sem conferir · {pending.length}
             </h2>
-            <ul className="m-0 flex list-none flex-col p-0">
+            <ul className="enter-list m-0 flex list-none flex-col p-0">
               {pending.map((entry) => (
                 <AttendanceRow key={entry.id} entry={entry} displayName={names.get(entry.id) ?? entry.name} onMark={(attended) => change(entry, attended)} />
               ))}
@@ -135,7 +135,7 @@ export function AdminAttendance() {
             <h2 id="done-heading" className={`${GROUP} text-brown-400`}>
               Conferidos · {done.length}
             </h2>
-            <ul className="m-0 flex list-none flex-col p-0">
+            <ul className="enter-list m-0 flex list-none flex-col p-0">
               {done.map((entry) => (
                 <AttendanceRow key={entry.id} entry={entry} displayName={names.get(entry.id) ?? entry.name} onMark={(attended) => change(entry, attended)} />
               ))}
