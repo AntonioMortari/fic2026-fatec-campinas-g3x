@@ -17,6 +17,8 @@
     "db:migrate:prod": "node dist/database/migrate.js up",
     "db:migrate:undo": "tsx src/database/migrate.ts down",
     "db:seed": "tsx src/database/seed.ts",
+    "db:seed:content": "tsx src/database/seed-content.ts",
+    "db:seed:content:prod": "node dist/database/seed-content.js",
     "test:db": "DB_TESTS=1 jest tests/integration --runInBand"
   },
   "dependencies": {

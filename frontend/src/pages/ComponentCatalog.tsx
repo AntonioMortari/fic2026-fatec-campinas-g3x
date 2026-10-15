@@ -215,7 +215,7 @@ export function ComponentCatalog() {
           <ListItem number="01" tone="ochre" title="Conhecer" description="Nossa história e os três setores." to="/quem-somos" />
           <ListItem number="02" tone="blue" title="Participar" description="Oficinas e vivências. Inscrição sem cadastro." to="/agenda" />
           <ListItem number="03" tone="brown" title="Ser voluntário" description="Cinco áreas, do pedagógico ao acervo." to="/voluntariado" />
-          <ListItem number="04" tone="ochre" title="Apoiar" description="Livros, instrumentos, materiais e recursos." to="/doar" />
+          <ListItem number="04" tone="ochre" title="Apoiar" description="Recursos para manter as atividades, a equipe e os materiais." to="/doar" />
         </ul>
       </Section>
 

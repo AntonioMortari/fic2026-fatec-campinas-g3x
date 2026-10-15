@@ -4,6 +4,7 @@ import { useActiveSection } from './useActiveSection'
 const ABOUT_SECTIONS = [
   { id: 'sankofa', label: 'Sankofa' },
   { id: 'quem-idealizou', label: 'Quem idealizou' },
+  { id: 'missao', label: 'Missão' },
   { id: 'setores', label: 'Setores' },
   { id: 'onde-estamos', label: 'Onde estamos' },
 ] as const

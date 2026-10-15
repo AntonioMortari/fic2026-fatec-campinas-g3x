@@ -58,6 +58,7 @@ Sem rodar `db:migrate` antes, a API sobe mas toda rota que lê uma tabela respon
 | `npm run db:migrate` / `db:migrate:undo` | aplica as pendentes / desfaz a última |
 | `npm run db:migrate:prod` | aplica as pendentes a partir do código compilado (`dist/`); é o que o contêiner de produção roda antes de subir |
 | `npm run db:seed` | cria (ou restaura) as duas contas de teste; só roda em banco local e fora de produção |
+| `npm run db:seed:content` | publica as 4 notícias e as 34 fotos (8 álbuns) reais da ONG (`seed-content/`), **uma vez**: não faz nada se o site já tem notícia ou foto; `-- --force` acrescenta só o que falta. É o que o `docker compose up` roda depois da seed de contas. Em produção: `db:seed:content:prod`, ou `SEED_CONTENT=true` no contêiner |
 
 ### Testes de integração
 

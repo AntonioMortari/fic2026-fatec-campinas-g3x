@@ -69,6 +69,8 @@ export function DesktopMenu({ open, section, onClose, onOpen }: DesktopMenuProps
           aria-hidden="true"
           className="h-[calc(4.75rem+1px)] shrink-0"
           onMouseMove={(event) => {
+            // "Aa" is clicked, never hovered, and sits in this strip: closing here would shut the controls under the pointer.
+            if (section === 'reading') return
             const trigger = document.querySelector('[data-menu-trigger]')?.getBoundingClientRect()
             const margin = 8
             const over =
@@ -130,7 +132,7 @@ export function DesktopMenu({ open, section, onClose, onOpen }: DesktopMenuProps
                   Fale com a gente
                 </h3>
                 <p className="m-0 text-[1.25rem] leading-[1.2] font-bold">{CONTACTS.phoneDisplay}</p>
-                <p className="m-0 text-small text-brown-600">WhatsApp, seg a sáb, 9h–18h</p>
+                <p className="m-0 text-small text-brown-600">WhatsApp e ligação</p>
               </section>
               <a
                 href={CONTACTS.whatsapp}
@@ -185,7 +187,7 @@ export function DesktopMenu({ open, section, onClose, onOpen }: DesktopMenuProps
             </div>
           </div>
         </div>
-        <div aria-hidden="true" className={cn(leaving ? 'animate-page-out' : 'animate-page', 'flex-1 bg-scrim')} onMouseEnter={onClose} />
+        <div aria-hidden="true" className={cn(leaving ? 'animate-page-out' : 'animate-page', 'flex-1 bg-scrim')} onMouseEnter={section === 'reading' ? undefined : onClose} />
       </div>
     </dialog>
   )

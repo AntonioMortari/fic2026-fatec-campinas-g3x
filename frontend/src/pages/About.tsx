@@ -3,6 +3,7 @@ import { AboutHero } from '../components/about/AboutHero'
 import { AudienceStatement } from '../components/about/AudienceStatement'
 import { FoundersSection } from '../components/about/FoundersSection'
 import { LocationSection } from '../components/about/LocationSection'
+import { MissionSection } from '../components/about/MissionSection'
 import { SankofaSection } from '../components/about/SankofaSection'
 import { SectionIndex } from '../components/about/SectionIndex'
 import { SectorsSection } from '../components/about/SectorsSection'
@@ -17,6 +18,7 @@ export function About() {
       <div className={READING_COLUMN}>
         <SankofaSection />
         <FoundersSection />
+        <MissionSection />
       </div>
       <SectorsSection />
       <div className={READING_COLUMN}>

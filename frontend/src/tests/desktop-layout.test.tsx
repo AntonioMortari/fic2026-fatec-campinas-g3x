@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { DESKTOP_MENU_GROUPS, DESKTOP_NAV, MENU_GROUPS } from '../lib/navigation'
@@ -30,6 +30,8 @@ describe('desktop menu panel (design 8a)', () => {
     for (const href of links) expect(inHeader.has(href as string)).toBe(false)
     expect(within(menu).getByRole('link', { name: /Galeria\s*Fotos das oficinas e saraus/ })).toHaveAttribute('href', '/galeria')
     expect(within(menu).getByRole('link', { name: /WhatsApp/ })).toHaveAttribute('href', 'https://wa.me/5511953968344')
+    expect(within(menu).getByText('(11) 95396-8344')).toBeInTheDocument()
+    expect(within(menu).queryByText(/9h/)).not.toBeInTheDocument()
     expect(within(menu).getByRole('button', { name: /Alto contraste/ })).toBeInTheDocument()
   })
 
@@ -61,6 +63,34 @@ describe('desktop menu panel (design 8a)', () => {
     expect(menu).toHaveAttribute('open')
 
     await user.hover(menu.querySelector('.bg-scrim') as HTMLElement)
+    await waitFor(() => expect(menu).not.toHaveAttribute('open'))
+  })
+
+  it('keeps the reading controls open while the pointer moves around, because "Aa" was clicked and not hovered', async () => {
+    desktop()
+    const user = userEvent.setup()
+    renderRoute('/')
+    await user.click(screen.getByRole('button', { name: /^Aa/ }))
+    const menu = screen.getByRole('dialog', { name: 'Menu' })
+    expect(menu).toHaveAttribute('open')
+
+    fireEvent.mouseMove(menu.querySelector('.shrink-0') as HTMLElement, { clientX: 900, clientY: 20 })
+    await user.hover(menu.querySelector('[data-menu-panel]') as HTMLElement)
+    await user.hover(menu.querySelector('.bg-scrim') as HTMLElement)
+    await new Promise((resolve) => setTimeout(resolve, 400))
+
+    expect(menu).toHaveAttribute('open')
+    expect(within(menu).getByRole('button', { name: /Alto contraste/ })).toBeVisible()
+  })
+
+  it('still closes the reading controls with a click on the dimmed page', async () => {
+    desktop()
+    const user = userEvent.setup()
+    renderRoute('/')
+    await user.click(screen.getByRole('button', { name: /^Aa/ }))
+    const menu = screen.getByRole('dialog', { name: 'Menu' })
+
+    await user.click(menu.querySelector('.bg-scrim') as HTMLElement)
     await waitFor(() => expect(menu).not.toHaveAttribute('open'))
   })
 
@@ -131,10 +161,11 @@ describe('focused layout and sign-in screen (designs 3f and 8b)', () => {
 
     expect(within(list).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       '1Veja se sua candidatura foi aceita',
-      '2Acompanhe as doações que você ofereceu',
-      '3Receba os avisos da equipe para voluntários',
+      '2Veja as atividades em que você se inscreveu',
+      '3Altere seus dados quando precisar',
     ])
-    expect(screen.getByText('Para acompanhar sua candidatura ao voluntariado e suas doações.', { exact: false })).toBeInTheDocument()
+    expect(screen.getByText('Para acompanhar sua candidatura ao voluntariado e suas inscrições nas atividades.', { exact: false })).toBeInTheDocument()
+    expect(screen.queryByText(/doaç/i)).not.toBeInTheDocument()
   })
 
   it('tells the visitor that signing up for an event needs no account', () => {

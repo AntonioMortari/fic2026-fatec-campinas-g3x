@@ -134,3 +134,12 @@ describe('reading preferences', () => {
     expect(document.documentElement).not.toHaveAttribute('data-font-scale')
   })
 })
+
+describe('footer', () => {
+  it('shows the CNPJ the ONG gave in the form', () => {
+    renderRoute('/')
+
+    const footer = screen.getByRole('contentinfo')
+    expect(within(footer).getByText(/CNPJ 24\.369\.179\/0001-17/)).toBeInTheDocument()
+  })
+})

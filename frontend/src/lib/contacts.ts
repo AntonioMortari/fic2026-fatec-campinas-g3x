@@ -12,4 +12,5 @@ export const CONTACTS = {
   street: 'Rua Dr. Paulo Gatti, 135 — Vila Romero',
   city: 'São Paulo/SP',
   postalCode: '02468-030',
+  cnpj: '24.369.179/0001-17',
 } as const
