@@ -852,8 +852,8 @@ material; sobretítulo "Quem somos" e faixa listrada dentro da página, contrari
 
 **Arquivos:**
 - Criar: `backend/src/database/data/projects.json` (gerado no Passo 1)
-- Criar: `backend/src/database/migrations/20261010120000-create-projects.ts` (se já houver migration com data maior na
-  `main`, usar um timestamp posterior a ela)
+- Criar: `backend/src/database/migrations/20261015100000-create-projects.ts` (a última da `main` hoje é
+  `20261014110000-create-gallery-photos.ts`; se entrar outra antes do merge, usar um timestamp posterior)
 - Criar: `backend/src/models/project.model.ts`
 - Modificar: `backend/src/models/index.ts`
 - Teste: `backend/tests/integration/projects.integration.test.ts` (novo)
@@ -951,7 +951,7 @@ describe('projects table', () => {
   Esperado: FAIL (`Project` não existe). Pré-requisito: MySQL do `docker compose up db` e o banco `atelie_test`
   criado como no `backend/README.md`.
 
-- [ ] **Passo 4: implementar** — migration `20261010120000-create-projects.ts`
+- [ ] **Passo 4: implementar** — migration `20261015100000-create-projects.ts`
 
 ```ts
 import { randomUUID } from 'node:crypto';
@@ -1076,14 +1076,14 @@ Project.init(
 
 Em `backend/src/models/index.ts`, acrescentar `export { Project, type ProjectCategory } from './project.model';`.
 
-- [ ] **Passo 5: rodar e ver passar** — `npm run test:db -- projects` e `npm run typecheck`.
+- [ ] **Passo 5: rodar e ver passar** — `DB_TESTS=1 DB_HOST=127.0.0.1 DB_PORT=3307 DB_NAME=atelie_test DB_USER=atelie DB_PASSWORD=atelie-dev npx jest tests/integration --runInBand` (no bash; `npm run test:db` não roda no Windows) e `npm run typecheck`.
 - [ ] **Passo 6: checkpoint.**
 
 ### Tarefa 9: `GET /api/projects`
 
 **Arquivos:**
 - Criar: `backend/src/services/projects.service.ts`, `backend/src/controllers/projects.controller.ts`,
-  `backend/src/routes/projects.routes.ts`
+  `backend/src/routes/projects.routes.ts`, `backend/src/validators/projects.validator.ts`
 - Modificar: `backend/src/routes/index.ts`, `backend/src/docs/openapi.ts`, `backend/README.md` (tabela de rotas)
 - Teste: `backend/tests/projects.test.ts` (novo); acrescentar caso em `projects.integration.test.ts`
 
@@ -1213,17 +1213,23 @@ export async function getPublishedProject(slug: string): Promise<ProjectDetail |
 }
 ```
 
-`backend/src/controllers/projects.controller.ts` (a parte do detalhe já fica pronta para a Tarefa 13):
+`backend/src/validators/projects.validator.ts` (mesmo lugar dos schemas de eventos, notícias e galeria; usado na
+Tarefa 13):
 
 ```ts
-import type { Request, Response } from 'express';
 import { z } from 'zod';
-import { getPublishedProject, listPublishedProjects } from '../services/projects.service';
-import { ApiError } from '../utils/api-error';
 
 export const projectParams = z.object({
   slug: z.string().max(80, 'Endereço inválido.').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Endereço inválido.'),
 });
+```
+
+`backend/src/controllers/projects.controller.ts` (a parte do detalhe já fica pronta para a Tarefa 13):
+
+```ts
+import type { Request, Response } from 'express';
+import { getPublishedProject, listPublishedProjects } from '../services/projects.service';
+import { ApiError } from '../utils/api-error';
 
 export async function listProjects(_req: Request, res: Response): Promise<void> {
   res.json({ data: await listPublishedProjects() });
@@ -1302,7 +1308,7 @@ Acrescentar em `projects.integration.test.ts`:
 
 (importar `listPublishedProjects` de `../../src/services/projects.service`).
 
-- [ ] **Passo 4: rodar e ver passar** — `npm test`, `npm run test:db -- projects`, `npm run typecheck`.
+- [ ] **Passo 4: rodar e ver passar** — `npm test`, `DB_TESTS=1 DB_HOST=127.0.0.1 DB_PORT=3307 DB_NAME=atelie_test DB_USER=atelie DB_PASSWORD=atelie-dev npx jest tests/integration --runInBand` (no bash; `npm run test:db` não roda no Windows), `npm run typecheck`.
 - [ ] **Passo 5: checkpoint.**
 
 ### Tarefa 10: Página `/projetos` — lista
@@ -1321,7 +1327,7 @@ Acrescentar em `projects.integration.test.ts`:
 - [ ] **Passo 1: testes que falham** — `frontend/src/tests/projects.test.tsx`
 
 ```tsx
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import { api } from '../services/api'
 import type { ProjectSummary } from '../types/project'
 import { renderRoute } from './render'
@@ -1350,7 +1356,7 @@ const PROJECTS = [
 async function openProjects(projects: ProjectSummary[] = PROJECTS) {
   vi.mocked(api.get).mockResolvedValue({ data: { data: projects } })
   renderRoute('/projetos')
-  await waitFor(() => expect(screen.queryByText('Carregando os projetos…')).not.toBeInTheDocument())
+  await screen.findByRole('list', { name: 'Projetos' })
 }
 
 describe('Projects page', () => {
@@ -1521,7 +1527,7 @@ export function ProjectList({ projects }: { projects: ProjectSummary[] }) {
 
 ```tsx
 import { ProjectList } from '../components/projects/ProjectList'
-import { Container, PageHeader } from '../components/ui'
+import { Container, LoadingState, PageHeader } from '../components/ui'
 import { useProjects } from '../services/projects'
 
 export function Projects() {
@@ -1534,7 +1540,7 @@ export function Projects() {
         title="Projetos e atividades"
         lead="Contações de história performáticas e vivências brincantes. Todas se adaptam a qualquer espaço e têm classificação livre."
       />
-      {isPending && <p role="status" className="m-0 text-brown-400">Carregando os projetos…</p>}
+      {isPending && <LoadingState label="Carregando os projetos…" shape="rows" count={4} />}
       {projects && <ProjectList projects={projects} />}
     </Container>
   )
@@ -1554,7 +1560,8 @@ Em `routes.tsx`: `{ path: '/projetos', element: <Projects /> }` nos filhos do `L
 - Teste: `frontend/src/tests/projects.test.tsx`
 
 **Interfaces:**
-- Consome: `ChipFilter`, `ChipOption` (`components/ui`), `SCHOOLS` (Tarefa 1).
+- Consome: `ChipFilter`, `ChipOption`, `LoadingState` (`components/ui`), `SCHOOLS` (Tarefa 1), `SchoolsPromo`
+  (`components/agenda`, o cartão lateral da Agenda desktop 6b, reaproveitado sem mudança).
 - Produz: `ALL_PROJECTS = 'all'`, `projectCategoryOptions(projects): ChipOption[]`,
   `filterProjects(projects, value): ProjectSummary[]`, `SchoolsCallToAction()`.
 
@@ -1588,10 +1595,12 @@ import userEvent from '@testing-library/user-event'
     expect(screen.getByRole('button', { name: 'Tentar de novo' })).toBeInTheDocument()
   })
 
-  it('ends with the schools call to action', async () => {
+  it('ends with the schools call to action on the phone, and keeps the agenda card on the side for the desktop', async () => {
     await openProjects()
-    expect(screen.getByText('Quer levar uma destas para a sua escola?')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Para escolas' })).toHaveClass('desktop:hidden')
     expect(screen.getByRole('link', { name: 'Veja como funciona' })).toHaveAttribute('href', '/para-escolas')
+    const side = screen.getByRole('complementary', { name: 'Filtrar projetos' })
+    expect(within(side).getByRole('link', { name: 'Ver como funciona →' })).toHaveAttribute('href', '/para-escolas')
   })
 ```
 
@@ -1632,7 +1641,7 @@ import { Button } from '../ui'
 
 export function SchoolsCallToAction() {
   return (
-    <section aria-label="Para escolas" className="mt-2 bg-brown p-5 text-cream">
+    <section aria-label="Para escolas" className="mt-2 bg-brown p-5 text-cream desktop:hidden">
       <p className="m-0 text-h3 leading-[1.3] font-bold">Quer levar uma destas para a sua escola?</p>
       <Button to={SCHOOLS.to} variant="support" fullWidth className="mt-3.5 min-h-12">
         Veja como funciona
@@ -1648,7 +1657,8 @@ export function SchoolsCallToAction() {
 import { useMemo, useState } from 'react'
 import { ProjectList } from '../components/projects/ProjectList'
 import { SchoolsCallToAction } from '../components/projects/SchoolsCallToAction'
-import { Button, ChipFilter, Container, EmptyState, PageHeader } from '../components/ui'
+import { SchoolsPromo } from '../components/agenda/SchoolsPromo'
+import { Button, ChipFilter, Container, EmptyState, LoadingState, PageHeader } from '../components/ui'
 import { ALL_PROJECTS, filterProjects, projectCategoryOptions } from '../lib/projects'
 import { useProjects } from '../services/projects'
 
@@ -1669,12 +1679,16 @@ export function Projects() {
 
       {projects && projects.length > 0 && (
         <aside aria-label="Filtrar projetos" className="mb-4 desktop:col-start-1 desktop:row-start-2 desktop:mb-0 desktop:border-t desktop:border-line desktop:pt-6">
+          <p className="mb-2 hidden text-overline font-semibold uppercase tracking-[0.12em] text-brown-400 desktop:block">Tipo</p>
           <ChipFilter label="Tipo de projeto" options={options} selected={category} onSelect={setCategory} listOnDesktop />
+          <div className="mt-8 hidden desktop:block">
+            <SchoolsPromo />
+          </div>
         </aside>
       )}
 
       <div className="flex flex-col gap-3 desktop:col-start-2 desktop:row-start-2 desktop:border-t desktop:border-line desktop:pt-6">
-        {isPending && <p role="status" className="m-0 text-brown-400">Carregando os projetos…</p>}
+        {isPending && <LoadingState label="Carregando os projetos…" shape="rows" count={4} />}
         {isError && (
           <EmptyState
             tone="error"
@@ -1728,7 +1742,7 @@ export function Projects() {
 - Teste: `backend/tests/projects.test.ts`, `backend/tests/integration/projects.integration.test.ts`
 
 **Interfaces:**
-- Consome: `getProject`, `projectParams` (Tarefa 9), `getPublishedProject`.
+- Consome: `getProject`, `projectParams` de `validators/projects.validator.ts` (Tarefa 9), `getPublishedProject`.
 - Produz: `GET /api/projects/:slug` → `{ project: ProjectDetail }`; 404 `project_not_found`; 400 `invalid_data`.
 
 - [ ] **Passo 0:** `git switch main && git pull --ff-only && git switch -c feat/project-details` (com o PR 2 já na `main`).
@@ -1790,8 +1804,9 @@ e em `projects.integration.test.ts`:
 
 ```ts
 import { Router } from 'express';
-import { getProject, listProjects, projectParams } from '../controllers/projects.controller';
+import { getProject, listProjects } from '../controllers/projects.controller';
 import { validate } from '../middlewares/validate';
+import { projectParams } from '../validators/projects.validator';
 
 export const projectsRoutes = Router();
 
@@ -1839,146 +1854,62 @@ e path:
 
 `backend/README.md`: `| GET | /api/projects/:slug | público | um projeto publicado (404 se fora do ar) |`.
 
-- [ ] **Passo 4: rodar e ver passar** — `npm test`, `npm run test:db -- projects`, `npm run typecheck`.
+- [ ] **Passo 4: rodar e ver passar** — `npm test`, `DB_TESTS=1 DB_HOST=127.0.0.1 DB_PORT=3307 DB_NAME=atelie_test DB_USER=atelie DB_PASSWORD=atelie-dev npx jest tests/integration --runInBand` (no bash; `npm run test:db` não roda no Windows), `npm run typecheck`.
 - [ ] **Passo 5: checkpoint.**
 
-### Tarefa 14: "Compartilhar" no topo do `FocusedLayout`
+### Tarefa 14: Botão à direita no `BackBar`
 
 **Arquivos:**
-- Criar: `frontend/src/components/layout/ShareButton.tsx`
-- Modificar: `frontend/src/components/layout/Layout.tsx` (tipo `RouteHandle`), `frontend/src/components/layout/FocusedLayout.tsx`
-- Teste: `frontend/src/tests/share.test.tsx` (novo)
+- Modificar: `frontend/src/components/layout/BackBar.tsx`
+- Teste: `frontend/src/tests/back-bar.test.tsx` (novo)
 
 **Interfaces:**
-- Produz: `RouteHandle.share?: boolean`; `ShareButton()`. O `FocusedLayout` passa a ter `ToastProvider` (antes não tinha:
-  só `Layout` e `AdminLayout` tinham).
+- Produz: `BackBar({ to, label, onDesktop?, action? })` — `action` é um `ReactNode` opcional, mostrado à direita da
+  barra do celular. Sem `action`, a barra fica igual à de hoje (agenda, notícias e candidaturas não mudam).
+- Consome: `ShareButton` de `components/news/ShareButton.tsx`, já usado em `NewsDetail` (Web Share API; sem suporte,
+  copia o link e avisa com `useToast`). Nada novo para compartilhar.
 
-- [ ] **Passo 1: testes que falham** — `frontend/src/tests/share.test.tsx`
+- [ ] **Passo 1: testes que falham** — `frontend/src/tests/back-bar.test.tsx`
 
 ```tsx
-import { act, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { FocusedLayout } from '../components/layout/FocusedLayout'
+import { screen } from '@testing-library/react'
+import { BackBar } from '../components/layout/BackBar'
 import { renderRoute } from './render'
 
-function open(share: boolean) {
-  renderRoute('/x', [{ element: <FocusedLayout />, children: [{ path: '/x', element: <p>conteúdo</p>, handle: { backTo: '/projetos', share } }] }])
+function open(action?: React.ReactNode) {
+  renderRoute('/x', [{ path: '/x', element: <BackBar to="/projetos" label="Projetos" onDesktop={false} action={action} /> }])
 }
 
-describe('Share button in the focused layout', () => {
-  afterEach(() => vi.unstubAllGlobals())
-
-  it('appears only on routes that ask for it', () => {
-    open(false)
-    expect(screen.queryByRole('button', { name: 'Compartilhar' })).not.toBeInTheDocument()
+describe('BackBar', () => {
+  it('shows only the way back when there is no action', () => {
+    open()
+    expect(screen.getByRole('link', { name: 'Voltar para Projetos' })).toHaveAttribute('href', '/projetos')
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
-  it('opens the native share sheet with the page address', async () => {
-    const share = vi.fn().mockResolvedValue(undefined)
-    vi.stubGlobal('navigator', { ...navigator, share })
-    open(true)
-
-    await userEvent.click(screen.getByRole('button', { name: 'Compartilhar' }))
-
-    expect(share).toHaveBeenCalledWith(expect.objectContaining({ url: window.location.href }))
-  })
-
-  it('says nothing when the person closes the share sheet', async () => {
-    vi.stubGlobal('navigator', { ...navigator, share: vi.fn().mockRejectedValue(new DOMException('cancel', 'AbortError')) })
-    open(true)
-
-    await userEvent.click(screen.getByRole('button', { name: 'Compartilhar' }))
-
-    expect(screen.queryByText('Não foi possível copiar o link.')).not.toBeInTheDocument()
-    expect(screen.queryByText('Link copiado.')).not.toBeInTheDocument()
-  })
-
-  it('copies the link when the browser cannot share', async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined)
-    vi.stubGlobal('navigator', { ...navigator, share: undefined, clipboard: { writeText } })
-    open(true)
-
-    await act(async () => userEvent.click(screen.getByRole('button', { name: 'Compartilhar' })))
-
-    expect(writeText).toHaveBeenCalledWith(window.location.href)
-    expect(await screen.findByText('Link copiado.')).toBeInTheDocument()
+  it('puts the action on the right of the bar', () => {
+    open(<button type="button">Compartilhar</button>)
+    expect(screen.getByRole('link', { name: 'Voltar para Projetos' }).nextElementSibling).toHaveTextContent('Compartilhar')
   })
 })
 ```
 
 - [ ] **Passo 2: rodar e ver falhar.**
 
-- [ ] **Passo 3: implementar** — em `Layout.tsx`, no `RouteHandle`, acrescentar `share?: boolean`.
-
-`frontend/src/components/layout/ShareButton.tsx`
-
-```tsx
-import { useToast } from '../ui'
-
-export function ShareButton() {
-  const toast = useToast()
-
-  async function share() {
-    const url = window.location.href
-    if (navigator.share) {
-      // Rejects when the person closes the sheet: nothing to report.
-      await navigator.share({ title: document.title, url }).catch(() => undefined)
-      return
-    }
-    try {
-      await navigator.clipboard.writeText(url)
-      toast('Link copiado.')
-    } catch {
-      toast('Não foi possível copiar o link.', { tone: 'error' })
-    }
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => void share()}
-      className="inline-flex min-h-11 cursor-pointer items-center rounded-control border-[1.5px] border-brown bg-transparent px-3.5 text-small font-semibold text-brown"
-    >
-      Compartilhar
-    </button>
-  )
-}
-```
-
-`FocusedLayout.tsx` — ler o `share` dos `handle` como já se lê o `backTo`, envolver tudo em `ToastProvider` e pôr o
-botão à direita do cabeçalho:
+- [ ] **Passo 3: implementar** — em `BackBar.tsx`, acrescentar `action?: ReactNode` às props, `justify-between` e `pr-2`
+  no `div` da barra do celular, e `{action}` depois do `Link`:
 
 ```tsx
-import { ToastProvider } from '../ui/ToastProvider'
-import { ShareButton } from './ShareButton'
-
-  const handles = useMatches().map((match) => match.handle as RouteHandle | undefined)
-  const defaultBack = handles.map((handle) => handle?.backTo).findLast(Boolean)
-  const canShare = handles.some((handle) => handle?.share)
-```
-
-(substitui o `useMatches().map(...).findLast(Boolean)` atual), e no JSX:
-
-```tsx
-    <ToastProvider>
-      <div className="flex min-h-dvh flex-col">
-        <SkipLink />
-        <header className="border-b border-line">
-          <div className="mx-auto flex h-15 max-w-xl items-center px-1 pr-2">
-            <Link …mesmo link de voltar de hoje… />
-            <span className="flex-1" />
-            {canShare && <ShareButton />}
-          </div>
-        </header>
-        <main …mesmo main de hoje…>
-          <Outlet />
-        </main>
+      <div className="border-b border-line desktop:hidden">
+        <div className="mx-auto flex h-15 max-w-xl items-center justify-between px-1 pr-2">
+          <Link …o mesmo link de hoje…>…</Link>
+          {action}
+        </div>
       </div>
-    </ToastProvider>
 ```
 
-- [ ] **Passo 4: rodar e ver passar** — `npx vitest run src/tests/share.test.tsx src/tests/registration.test.tsx src/tests/auth.test.tsx`
-  (as telas que já usam o `FocusedLayout` continuam iguais).
+- [ ] **Passo 4: rodar e ver passar** — `npx vitest run src/tests/back-bar.test.tsx` e as suítes que já usam o `BackBar`
+  (detalhe do evento, notícia, candidaturas), que continuam iguais.
 - [ ] **Passo 5: checkpoint.**
 
 ### Tarefa 15: Página `/projetos/:slug`
@@ -1986,18 +1917,24 @@ import { ShareButton } from './ShareButton'
 **Arquivos:**
 - Criar: `frontend/src/pages/ProjectDetail.tsx`, `frontend/src/components/projects/ProjectCover.tsx`,
   `FactStrip.tsx`, `TechnicalSheet.tsx`
-- Modificar: `frontend/src/routes.tsx` (filhos do `FocusedLayout`)
+- Modificar: `frontend/src/lib/api-error.ts` (`isMissingProject`), `frontend/src/routes.tsx` (filhos do `Layout`)
 - Teste: `frontend/src/tests/project-detail.test.tsx` (novo)
 
 **Interfaces:**
-- Consome: `useProject(slug)`, `ProjectDetail` (Tarefa 10); `SCHOOLS`; `CONTACTS.whatsapp`; `ActionBar`, `Button`,
-  `EmptyState`; `NotFound`; `handle.share` (Tarefa 14).
-- Produz: `ProjectDetail()` (página), `ProjectCover`, `FactStrip`, `TechnicalSheet`.
+- Consome: `useProject(slug)`, `ProjectDetail` (Tarefa 10); `SCHOOLS`; `CONTACTS.whatsapp`; `BackBar` com `action`
+  (Tarefa 14); `ShareButton` (notícias); `BackLink`, `Button`, `Container`, `EmptyState`; `LoadingSession`; `NotFound`.
+- Produz: `ProjectDetail()` (página), `ProjectCover`, `FactStrip`, `TechnicalSheet`, `isMissingProject(error)`.
+
+Molde: `pages/EventDetail.tsx`. No celular, a ordem da 3c (capa → gênero → H1 → números → descrição → ficha técnica →
+barra fixa). No desktop, grid `minmax(0,1fr) 25rem`: à esquerda `BackLink`, gênero, H1, capa e descrição; à direita o
+cartão `sticky` com números, ficha técnica e os três botões. Capa, números e ficha aparecem uma vez para o celular
+(`desktop:hidden`) e uma vez para o desktop (`hidden desktop:…`); `display: none` tira a cópia escondida da árvore de
+acessibilidade, como já acontece com as ações do `EventDetail`.
 
 - [ ] **Passo 1: testes que falham** — `frontend/src/tests/project-detail.test.tsx`
 
 ```tsx
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import { api } from '../services/api'
 import type { ProjectDetail } from '../types/project'
 import { apiError, mockApi } from './auth-support'
@@ -2029,29 +1966,37 @@ async function openProject(project: ProjectDetail) {
 }
 
 describe('Project detail page', () => {
-  it('shows screen 3c: back link, share, cover, facts, description and technical sheet', async () => {
+  it('shows screen 3c: way back, share, cover, genre, description and the calls to action', async () => {
     await openProject(detail())
 
-    expect(screen.getByRole('link', { name: 'Projetos' })).toHaveAttribute('href', '/projetos')
-    expect(screen.getByRole('button', { name: 'Compartilhar' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: /Cafú e o Café/ })).toHaveAttribute('src', '/images/sector-literary.jpg')
+    expect(screen.getByRole('link', { name: 'Voltar para Projetos' })).toHaveAttribute('href', '/projetos')
+    expect(screen.getAllByRole('button', { name: /^Compartilhar/ })).toHaveLength(2)
+    for (const image of screen.getAllByRole('img', { name: /Cafú e o Café/ })) expect(image).toHaveAttribute('src', '/images/sector-literary.jpg')
     expect(screen.getByText('Contação de história')).toBeInTheDocument()
-    expect(screen.getByText('Duração').nextSibling).toHaveTextContent('50 min')
     expect(screen.getByText('Primeiro parágrafo.')).toBeInTheDocument()
     expect(screen.getByText('Segundo parágrafo.')).toBeInTheDocument()
-    expect(screen.getByText('Ficha técnica')).toBeInTheDocument()
-    expect(screen.getByText('Rider').nextSibling).toHaveTextContent('1 caixa de som · 1 microfone headset')
-    expect(screen.getByRole('link', { name: 'Levar para minha escola' })).toHaveAttribute('href', '/para-escolas')
-    expect(screen.getByRole('link', { name: 'WhatsApp' })).toHaveAttribute('href', 'https://wa.me/5511953968344')
+    for (const link of screen.getAllByRole('link', { name: 'Levar para minha escola' })) expect(link).toHaveAttribute('href', '/para-escolas')
+    for (const link of screen.getAllByRole('link', { name: 'WhatsApp' })) expect(link).toHaveAttribute('href', 'https://wa.me/5511953968344')
+  })
+
+  it('puts the facts, the technical sheet and the actions on the side card for the desktop', async () => {
+    await openProject(detail())
+
+    const card = screen.getByRole('complementary', { name: 'Ficha do projeto' })
+    expect(card).toHaveClass('desktop:sticky')
+    expect(within(card).getByText('Duração').nextSibling).toHaveTextContent('50 min')
+    expect(within(card).getByText('Rider').nextSibling).toHaveTextContent('1 caixa de som · 1 microfone headset')
+    expect(within(card).getByRole('link', { name: 'Levar para minha escola' })).toBeInTheDocument()
+    expect(within(card).getByRole('button', { name: /^Compartilhar/ })).toBeInTheDocument()
   })
 
   it('drops what the project does not have and keeps the image space with the logo', async () => {
     await openProject(detail({ slug: 'eu-griot', title: 'Eu Griot', coverUrl: null, coverAlt: null, duration: null, description: null, castMembers: null, requirements: null }))
 
-    expect(screen.queryByText('Duração')).not.toBeInTheDocument()
-    expect(screen.getByText('Idade')).toBeInTheDocument()
-    expect(screen.queryByText('Ficha técnica')).not.toBeInTheDocument()
-    expect(screen.getByTestId('cover-placeholder')).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.queryAllByText('Duração')).toHaveLength(0)
+    expect(screen.getAllByText('Idade').length).toBeGreaterThan(0)
+    expect(screen.queryAllByText('Ficha técnica')).toHaveLength(0)
+    for (const placeholder of screen.getAllByTestId('cover-placeholder')) expect(placeholder).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('shows "page not found" for a project that is missing or off the site', async () => {
@@ -2076,17 +2021,29 @@ describe('Project detail page', () => {
 
 - [ ] **Passo 2: rodar e ver falhar.**
 
-- [ ] **Passo 3: implementar** — `frontend/src/components/projects/ProjectCover.tsx`
+- [ ] **Passo 3: implementar** — em `frontend/src/lib/api-error.ts`, ao lado de `isMissingEvent`:
+
+```ts
+export const isMissingProject = (error: unknown) => ['project_not_found', 'invalid_data'].includes(parseApiError(error).code)
+```
+
+`frontend/src/components/projects/ProjectCover.tsx`
 
 ```tsx
+import { cn } from '../../lib/cn'
 import type { ProjectDetail } from '../../types/project'
 
-export function ProjectCover({ project }: { project: Pick<ProjectDetail, 'coverUrl' | 'coverAlt'> }) {
+interface ProjectCoverProps {
+  project: Pick<ProjectDetail, 'coverUrl' | 'coverAlt'>
+  className?: string
+}
+
+export function ProjectCover({ project, className }: ProjectCoverProps) {
   if (project.coverUrl) {
-    return <img src={project.coverUrl} alt={project.coverAlt ?? ''} width={1200} height={900} className="block aspect-[4/3] w-full object-cover" />
+    return <img src={project.coverUrl} alt={project.coverAlt ?? ''} width={1200} height={900} className={cn('block aspect-[4/3] object-cover', className)} />
   }
   return (
-    <div data-testid="cover-placeholder" aria-hidden="true" className="grid aspect-[4/3] w-full place-items-center bg-cream-dark">
+    <div data-testid="cover-placeholder" aria-hidden="true" className={cn('grid aspect-[4/3] place-items-center bg-cream-dark', className)}>
       <img src="/images/logo.png" alt="" width={120} className="w-30 opacity-35 grayscale" />
     </div>
   )
@@ -2110,7 +2067,7 @@ export function FactStrip({ project }: { project: Pick<ProjectDetail, 'duration'
   if (facts.length === 0) return null
 
   return (
-    <dl className={cn('m-0 mt-1.5 grid border-y border-line', COLUMNS[facts.length as 1 | 2 | 3])}>
+    <dl className={cn('m-0 grid border-y border-line', COLUMNS[facts.length as 1 | 2 | 3])}>
       {facts.map((fact) => (
         <div key={fact.label} className="flex min-w-0 flex-col gap-0.5 py-3 not-first:border-l not-first:border-line not-first:pl-3">
           <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-brown-400">{fact.label}</dt>
@@ -2135,7 +2092,7 @@ export function TechnicalSheet({ project }: { project: Pick<ProjectDetail, 'cast
   if (rows.length === 0) return null
 
   return (
-    <details open className="mt-2.5 border-y border-line">
+    <details open className="border-y border-line">
       <summary className="flex min-h-13 cursor-pointer list-none items-center text-item font-bold">Ficha técnica</summary>
       <dl className="m-0 grid grid-cols-[6rem_minmax(0,1fr)] gap-x-3 gap-y-2 pb-4 text-[0.9375rem] leading-[1.45]">
         {rows.map((row) => (
@@ -2154,76 +2111,115 @@ export function TechnicalSheet({ project }: { project: Pick<ProjectDetail, 'cast
 
 ```tsx
 import { useParams } from 'react-router-dom'
+import { LoadingSession } from '../components/auth/LoadingSession'
+import { BackBar } from '../components/layout/BackBar'
+import { ShareButton } from '../components/news/ShareButton'
 import { FactStrip } from '../components/projects/FactStrip'
 import { ProjectCover } from '../components/projects/ProjectCover'
 import { TechnicalSheet } from '../components/projects/TechnicalSheet'
-import { ActionBar, Button, EmptyState } from '../components/ui'
+import { BackLink, Button, Container, EmptyState } from '../components/ui'
+import { isMissingProject } from '../lib/api-error'
 import { CONTACTS } from '../lib/contacts'
 import { SCHOOLS } from '../lib/navigation'
 import { useProject } from '../services/projects'
 import { NotFound } from './NotFound'
 
-const NOT_FOUND_STATUSES = [400, 404]
+const PARAGRAPH = 'm-0 text-[1.03125rem] leading-[1.65] desktop:max-w-[42.5rem] desktop:text-[1.125rem]'
+
+function Actions() {
+  return (
+    <>
+      <Button to={SCHOOLS.to} variant="applique" className="min-h-13">
+        Levar para minha escola
+      </Button>
+      <Button href={CONTACTS.whatsapp} variant="secondary" className="min-h-13">
+        WhatsApp
+      </Button>
+    </>
+  )
+}
 
 export function ProjectDetail() {
   const { slug } = useParams()
-  const { data: project, isPending, isError, error, refetch } = useProject(slug)
+  const project = useProject(slug)
 
-  if (isError) {
-    const status = (error as { response?: { status?: number } }).response?.status
-    if (status && NOT_FOUND_STATUSES.includes(status)) return <NotFound />
+  if (project.isPending) return <LoadingSession />
+
+  if (project.isError) {
+    if (isMissingProject(project.error)) return <NotFound />
     return (
-      <EmptyState
-        tone="error"
-        title="Não conseguimos carregar o projeto agora"
-        text="A conexão pode ter falhado. Tente de novo em instantes."
-        actions={
-          <Button variant="secondary" size="compact" onClick={() => void refetch()}>
-            Tentar de novo
-          </Button>
-        }
-      />
+      <Container className="pt-6 pb-10">
+        <EmptyState
+          tone="error"
+          title="Não conseguimos carregar o projeto agora"
+          text="A conexão pode ter falhado. Tente de novo em instantes."
+          actions={
+            <Button variant="secondary" size="compact" onClick={() => void project.refetch()}>
+              Tentar de novo
+            </Button>
+          }
+        />
+      </Container>
     )
   }
-  if (isPending) return <p role="status" className="m-0 text-brown-400">Carregando o projeto…</p>
 
-  const paragraphs = project.description?.split(/\n\s*\n/).filter(Boolean) ?? []
+  const detail = project.data
+  const paragraphs = detail.description?.split(/\n\s*\n/).filter(Boolean) ?? []
 
   return (
-    <article className="pb-28 desktop:pb-0">
-      <div className="-mx-4 -mt-7">
-        <ProjectCover project={project} />
+    <>
+      <BackBar to="/projetos" label="Projetos" onDesktop={false} action={<ShareButton title={detail.title} />} />
+      <ProjectCover project={detail} className="w-full desktop:hidden" />
+      <Container className="pt-5 pb-8 desktop:grid desktop:grid-cols-[minmax(0,1fr)_25rem] desktop:items-start desktop:gap-x-14 desktop:gap-y-6 desktop:pt-4 desktop:pb-20">
+        <div className="hidden desktop:col-span-2 desktop:-mb-5 desktop:block">
+          <BackLink to="/projetos" label="Projetos" tone="link" />
+        </div>
+
+        <article className="flex flex-col gap-4.5">
+          <header className="flex flex-col gap-2.5 desktop:gap-3">
+            {detail.genre && <p className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-blue-deep">{detail.genre}</p>}
+            <h1 className="m-0 text-[1.875rem] leading-[1.12] font-bold text-balance desktop:text-h1-desktop">{detail.title}</h1>
+          </header>
+          <ProjectCover project={detail} className="hidden w-full desktop:block" />
+          <div className="desktop:hidden">
+            <FactStrip project={detail} />
+          </div>
+          {paragraphs.map((paragraph, index) => (
+            <p key={index} className={PARAGRAPH}>
+              {paragraph}
+            </p>
+          ))}
+          <div className="desktop:hidden">
+            <TechnicalSheet project={detail} />
+          </div>
+        </article>
+
+        <aside
+          aria-label="Ficha do projeto"
+          className="hidden desktop:sticky desktop:top-6 desktop:flex desktop:flex-col desktop:gap-4.5 desktop:border-[1.5px] desktop:border-brown desktop:bg-card desktop:p-6"
+        >
+          <FactStrip project={detail} />
+          <TechnicalSheet project={detail} />
+          <Actions />
+          <ShareButton title={detail.title} />
+        </aside>
+      </Container>
+
+      <div className="sticky bottom-[calc(3.5rem+1.5px+max(1rem,env(safe-area-inset-bottom)))] z-20 border-t border-line bg-cream desktop:hidden">
+        <div className="mx-auto grid max-w-xl grid-cols-[minmax(0,1fr)_auto] gap-2 px-4 py-2.5">
+          <Actions />
+        </div>
       </div>
-      <div className="flex flex-col gap-2.5 pt-5">
-        {project.genre && <p className="m-0 text-overline font-semibold uppercase tracking-[0.12em] text-blue-deep">{project.genre}</p>}
-        <h1 className="m-0 text-h1 font-bold">{project.title}</h1>
-        <FactStrip project={project} />
-        {paragraphs.map((paragraph, index) => (
-          <p key={index} className={index === 0 ? 'm-0 mt-2 text-body leading-[1.6]' : 'm-0 text-body leading-[1.6]'}>
-            {paragraph}
-          </p>
-        ))}
-        <TechnicalSheet project={project} />
-      </div>
-      <ActionBar
-        primary={
-          <Button to={SCHOOLS.to} variant="applique" className="min-h-13 w-full desktop:w-auto desktop:px-8">
-            Levar para minha escola
-          </Button>
-        }
-        secondary={
-          <Button href={CONTACTS.whatsapp} variant="secondary" className="min-h-13">
-            WhatsApp
-          </Button>
-        }
-      />
-    </article>
+    </>
   )
 }
 ```
 
-Em `routes.tsx`, nos filhos do `FocusedLayout`:
-`{ path: '/projetos/:slug', element: <ProjectDetail />, handle: { backTo: '/projetos', share: true } }`.
+(A capa do celular fica fora do `Container`, de borda a borda como na 3c; a do desktop fica dentro da coluna, depois do
+H1, como no detalhe do evento.)
+
+Em `routes.tsx`, nos filhos do `Layout`, depois de `/projetos`:
+`{ path: '/projetos/:slug', element: <ProjectDetail />, handle: { hideHeaderOnMobile: true } }`.
 
 - [ ] **Passo 4: rodar e ver passar** — `npx vitest run src/tests/project-detail.test.tsx`
 - [ ] **Passo 5: checkpoint.**
@@ -2238,10 +2234,10 @@ Em `routes.tsx`, nos filhos do `FocusedLayout`:
   com a tela 3c; barra de ação não cobre o fim do conteúdo.
 - [ ] **Passo 3: Changelog** — entrada "Página de cada projeto (RF03, tela 3c)": antes (404), depois (capa ou espaço
   com logo, faixa de números flexível, descrição em parágrafos, ficha técnica, barra de ação, compartilhar), por quê,
-  diferenças (espaço com logo quando não há capa; células sem dado somem; `FocusedLayout` ganhou "Compartilhar" e
-  `ToastProvider`), PR `feat/project-details`.
+  diferenças (espaço com logo quando não há capa; células sem dado somem; desktop no molde do detalhe do evento;
+  `BackBar` ganhou a prop `action`), PR `feat/project-details`.
 - [ ] **Passo 4:** status no `CLAUDE.md`, log de IA no `AGENTS.md`, rota no `backend/README.md`; avisar o Antonio sobre
-  a mudança no `FocusedLayout` na descrição do PR.
+  a prop `action` do `BackBar` na descrição do PR.
 - [ ] **Passo 5: revisão antes do commit** — resumo do diff, pontos de atenção, pedir autorização para os commits
   `feat(backend): RF03 project detail endpoint`, `feat(frontend): RF03 project page following screen 3c` e
   `docs: record the project page …`, e depois push e PR.

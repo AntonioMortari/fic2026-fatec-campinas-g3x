@@ -39,7 +39,7 @@ inferior não são recriados: vêm do `Layout` da base.
 | # | Decisão |
 |---|---|
 | F1 | Fidelidade total ao design, inclusive textos resumidos e placeholders de imagem (ver §4.1 e §7) |
-| F2 | Mobile é o foco. No desktop (≥ 1024px), coluna de leitura de ~720px; só o hero (5fr/7fr) e os setores (3 colunas) do Sobre usam a largura toda |
+| F2 | Mobile é o foco. O design não tem desktop para 3b e 3c: Projetos segue a Agenda desktop (6b) e o Detalhe segue o detalhe do evento (13a), ambos já no código. Prévia aprovada pelo Yuri em 2026-10-15 |
 | F3 | Links para rotas que outros integrantes ainda vão criar (`/voluntariado`, `/doar`, `/para-escolas`) apontam para a rota final, a partir das constantes de `lib/navigation.ts` — mesma convenção do menu público |
 | F4 | Mapa: iframe do Google Maps sem chave (`https://www.google.com/maps?q=<endereço>&output=embed`), endereço de `CONTACTS.address`. A Maps Embed API (chave restrita por domínio) fica para depois |
 | F5 | Índice de chips do Sobre: links âncora com o visual do `ChipFilter`, sticky, com destaque da seção visível por `IntersectionObserver` e `aria-current="location"` |
@@ -48,10 +48,10 @@ inferior não são recriados: vêm do `Layout` da base.
 | F8 | Classificação: Contação — Banzo, Catirina e Nego Dito, Cafú e o Café, A Cabaça e o Canto Ancestral, Eu Griot, Memória Negra; Vivência — Brincadeiras Encantadas na Mata, Projeto Brincantes, Batuque na Cozinha; Peça — Brasil Negreiro; sem categoria (só em "Todas") — Ateliê Afro Cultural Itinerante. A confirmar com a ONG |
 | F9 | Chave UUID + `slug` único, gerado do título e fixo (`/projetos/banzo`); os 11 mantêm os slugs da V1 |
 | F10 | Ordem alfabética pelo título |
-| F11 | Capas reais só em Cafú e o Café (`/images/sector-literary.jpg`) e Brasil Negreiro (`/images/sector-musical.jpg`), com o alt já usado na home; os demais aparecem como linha na lista |
+| F11 | Capas reais só em Cafú e o Café (`/images/sector-literary.jpg`) e Brasil Negreiro (`/images/sector-musical.jpg`), com o alt já usado na home; os demais aparecem como linha na lista, fiel ao 3b. As fotos reais de `backend/seed-content/images/` ficam para um PR seguinte (decisão do Yuri, 2026-10-15) |
 | F12 | Detalhe sem capa: espaço decorativo 4/3 em `cream-dark` com o logo em cinza (`aria-hidden`) |
-| F13 | "Compartilhar": Web Share API; sem suporte, copia o link e mostra "Link copiado" (`useToast`) |
-| F14 | "Compartilhar" fica à direita do topo do `FocusedLayout`, ligado por `handle: { backTo: '/projetos', share: true }` (extensão aditiva — combinar com o Antonio) |
+| F13 | "Compartilhar": reusa `components/news/ShareButton` (Web Share API; sem suporte, copia o link e avisa com `useToast`) |
+| F14 | O Detalhe usa o `Layout` com `handle: { hideHeaderOnMobile: true }`, como `/agenda/:id`. No celular, o topo é o `BackBar` "‹ Projetos" com o `ShareButton` à direita, por uma prop opcional `action` (extensão aditiva — avisar o Antonio); no desktop, `BackLink` |
 | F15 | Faixa de números do detalhe: célula sem dado some (2 ou 1 colunas) |
 
 ## 4. Páginas
@@ -83,18 +83,23 @@ resumo se houver, chevron). O card ou a linha inteira é o link para `/projetos/
 "Quer levar uma destas para a sua escola?" e o botão "Veja como funciona" → `/para-escolas`. Etiqueta =
 `genre · duration` (só os campos preenchidos).
 
-Desktop: chips em coluna à esquerda (`listOnDesktop`) e lista à direita, como a Agenda (6b).
+Desktop (≥ 1024px), igual à Agenda: grid `15rem minmax(0,1fr)`; à esquerda, `ChipFilter` com `listOnDesktop` e o
+`SchoolsPromo` da agenda; à direita, a lista. O bloco escuro de escolas do fim só aparece no celular (`desktop:hidden`).
 
 Estados: carregando (`role="status"`), falha (`EmptyState tone="error"` + "Tentar de novo"), lista vazia
 (`EmptyState`), filtro sem resultado (`EmptyState`).
 
 ### 4.3 Detalhe — `/projetos/:slug` (tela 3c)
 
-Rota dentro do `FocusedLayout`: topo "‹ Projetos" + "Compartilhar". Corpo: capa 4/3 de borda a borda (ou o
+Rota no `Layout` (F14): topo "‹ Projetos" + "Compartilhar". Corpo: capa 4/3 de borda a borda (ou o
 espaço com logo, F12) → overline com `genre` → H1 → faixa Duração · Idade · Local (F15) → descrição em
 parágrafos (separados por linha em branco; some se vazia) → "Ficha técnica" em `<details open>` com Elenco e
-Rider (some se os dois estiverem vazios) → barra fixa (`ActionBar`) com "Levar para minha escola" →
-`/para-escolas` e "WhatsApp" → `CONTACTS.whatsapp`.
+Rider (some se os dois estiverem vazios) → barra fixa com "Levar para minha escola" → `/para-escolas` e
+"WhatsApp" → `CONTACTS.whatsapp`, no mesmo molde da barra do `EventDetail` (`desktop:hidden`).
+
+Desktop, igual ao `EventDetail`: grid `minmax(0,1fr) 25rem`. À esquerda: `BackLink`, overline, H1, capa e
+descrição. À direita, cartão `sticky` (`border-brown`, `bg-card`): faixa de números, ficha técnica, "Levar para
+minha escola", "WhatsApp" e "Compartilhar".
 
 Estados: carregando, falha com "Tentar de novo", e `<NotFound/>` para slug inexistente ou projeto fora do ar.
 
@@ -140,9 +145,9 @@ Brasil Negreiro recebe a capa F11. `age_rating` "Livre" em todos. `description`,
 `genre`, `duration`, `category`, `coverUrl`, `coverAlt`).
 
 `GET /api/projects/:slug` — um projeto publicado com todos os campos; inexistente ou fora do ar →
-`404 project_not_found` (`ApiError`). Slug validado com Zod.
+`404 project_not_found` (`ApiError`). Slug validado com Zod em `validators/projects.validator.ts`.
 
-Camadas como em eventos: `routes/projects.routes.ts` → `controllers/projects.controller.ts` (Zod) →
+Camadas como em eventos: `routes/projects.routes.ts` → `controllers/projects.controller.ts` (usa o schema de `validators/`) →
 `services/projects.service.ts` (mapeia modelo → DTO) → `models/project.model.ts`. Montagem em
 `routes/index.ts` (`/projects`). Documentação em `docs/openapi.ts`.
 
@@ -153,11 +158,11 @@ Camadas como em eventos: `routes/projects.routes.ts` → `controllers/projects.c
 | `src/types/project.ts` | `ProjectSummary`, `ProjectDetail`, `ProjectCategory` |
 | `src/services/projects.ts` | `useProjects()`, `useProject(slug)` (React Query; `retry: false` no detalhe) |
 | `src/pages/About.tsx` + `src/components/about/*` | blocos do 5b |
-| `src/pages/Projects.tsx` + `src/components/projects/ProjectCard.tsx`, `ProjectRow.tsx` | 3b |
-| `src/pages/ProjectDetail.tsx` + `src/components/projects/FactStrip.tsx`, `TechnicalSheet.tsx`, `ShareButton.tsx` | 3c |
-| `src/components/layout/FocusedLayout.tsx` | botão "Compartilhar" opcional por `handle.share` |
+| `src/pages/Projects.tsx` + `src/components/projects/ProjectCard.tsx`, `ProjectRow.tsx` | 3b; reusa `ChipFilter` e `components/agenda/SchoolsPromo` |
+| `src/pages/ProjectDetail.tsx` + `src/components/projects/FactStrip.tsx`, `TechnicalSheet.tsx` | 3c; reusa `components/news/ShareButton` |
+| `src/components/layout/BackBar.tsx` | prop opcional `action` (botão à direita, só no celular) |
 | `src/lib/sectors.ts` | imagens e alt dos setores, usados pela home e pelo Sobre |
-| `src/routes.tsx` | `/quem-somos` e `/projetos` no `Layout`; `/projetos/:slug` no `FocusedLayout` |
+| `src/routes.tsx` | `/quem-somos`, `/projetos` e `/projetos/:slug` (com `hideHeaderOnMobile`) no `Layout` |
 
 ## 7. Divergências registradas (Changelog)
 
@@ -181,7 +186,8 @@ slug inexistente → 404; migration cria os 11 com as categorias e capas previst
 vindos de `navigation.ts`, iframe com `title`, nenhuma imagem sem `alt`, chip ativo com `aria-current`
 (`IntersectionObserver` simulado no próprio teste). Projetos: lista, chips filtram, card × linha conforme capa,
 link para o slug, estados. Detalhe: dados renderizados, faixa e ficha somem quando vazias, espaço com logo sem
-capa, 404, `navigator.share` e fallback de cópia, links da barra de ação. `FocusedLayout`: botão só com `share`.
+capa, 404, botão "Compartilhar" no topo e no cartão, links da barra de ação, cartão lateral no desktop.
+`BackBar`: botão à direita só quando recebe `action`.
 
 **Verificação manual:** Chromium a 390px, 320px (A+ e alto contraste) e 1440px, lado a lado com as telas do
 design; sem rolagem horizontal; alvos ≥ 44px; navegação por teclado.
@@ -192,7 +198,7 @@ design; sem rolagem horizontal; alvos ≥ 44px; navegação por teclado.
 |---|---|---|---|
 | 1 | `feat/about-page` | Sobre (só frontend) | — |
 | 2 | `feat/projects-page` | tabela, migration com os 11, `GET /api/projects`, página Projetos | — |
-| 3 | `feat/project-details` | `GET /api/projects/:slug`, página Detalhe, extensão do `FocusedLayout` | PR 2 |
+| 3 | `feat/project-details` | `GET /api/projects/:slug`, página Detalhe, prop `action` do `BackBar` | PR 2 |
 
 Cada PR atualiza, no mesmo pacote: `docs/04_Gerencia_de_Mudancas/Changelog.md`, a tabela de status do
 `CLAUDE.md`, a linha do log de IA no `AGENTS.md`, o `openapi.ts` e o `backend/README.md` quando há rota nova.
@@ -205,7 +211,8 @@ Implementação em blocos pequenos, com aprovação do Yuri a cada bloco; nada d
 | Arte do símbolo Sankofa e foto de Wil e Nathy | ONG |
 | Aprovar o texto resumido do Sobre e os textos dos projetos do design | ONG |
 | Confirmar a classificação F8 | ONG |
-| Avisar o Antonio sobre a extensão do `FocusedLayout` e as duas regras de layout não seguidas | Yuri |
+| Avisar o Antonio sobre a prop `action` do `BackBar` e as duas regras de layout não seguidas | Yuri |
+| Capas com as fotos reais de `backend/seed-content/images/` | próximo PR |
 | Maps Embed API com chave restrita; `frame-src https://www.google.com` na CSP do deploy | equipe |
 | `/para-escolas`, `/voluntariado` e `/doar` (links já apontam para elas) | outros integrantes |
 | Administração de projetos e upload de capa | próximo ciclo |
