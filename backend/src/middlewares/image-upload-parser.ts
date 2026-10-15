@@ -2,7 +2,7 @@ import express, { type Request } from 'express';
 
 export const IMAGE_UPLOAD_LIMIT = '6mb';
 
-const IMAGE_UPLOAD_PATH = /^\/api\/admin\/events\/[^/]+\/image$/;
+const IMAGE_UPLOAD_PATH = /^\/api\/admin\/(events|news)\/[^/]+\/image$/;
 
 export const isImageUpload = (req: Pick<Request, 'method' | 'path'>): boolean => req.method === 'PUT' && IMAGE_UPLOAD_PATH.test(req.path);
 

@@ -4,14 +4,14 @@ import { describeRegistration, whenLabel } from '../../lib/event-detail'
 import type { EventDetail } from '../../types/event'
 
 const ROW =
-  'grid grid-cols-[6rem_minmax(0,1fr)] gap-3 border-b border-line py-3 ' +
-  'desktop:flex desktop:flex-col desktop:gap-1 desktop:border-b-0 desktop:border-t desktop:py-3.5 desktop:first:border-t-0 desktop:first:pt-0 desktop:last:pb-0'
+  'flex flex-wrap gap-x-3 gap-y-1 border-b border-line py-3 ' +
+  'desktop:flex-col desktop:flex-nowrap desktop:gap-1 desktop:border-b-0 desktop:border-t desktop:py-3.5 desktop:first:border-t-0 desktop:first:pt-0 desktop:last:pb-0'
 
 function Row({ label, children, className, bold = false }: { label: string; children: ReactNode; className?: string; bold?: boolean }) {
   return (
     <div className={ROW}>
-      <dt className="text-small font-semibold text-brown-400 desktop:text-overline desktop:tracking-[0.1em] desktop:uppercase">{label}</dt>
-      <dd className={cn('m-0 text-[1rem] leading-[1.4]', bold ? 'font-bold' : 'font-semibold', className)}>{children}</dd>
+      <dt className="w-24 flex-none text-small font-semibold text-brown-400 desktop:w-auto desktop:text-overline desktop:tracking-[0.1em] desktop:uppercase">{label}</dt>
+      <dd className={cn('m-0 min-w-44 flex-1 text-[1rem] leading-[1.4] desktop:min-w-0', bold ? 'font-bold' : 'font-semibold', className)}>{children}</dd>
     </div>
   )
 }

@@ -493,3 +493,17 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   acontecia entre o toque e a resposta, e quem voltava para a agenda pelo botão do navegador reaparecia no topo da lista.
   Ajuste de implementação: não altera a proposta aprovada nem nenhum critério de aceitação.
 - **PR:** branch `feat/subtle-motion`
+
+## 2026-10-14 — Notícias e campanhas (RF04, desenhos 11e–11g, 11n e 11o)
+- **Artefato:** Protótipos · Requisitos (RF04) · Arquitetura (nova tabela e rotas)
+- **Antes:** o link "Notícias" do menu levava ao 404 e não havia como a equipe escrever ou publicar notícias.
+- **Depois:** `/noticias` e `/noticias/:id` públicas, e `/admin/noticias` (lista com confirmação ao publicar e ao tirar do ar, escrever e editar) no painel. Back-end: tabela `news`, `GET /api/news` (só publicadas) e `/api/admin/news/*` (equipe). Escrever nunca publica; a data de publicação é carimbada na primeira vez e mantida ao tirar do ar; não há exclusão. A imagem, opcional, fica no disco do servidor e exige descrição e declaração de autorização de uso de imagem.
+- **Diferenças em relação ao desenho, e por quê:**
+  - o desenho não traz a declaração de autorização de imagem (regra de que nenhuma foto vai ao ar sem ela); foi acrescentada, obrigatória para subir a imagem;
+  - "Remover imagem" foi acrescentado (sem ele só dá para trocar);
+  - a lista da equipe no celular não tem desenho; foi adaptada ao padrão das mensagens e dos eventos;
+  - "Compartilhar" não tem comportamento descrito: usa a folha de compartilhamento do aparelho e, sem ela, copia o endereço;
+  - o desenho não pagina a lista pública; a implementação também não.
+- **Decidido aqui, a confirmar:** o tipo Notícia/Campanha (`kind`) foi implementado porque o desenho o traz, mas ele próprio o marca como proposta ("só se a coluna existir"); o menu do painel diz "Notícias" (o desenho diz "Publicações" no menu e "Notícias" no título, e sugere "Notícias" nos dois); a coluna "Acompanhe também" do desktop segue o desenho, que pede para confirmar se fica.
+- **Por quê:** RF04 e o pedido do grupo de que a equipe escreva e publique o que aparece no site.
+- **PR:** branch `feat/news`

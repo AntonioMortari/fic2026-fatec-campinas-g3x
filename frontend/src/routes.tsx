@@ -13,6 +13,7 @@ import { AdminHome } from './pages/admin/AdminHome'
 import { AdminReport } from './pages/admin/AdminReport'
 import { AdminRegistrants } from './pages/admin/AdminRegistrants'
 import { AdminContacts } from './pages/admin/AdminContacts'
+import { AdminNews } from './pages/admin/AdminNews'
 import { AdminVolunteers } from './pages/admin/AdminVolunteers'
 import { Auth } from './pages/Auth'
 import { EventDetail } from './pages/EventDetail'
@@ -27,6 +28,8 @@ import { MyVolunteerApplications } from './pages/MyVolunteerApplications'
 import { VolunteerApplicationPage } from './pages/VolunteerApplication'
 import { Volunteering } from './pages/Volunteering'
 import { Contact } from './pages/Contact'
+import { News } from './pages/News'
+import { NewsDetail } from './pages/NewsDetail'
 import { Schools } from './pages/Schools'
 
 const DEV_ONLY: RouteObject[] = import.meta.env.DEV ? [{ path: '/componentes', element: <ComponentCatalog /> }] : []
@@ -50,6 +53,8 @@ export const routes: RouteObject[] = [
       },
       { path: '/contato', element: <Contact /> },
       { path: '/para-escolas', element: <Schools /> },
+      { path: '/noticias', element: <News /> },
+      { path: '/noticias/:id', element: <NewsDetail />, handle: { hideHeaderOnMobile: true } },
       ...DEV_ONLY,
       { path: '*', element: <NotFound /> },
     ],
@@ -67,6 +72,9 @@ export const routes: RouteObject[] = [
       { path: '/admin/eventos/:id/presenca', element: <AdminAttendance />, handle: { hideHeaderOnMobile: true } },
       { path: '/admin/contatos', element: <AdminContacts /> },
       { path: '/admin/contatos/:id', element: <AdminContacts />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/noticias', element: <AdminNews /> },
+      { path: '/admin/noticias/nova', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/noticias/:id/editar', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/voluntarios', element: <AdminVolunteers /> },
       { path: '/admin/voluntarios/:id', element: <AdminVolunteers />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
     ],
