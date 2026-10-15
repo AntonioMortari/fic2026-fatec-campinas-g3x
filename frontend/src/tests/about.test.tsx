@@ -43,6 +43,16 @@ describe('About page', () => {
     for (const id of ['sankofa', 'quem-idealizou']) expect(document.getElementById(id)).toHaveClass('scroll-mt-32')
   })
 
+  it('lets the Sankofa symbol and name wrap onto two lines, and the long words break, so the largest text size does not push the page sideways', () => {
+    renderRoute('/quem-somos')
+
+    const title = screen.getByRole('heading', { name: 'Sankofa' })
+    expect(title.parentElement?.parentElement).toHaveClass('flex-wrap')
+    expect(title.parentElement).toHaveClass('min-w-0', 'basis-40')
+    expect(title).toHaveClass('[overflow-wrap:anywhere]')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveClass('[overflow-wrap:anywhere]')
+  })
+
   it('shows the mission and the values in the ONG\'s own words, as the values the form lists', () => {
     renderRoute('/quem-somos')
 

@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { DESKTOP_MENU_GROUPS, DESKTOP_NAV, MENU_GROUPS } from '../lib/navigation'
@@ -63,6 +63,34 @@ describe('desktop menu panel (design 8a)', () => {
     expect(menu).toHaveAttribute('open')
 
     await user.hover(menu.querySelector('.bg-scrim') as HTMLElement)
+    await waitFor(() => expect(menu).not.toHaveAttribute('open'))
+  })
+
+  it('keeps the reading controls open while the pointer moves around, because "Aa" was clicked and not hovered', async () => {
+    desktop()
+    const user = userEvent.setup()
+    renderRoute('/')
+    await user.click(screen.getByRole('button', { name: /^Aa/ }))
+    const menu = screen.getByRole('dialog', { name: 'Menu' })
+    expect(menu).toHaveAttribute('open')
+
+    fireEvent.mouseMove(menu.querySelector('.shrink-0') as HTMLElement, { clientX: 900, clientY: 20 })
+    await user.hover(menu.querySelector('[data-menu-panel]') as HTMLElement)
+    await user.hover(menu.querySelector('.bg-scrim') as HTMLElement)
+    await new Promise((resolve) => setTimeout(resolve, 400))
+
+    expect(menu).toHaveAttribute('open')
+    expect(within(menu).getByRole('button', { name: /Alto contraste/ })).toBeVisible()
+  })
+
+  it('still closes the reading controls with a click on the dimmed page', async () => {
+    desktop()
+    const user = userEvent.setup()
+    renderRoute('/')
+    await user.click(screen.getByRole('button', { name: /^Aa/ }))
+    const menu = screen.getByRole('dialog', { name: 'Menu' })
+
+    await user.click(menu.querySelector('.bg-scrim') as HTMLElement)
     await waitFor(() => expect(menu).not.toHaveAttribute('open'))
   })
 
