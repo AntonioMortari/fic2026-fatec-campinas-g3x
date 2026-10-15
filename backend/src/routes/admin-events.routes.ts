@@ -1,18 +1,22 @@
 import { Router } from 'express';
 import {
   create,
+  deleteImage,
   downloadRegistrations,
   getAttendance,
   getEvent,
+  getImage,
   getRegistrations,
   listEvents,
   markAttendance,
+  putImage,
   setPublication,
   update,
 } from '../controllers/admin-events.controller';
-import { adminEventParams, attendanceBody, attendanceParams, eventBody, publicationBody } from '../validators/admin-events.validator';
+import { adminEventParams, attendanceBody, attendanceParams, eventBody, imageBody, publicationBody } from '../validators/admin-events.validator';
 import { authenticate } from '../middlewares/authenticate';
 import { requireStaff } from '../middlewares/require-staff';
+import { parseImageUpload } from '../middlewares/image-upload-parser';
 import { validate } from '../middlewares/validate';
 
 // There is no DELETE: removing an event would take its sign-ups with it (RF13). The sign-ups are read-only here (RF16):
@@ -34,3 +38,6 @@ adminEventsRoutes.get('/:id/registrations', validate({ params: adminEventParams 
 adminEventsRoutes.get('/:id/registrations.csv', validate({ params: adminEventParams }), downloadRegistrations);
 adminEventsRoutes.get('/:id/attendance', validate({ params: adminEventParams }), getAttendance);
 adminEventsRoutes.patch('/:id/attendance/:registrationId', validate({ params: attendanceParams, body: attendanceBody }), markAttendance);
+adminEventsRoutes.get('/:id/image', validate({ params: adminEventParams }), getImage);
+adminEventsRoutes.put('/:id/image', parseImageUpload, validate({ params: adminEventParams, body: imageBody }), putImage);
+adminEventsRoutes.delete('/:id/image', validate({ params: adminEventParams }), deleteImage);

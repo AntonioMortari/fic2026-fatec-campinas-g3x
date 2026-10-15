@@ -2,7 +2,7 @@ import { Op, UniqueConstraintError } from 'sequelize';
 import { sequelize, Event, Registration, User } from '../models';
 import { ApiError } from '../utils/api-error';
 import { isValidCpf } from '../utils/cpf';
-import { countRegistrations, isOver, spotsLeft, toPublicEvent, type PublicEvent } from './events.service';
+import { countRegistrations, hasStarted, spotsLeft, toPublicEvent, type PublicEvent } from './events.service';
 
 // A guardian may sign up several children with one address; nobody needs a hundred.
 export const MAX_PER_EMAIL = 5;
@@ -45,7 +45,8 @@ export async function registerForEvent(
     // one counts after the first one is saved. Checking on the server without the lock would let both in.
     const event = await Event.findOne({ where: { id: eventId, published: true }, transaction, lock: transaction.LOCK.UPDATE });
     if (!event) throw new ApiError(404, 'event_not_found', 'Não encontramos essa atividade.');
-    if (isOver(event, now)) throw new ApiError(409, 'registrations_closed', 'As inscrições desta atividade já encerraram.');
+    if (hasStarted(event, now)) throw new ApiError(409, 'registrations_closed', 'As inscrições desta atividade já encerraram.');
+    if (!event.registrationOnSite) throw new ApiError(409, 'registrations_not_offered', 'Esta atividade não tem inscrição pelo site. É só chegar no horário.');
 
     // Whether a document is asked comes from the event in the database, never from the form.
     let cpf: string | null = null;
@@ -95,7 +96,7 @@ export async function registerForEvent(
       );
       return {
         registration: { id: registration.id, name: registration.name, createdAt: registration.createdAt.toISOString(), cancelCode: registration.cancelCode },
-        event: toPublicEvent(event, registered + 1),
+        event: toPublicEvent(event, registered + 1, now),
       };
     } catch (error) {
       if (error instanceof UniqueConstraintError) {

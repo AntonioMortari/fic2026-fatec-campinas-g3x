@@ -17,4 +17,5 @@ export interface EventInput {
   ageRange: string | null
   capacity: number | string | null
   requiresCpf: boolean
+  registrationOnSite: boolean
 }

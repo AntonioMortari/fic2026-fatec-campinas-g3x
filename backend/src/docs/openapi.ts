@@ -85,7 +85,22 @@ export const openApiDocument = {
           location: { type: ['string', 'null'] },
           ageRange: { type: ['string', 'null'], example: 'Livre' },
           capacity: { type: ['integer', 'null'], minimum: 1 },
-          spotsLeft: { type: ['integer', 'null'], minimum: 0, description: 'Vagas que restam; null quando não há limite.' },
+          spotsLeft: {
+            type: ['integer', 'null'],
+            minimum: 0,
+            description: 'Vagas que restam; null quando não há limite ou quando a contagem falhou (aí `registrationStatus` é `unknown`).',
+          },
+          registrationOnSite: { type: 'boolean', description: 'Falso: evento sem inscrição pelo site.' },
+          registrationStatus: {
+            type: 'string',
+            enum: ['open', 'few_left', 'full', 'not_on_site', 'started', 'unknown'],
+            description:
+              'Calculado no servidor, na ordem do desenho 13c, vale a primeira que bater: `started` (agora ≥ início), `not_on_site`, `unknown` (a contagem falhou e há limite de vagas: nunca vira zero nem "aberta"), `full`, `few_left` (restam 3 ou menos) e `open`.',
+          },
+          image: {
+            oneOf: [{ type: 'null' }, { type: 'object', required: ['url', 'alt'], properties: { url: { type: 'string', example: '/api/events/{id}/image?v=1760270400123' }, alt: { type: 'string' } } }],
+            description: 'A foto do evento, ou null. O `?v=` é a versão: muda quando a foto é trocada, para furar o cache. Os bytes nunca vêm na lista.',
+          },
         },
       },
       EventDetail: {
@@ -96,7 +111,7 @@ export const openApiDocument = {
             required: ['requiresCpf', 'registrationsOpen'],
             properties: {
               requiresCpf: { type: 'boolean', description: 'Se a inscrição pede o CPF (RN06).' },
-              registrationsOpen: { type: 'boolean', description: 'Falso quando o evento já acabou ou as vagas acabaram.' },
+              registrationsOpen: { type: 'boolean', description: 'Falso quando o evento já começou, não tem inscrição pelo site ou as vagas acabaram.' },
             },
           },
         ],
@@ -146,6 +161,17 @@ export const openApiDocument = {
           ageRange: { type: ['string', 'null'], maxLength: 80 },
           capacity: { type: ['integer', 'null'], minimum: 1, description: 'Em branco = sem limite.' },
           requiresCpf: { type: 'boolean', default: false },
+          registrationOnSite: { type: 'boolean', default: true, description: 'Falso: o servidor grava `capacity` null e `requiresCpf` false, porque não fazem sentido sem inscrição pelo site.' },
+        },
+      },
+      EventImageInput: {
+        type: 'object',
+        required: ['data', 'alt', 'authorized'],
+        description: 'Troca a foto: a declaração e a descrição valem de novo a cada envio. O tipo vem dos primeiros bytes do arquivo, nunca do que o cliente diz.',
+        properties: {
+          data: { type: 'string', format: 'byte', description: 'O arquivo em base64. JPG, PNG, GIF ou WebP, até 4 MB depois de decodificado.' },
+          alt: { type: 'string', minLength: 1, maxLength: 300, description: 'Descrição da foto, obrigatória.' },
+          authorized: { type: 'boolean', enum: [true], description: 'Declaração de que existe autorização de uso de imagem (RN07). Gravada como data, nunca como booleano.' },
         },
       },
       Health: {
@@ -381,6 +407,42 @@ export const openApiDocument = {
         },
       },
     },
+    '/admin/events/{id}/image': {
+      parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+      get: {
+        tags: ['Admin'],
+        summary: 'A foto do evento, mesmo de um rascunho (equipe)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Os bytes, com o tipo gravado', content: { 'image/*': { schema: { type: 'string', format: 'binary' } } } },
+          '404': { description: 'Evento inexistente ou sem foto', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      put: {
+        tags: ['Admin'],
+        summary: 'Sobe ou troca a foto do evento (equipe, RN07)',
+        description:
+          'Corpo JSON com a foto em base64 (limite de 6 MB só nesta rota; o resto da API segue com 100 KB). Sem `authorized: true` a foto não sobe. O tipo é lido pela assinatura dos bytes. Salvar o evento nunca mexe na foto.',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/EventImageInput' } } } },
+        responses: {
+          '200': { description: 'O evento, com `image`', content: { 'application/json': { schema: { type: 'object', properties: { event: { $ref: '#/components/schemas/AdminEvent' } } } } } },
+          '400': { description: 'Sem declaração, sem descrição, base64 inválido, ou `invalid_image` (não é JPG, PNG, GIF nem WebP)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Não existe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '413': { description: '`image_too_large` (acima de 4 MB) ou `payload_too_large` (corpo acima de 6 MB)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      delete: {
+        tags: ['Admin'],
+        summary: 'Remove a foto do evento (equipe)',
+        description: 'Zera as cinco colunas da foto. Existe para a foto subida por engano poder sair (RN07). O evento não é apagado.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'O evento, com `image: null`', content: { 'application/json': { schema: { type: 'object', properties: { event: { $ref: '#/components/schemas/AdminEvent' } } } } } },
+          '404': { description: 'Não existe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
     '/admin/events/{id}/registrations': {
       get: {
         tags: ['Admin'],
@@ -611,7 +673,8 @@ export const openApiDocument = {
       get: {
         tags: ['Events'],
         summary: 'Lista os eventos publicados',
-        description: 'Só eventos publicados. "upcoming" vem do mais próximo ao mais distante; "past", do mais recente ao mais antigo.',
+        description:
+          'Só eventos publicados. "upcoming" são os que ainda não começaram (início depois de agora) e vêm do mais próximo ao mais distante; "past" são os que já começaram, do mais recente ao mais antigo. Se a contagem de inscritos falhar, a lista vem mesmo assim, com `registrationStatus: unknown`.',
         parameters: [
           { name: 'period', in: 'query', schema: { type: 'string', enum: ['upcoming', 'past'], default: 'upcoming' } },
           { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100 } },
@@ -644,6 +707,19 @@ export const openApiDocument = {
         },
       },
     },
+    '/events/{id}/image': {
+      get: {
+        tags: ['Events'],
+        summary: 'A foto de um evento publicado',
+        description: 'Só de evento publicado e com foto. Tipo gravado, `nosniff`, `inline`, cache de uma hora e ETag (304 quando não mudou).',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'Os bytes da foto', content: { 'image/*': { schema: { type: 'string', format: 'binary' } } } },
+          '304': { description: 'Não mudou desde o `If-None-Match`' },
+          '404': { description: 'Rascunho, inexistente ou sem foto: a mesma resposta', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
     '/events/{id}/registrations': {
       post: {
         tags: ['Events'],
@@ -659,7 +735,7 @@ export const openApiDocument = {
           '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '401': { description: 'Token enviado, mas inválido ou de conta que não existe mais', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '404': { description: 'Evento inexistente ou não publicado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-          '409': { description: '`event_full`, `registrations_closed` (evento acabou) ou `already_registered`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: '`event_full`, `registrations_closed` (o evento já começou), `registrations_not_offered` (sem inscrição pelo site) ou `already_registered`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '429': { description: '`too_many_registrations` (5 pessoas por e-mail no evento) ou `too_many_requests` (30 inscrições por hora vindas da mesma conexão)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },

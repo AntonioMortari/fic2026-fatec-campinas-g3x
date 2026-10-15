@@ -4,7 +4,7 @@ import { TIME_ZONE } from './dates'
 
 export const ALL_CATEGORIES = ''
 
-function formatTime(iso: string): string {
+export function formatTime(iso: string): string {
   const parts = new Intl.DateTimeFormat('pt-BR', {
     timeZone: TIME_ZONE,
     hour: 'numeric',
@@ -20,6 +20,9 @@ export function formatTimeRange(event: Pick<EventSummary, 'startsAt' | 'endsAt'>
   const start = formatTime(event.startsAt)
   return event.endsAt ? `${start}–${formatTime(event.endsAt)}` : start
 }
+
+export const canRegister = (event: Pick<EventSummary, 'registrationStatus'>): boolean =>
+  event.registrationStatus === 'open' || event.registrationStatus === 'few_left'
 
 export function spotsText(event: Pick<EventSummary, 'spotsLeft'>): string | null {
   if (event.spotsLeft === null) return null

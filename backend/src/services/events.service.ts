@@ -3,6 +3,15 @@ import { Event, Registration } from '../models';
 
 export type EventPeriod = 'upcoming' | 'past';
 
+export type RegistrationStatus = 'open' | 'few_left' | 'full' | 'not_on_site' | 'started' | 'unknown';
+
+export const FEW_SPOTS_THRESHOLD = 3;
+
+export interface EventImage {
+  url: string;
+  alt: string;
+}
+
 export interface PublicEvent {
   id: string;
   title: string;
@@ -14,6 +23,9 @@ export interface PublicEvent {
   ageRange: string | null;
   capacity: number | null;
   spotsLeft: number | null;
+  registrationOnSite: boolean;
+  registrationStatus: RegistrationStatus;
+  image: EventImage | null;
 }
 
 export interface PublicEventDetail extends PublicEvent {
@@ -27,12 +39,8 @@ export interface ListEventsOptions {
   now?: Date;
 }
 
-// Spelled out for both periods instead of NOT(...): with a NULL ends_at the negation evaluates to NULL and drops the row.
 function periodFilter(period: EventPeriod, now: Date): WhereOptions {
-  if (period === 'upcoming') {
-    return { [Op.or]: [{ endsAt: { [Op.gte]: now } }, { endsAt: null, startsAt: { [Op.gte]: now } }] };
-  }
-  return { [Op.or]: [{ endsAt: { [Op.lt]: now } }, { endsAt: null, startsAt: { [Op.lt]: now } }] };
+  return period === 'upcoming' ? { startsAt: { [Op.gt]: now } } : { startsAt: { [Op.lte]: now } };
 }
 
 export async function countRegistrations(eventIds: string[], transaction?: Transaction): Promise<Map<string, number>> {
@@ -47,13 +55,44 @@ export async function countRegistrations(eventIds: string[], transaction?: Trans
   return new Map(rows.map((row) => [row.eventId, Number(row.total)]));
 }
 
-export const spotsLeft = (capacity: number | null, registered: number): number | null =>
-  capacity === null ? null : Math.max(0, capacity - registered);
+export async function countRegistrationsOrNull(eventIds: string[]): Promise<Map<string, number> | null> {
+  try {
+    return await countRegistrations(eventIds);
+  } catch (error) {
+    console.error('[events] could not count registrations', error);
+    return null;
+  }
+}
 
-// An event is over when its end (or its start, with no end) is behind us: the same line the agenda draws between "Em breve" and "Já aconteceu".
+export const spotsLeft = (capacity: number | null, registered: number | null): number | null =>
+  capacity === null || registered === null ? null : Math.max(0, capacity - registered);
+
+export const hasStarted = (event: Pick<Event, 'startsAt'>, now: Date): boolean => now >= event.startsAt;
+
+export function registrationStatus(
+  event: Pick<Event, 'startsAt' | 'registrationOnSite' | 'capacity'>,
+  registered: number | null,
+  now: Date,
+): RegistrationStatus {
+  if (hasStarted(event, now)) return 'started';
+  if (!event.registrationOnSite) return 'not_on_site';
+  if (event.capacity === null) return 'open';
+  if (registered === null) return 'unknown';
+  const left = event.capacity - registered;
+  if (left <= 0) return 'full';
+  return left <= FEW_SPOTS_THRESHOLD ? 'few_left' : 'open';
+}
+
+export const eventImageUrl = (event: Pick<Event, 'id' | 'imageUpdatedAt'>): string =>
+  `/api/events/${event.id}/image?v=${event.imageUpdatedAt?.getTime() ?? 0}`;
+
+export function publicImage(event: Pick<Event, 'id' | 'imageUpdatedAt' | 'imageAlt'>): EventImage | null {
+  return event.imageUpdatedAt && event.imageAlt ? { url: eventImageUrl(event), alt: event.imageAlt } : null;
+}
+
 export const isOver = (event: Pick<Event, 'startsAt' | 'endsAt'>, now: Date): boolean => (event.endsAt ?? event.startsAt) < now;
 
-export function toPublicEvent(event: Event, registered = 0): PublicEvent {
+export function toPublicEvent(event: Event, registered: number | null = 0, now: Date = new Date()): PublicEvent {
   return {
     id: event.id,
     title: event.title,
@@ -65,6 +104,9 @@ export function toPublicEvent(event: Event, registered = 0): PublicEvent {
     ageRange: event.ageRange,
     capacity: event.capacity,
     spotsLeft: spotsLeft(event.capacity, registered),
+    registrationOnSite: event.registrationOnSite,
+    registrationStatus: registrationStatus(event, registered, now),
+    image: publicImage(event),
   };
 }
 
@@ -74,22 +116,30 @@ export async function listPublishedEvents({ period, limit, now = new Date() }: L
     order: [['startsAt', period === 'upcoming' ? 'ASC' : 'DESC']],
     ...(limit ? { limit } : {}),
   });
-  const registered = await countRegistrations(events.map((event) => event.id));
-  return events.map((event) => toPublicEvent(event, registered.get(event.id) ?? 0));
+  const registered = await countRegistrationsOrNull(events.map((event) => event.id));
+  return events.map((event) => toPublicEvent(event, registered ? (registered.get(event.id) ?? 0) : null, now));
 }
 
 export async function getPublishedEventDetail(id: string, now: Date = new Date()): Promise<PublicEventDetail | null> {
   const event = await findPublishedEvent(id);
   if (!event) return null;
-  const registered = (await countRegistrations([event.id])).get(event.id) ?? 0;
-  const publicEvent = toPublicEvent(event, registered);
+  const counts = await countRegistrationsOrNull([event.id]);
+  const publicEvent = toPublicEvent(event, counts ? (counts.get(event.id) ?? 0) : null, now);
   return {
     ...publicEvent,
     requiresCpf: event.requiresCpf,
-    registrationsOpen: !isOver(event, now) && publicEvent.spotsLeft !== 0,
+    registrationsOpen: ['open', 'few_left', 'unknown'].includes(publicEvent.registrationStatus),
   };
 }
 
 export async function findPublishedEvent(id: string): Promise<Event | null> {
   return Event.findOne({ where: { id, published: true } });
+}
+
+export async function findPublishedEventImage(id: string): Promise<Event | null> {
+  const event = await Event.findOne({
+    attributes: ['id', 'imageFile', 'imageMime', 'imageUpdatedAt'],
+    where: { id, published: true },
+  });
+  return event?.imageFile ? event : null;
 }

@@ -417,6 +417,34 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Por quê:** RF38 é o caminho de quem chega querendo pedir uma atividade; o contato é o objetivo da página.
 - **PR:** branch `feat/schools-page`
 
+## 2026-10-13 — Detalhe do evento, foto do evento e regra de inscrição (RF14/RF13, desenhos 13a–13d)
+- **Artefato:** Protótipos · Arquitetura · Requisitos (RF13, RF14, RF15)
+- **Antes:** "Ver detalhes" não existia; evento não tinha foto; um evento saía de "Em breve" quando terminava
+  (`COALESCE(ends_at, starts_at) >= agora`) e a inscrição fechava quando terminava; todo evento aceitava inscrição
+  pelo site; uma contagem de vagas que falhasse derrubava a lista inteira com 500.
+- **Depois:** rota `/agenda/:id` com os seis estados do desenho 13; `registrationStatus` calculado no servidor
+  (`open`, `few_left`, `full`, `not_on_site`, `started`, `unknown`); coluna `events.registration_on_site`; foto
+  guardada em arquivo no disco do servidor (`UPLOADS_DIR`; o evento guarda `image_file` e quatro colunas de apoio, com `CHECK` de tudo-ou-nada), servida em
+  `GET /api/events/:id/image` e enviada em `PUT /api/admin/events/:id/image` (JSON em base64, tipo pela assinatura
+  dos bytes, até 4 MB, declaração RN07 gravada como data); `DELETE` da foto; "Ver detalhes" em todo cartão da
+  agenda; no painel, foto e "Pelo site | Sem inscrição pelo site" no formulário do evento. Migration
+  `20261012120000`.
+- **Comportamento que mudou (a confirmar com o grupo):** (1) o evento sai de "Em breve" **no instante em que
+  começa** e a inscrição **fecha no início** (o desenho 13c marca como "proposta"; a borda é estrita: no instante
+  exato do início já está fechado, o que o desenho escreve como "agora ≥ começa_em"; a mensagem pedia `>=` para
+  "upcoming", e `>=` deixaria o evento "Em breve" e fechado ao mesmo tempo); (2) cancelar inscrição continua fechando
+  só no fim da atividade; (3) contagem de vagas que falha vira `unknown`, nunca zero nem aberta; (4) corpo grande
+  demais passou a responder 413 `payload_too_large` em vez de 500.
+- **Diferenças em relação ao desenho e por quê:** sem "Ver as fotos na galeria" (a galeria não existe neste projeto;
+  link para o 404 é pior que a ausência); sem foto no destaque da agenda (o desenho 6b/2b não a mostra); "Onde" em
+  uma linha (`location` é um campo só); com foto gravada, a descrição aparece como texto e só muda trocando a foto;
+  **botão "Remover foto" acrescentado** (não está no desenho; sem ele uma foto de criança subida por engano não sai,
+  e a regra 12 não deixa); "Últimas vagas" aparece quando restam 3 ou menos (o desenho não define o limiar); a
+  descrição da foto é obrigatória no servidor e no banco, como o desenho diz.
+- **Por quê:** o desenho 13 fecha uma divergência encontrada no código antigo (agenda e inscrição fechavam em
+  momentos diferentes) e dá ao evento a foto que o RF13 pedia; a foto fica em arquivo no servidor **por decisão do usuário** (a primeira versão a guardava em MEDIUMBLOB no MySQL, para não depender de volume num deploy ainda indefinido). O custo é de deploy: em plataforma com disco efêmero é preciso um volume persistente em `UPLOADS_DIR`, ou as fotos somem a cada deploy; o `docker-compose.yml` já monta o volume `uploads-data`. O nome do arquivo é sempre gerado pelo servidor (uuid + extensão pela assinatura dos bytes), por causa de path traversal.
+- **PR:** branch `feat/event-detail`
+
 ## 2026-10-12 — Back-end: esquemas de validação saem dos controllers
 - **Artefato:** Arquitetura (organização do back-end)
 - **Antes:** os esquemas Zod ficavam exportados dentro de cada controller, que passava a ter duas responsabilidades (validar e responder), e as rotas importavam o esquema do controller.

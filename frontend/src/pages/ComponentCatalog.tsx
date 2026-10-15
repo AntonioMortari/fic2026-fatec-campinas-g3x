@@ -202,6 +202,9 @@ export function ComponentCatalog() {
               ageRange: 'Livre',
               capacity: null,
               spotsLeft: null,
+              registrationOnSite: true,
+              registrationStatus: 'open',
+              image: null,
             }}
           />
         </div>
