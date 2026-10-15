@@ -26,4 +26,5 @@ export const PRESS_FEATURED: PressFeatured = {
 
 export const PRESS_OTHERS: PressItem[] = [
   { outlet: 'Rede Globo', year: '2021', title: 'Caldeirão do Huck · quadro The Wall', detail: 'Participação em rede nacional', url: 'https://globoplay.globo.com/v/9362917/', action: 'Assistir no Globoplay' },
+  { outlet: 'Gshow', year: '2021', title: 'Participante do The Wall faz discurso emocionante contra o racismo', detail: 'Matéria sobre a participação no quadro', url: 'https://gshow.globo.com/programas/caldeirao-do-huck/the-wall/noticia/participante-do-the-wall-faz-discurso-emocionante-contra-o-racismo-estamos-perdendo-as-nossas-criancas.ghtml', action: 'Ler a matéria no Gshow' },
 ]
