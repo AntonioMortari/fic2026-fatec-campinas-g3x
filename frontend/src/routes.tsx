@@ -9,6 +9,9 @@ import { AccountEdit } from './pages/AccountEdit'
 import { AdminAttendance } from './pages/admin/AdminAttendance'
 import { AdminEventForm } from './pages/admin/AdminEventForm'
 import { AdminEvents } from './pages/admin/AdminEvents'
+import { AdminGallery } from './pages/admin/AdminGallery'
+import { AdminGalleryEditRoute } from './pages/admin/AdminGalleryEditRoute'
+import { AdminGalleryDelete } from './pages/admin/AdminGalleryDelete'
 import { AdminHome } from './pages/admin/AdminHome'
 import { AdminReport } from './pages/admin/AdminReport'
 import { AdminRegistrants } from './pages/admin/AdminRegistrants'
@@ -28,6 +31,7 @@ import { MyVolunteerApplications } from './pages/MyVolunteerApplications'
 import { VolunteerApplicationPage } from './pages/VolunteerApplication'
 import { Volunteering } from './pages/Volunteering'
 import { Contact } from './pages/Contact'
+import { Gallery } from './pages/Gallery'
 import { News } from './pages/News'
 import { NewsDetail } from './pages/NewsDetail'
 import { Schools } from './pages/Schools'
@@ -53,6 +57,7 @@ export const routes: RouteObject[] = [
       },
       { path: '/contato', element: <Contact /> },
       { path: '/para-escolas', element: <Schools /> },
+      { path: '/galeria', element: <Gallery /> },
       { path: '/noticias', element: <News /> },
       { path: '/noticias/:id', element: <NewsDetail />, handle: { hideHeaderOnMobile: true } },
       ...DEV_ONLY,
@@ -72,6 +77,10 @@ export const routes: RouteObject[] = [
       { path: '/admin/eventos/:id/presenca', element: <AdminAttendance />, handle: { hideHeaderOnMobile: true } },
       { path: '/admin/contatos', element: <AdminContacts /> },
       { path: '/admin/contatos/:id', element: <AdminContacts />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/galeria', element: <AdminGallery />, handle: { hideHeaderOnMobile: true } },
+      { path: '/admin/galeria/nova', element: <AdminGallery />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/galeria/:id/editar', element: <AdminGalleryEditRoute />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/galeria/:id/apagar', element: <AdminGalleryDelete />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/noticias', element: <AdminNews /> },
       { path: '/admin/noticias/nova', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/noticias/:id/editar', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },

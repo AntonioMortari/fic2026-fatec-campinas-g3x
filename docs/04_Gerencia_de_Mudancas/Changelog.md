@@ -494,6 +494,21 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
   Ajuste de implementação: não altera a proposta aprovada nem nenhum critério de aceitação.
 - **PR:** branch `feat/subtle-motion`
 
+## 2026-10-14 — Galeria (RF05, desenhos 11a, 11c, 11d e 11j–11m)
+- **Artefato:** Protótipos · Requisitos (RF05, RN07) · Arquitetura (nova tabela, rotas e armazenamento de imagens)
+- **Antes:** o link "Galeria" do menu levava ao 404 e não havia como a equipe subir, publicar ou apagar fotos.
+- **Depois:** `/galeria` (álbuns por nome, miniaturas quadradas, tela cheia com anterior/próxima que dão a volta, setas, Esc e deslizar) e, no painel, `/admin/galeria` (lista com filtros, subir foto, pôr no ar/tirar do ar com confirmação) e `/admin/galeria/:id/apagar` (tela de confirmação). Back-end: tabela `gallery_photos`, `GET /api/gallery`, `GET /api/gallery/:id/image` e `/api/admin/gallery/*`. As fotos ficam no disco do servidor (`UPLOADS_DIR`), com nome gerado e tipo lido dos bytes, até 4 MB; foto maior é reduzida no celular antes do envio.
+- **RN07 em três camadas:** subir nunca publica; a declaração de autorização vira data e, sem ela, a API recusa publicar (409) **e o banco também** (`CHECK published = 0 OR authorized_at IS NOT NULL`); a rota pública da imagem responde 404 para foto guardada, tirada do ar ou sem autorização, então o arquivo também não sai. Apagar remove a linha e o arquivo.
+- **Diferenças em relação ao desenho, e por quê:**
+  - o desenho foi pensado sobre o bucket do Supabase (migration 008); aqui o arquivo é servido pela API, então **o aviso de "depósito aberto" não existe** e "Tirar do ar" diz "alguns minutos" (cache de 5 minutos) em vez de "até uma hora" (prazo da URL assinada);
+  - **sem "Conhecer o projeto →"** nos álbuns nem no visualizador: o site ainda não tem projetos (RF03), e um link para o 404 é pior que a ausência;
+  - **a declaração de autorização é opcional ao subir**, como o desenho decide de propósito ("sem ela a foto sobe e fica guardada"): a foto fica "Sem autorização de imagem" e não pode ir ao ar. O pedido inicial da equipe de desenvolvimento era exigir a declaração; o desenho venceu por ser a fonte de verdade das telas, e a regra de que nada vai ao ar sem autorização continua inteira;
+  - **edição só do texto, pedida pelo grupo e sem tela no desenho** (o desenho diz que, para corrigir, sobe-se de novo e apaga-se a antiga): `PUT /api/admin/gallery/:id` e `/admin/galeria/:id/editar` reescrevem **álbum, descrição e legenda** — nada além. O arquivo, a declaração de autorização e a publicação não mudam por aí, seja qual for o corpo (Zod descarta o resto **e** o service lista as três colunas), então a RN07 não é contornada: trocar a **foto em si** continua sendo subir outra e apagar a antiga. No desktop, "Editar" abre a foto **na coluna da direita** (a mesma de "Subir uma foto", que volta com "Cancelar"), com a lista à esquerda, o cartão marcado e o salvamento no lugar, como em Notícias e Mensagens; no celular é tela própria (`/admin/galeria/:id/editar`), como "Apagar". A decisão precisa ser **confirmada com quem desenha**;
+  - "sem JavaScript, tocar na foto abre a imagem" (11c) não se aplica a uma SPA: sem script não há página. A miniatura é um `<a>` para a imagem, que abre numa aba com Ctrl/Cmd.
+- **Sem desenho, escrito aqui:** a frase de "Nenhuma foto enviada ainda" no painel e os dois avisos depois de subir (com e sem autorização).
+- **Decidido aqui, a confirmar:** álbuns agrupados sem distinguir caixa nem acento; álbuns do mais recentemente publicado para o mais antigo e fotos na ordem em que foram ao ar; só imagem (vídeo não cabe no corpo da requisição); a frase do estado vazio público do desenho cita "fotos e vídeos".
+- **Por quê:** RF05, RN07 e o pedido do grupo de que a equipe suba e publique o que aparece no site.
+- **PR:** branch `feat/gallery`
 ## 2026-10-14 — Notícias e campanhas (RF04, desenhos 11e–11g, 11n e 11o)
 - **Artefato:** Protótipos · Requisitos (RF04) · Arquitetura (nova tabela e rotas)
 - **Antes:** o link "Notícias" do menu levava ao 404 e não havia como a equipe escrever ou publicar notícias.

@@ -18,21 +18,22 @@ export interface AdminGroup {
 export const ADMIN_CONTACTS: AdminDestination = { label: 'Mensagens', to: '/admin/contatos', badge: 'new-contacts' }
 export const ADMIN_NEWS: AdminDestination = { label: 'Notícias', to: '/admin/noticias' }
 export const ADMIN_VOLUNTEERS: AdminDestination = { label: 'Voluntários', to: '/admin/voluntarios', badge: 'new-volunteers' }
+export const ADMIN_GALLERY: AdminDestination = { label: 'Galeria', to: '/admin/galeria' }
 
 // The panel menu (designs 9a and 10e). Only screens that exist: the design also lists Atividades, Contatos,
-// Doações, Depoimentos, Galeria, Biblioteca, Avisos, Exportar and Configurações, which would lead to the 404.
+// Doações, Depoimentos, Biblioteca, Avisos, Exportar and Configurações, which would lead to the 404.
 export const ADMIN_SIDEBAR_GROUPS: AdminGroup[] = [
   { items: [ADMIN_HOME] },
   { title: 'Agenda', items: [{ label: 'Eventos e presença', to: ADMIN_EVENTS.to }] },
   { title: 'Pessoas', items: [ADMIN_CONTACTS, ADMIN_VOLUNTEERS] },
-  { title: 'Conteúdo', items: [ADMIN_NEWS] },
+  { title: 'Conteúdo', items: [ADMIN_NEWS, ADMIN_GALLERY] },
   { title: 'Gestão', items: [ADMIN_REPORT] },
 ]
 
 // "Mais" on the phone (design 10e): what the bottom bar does not show.
 export const ADMIN_MORE_GROUPS: AdminGroup[] = [
   { title: 'Pessoas', items: [ADMIN_CONTACTS, ADMIN_VOLUNTEERS] },
-  { title: 'Conteúdo', items: [ADMIN_NEWS] },
+  { title: 'Conteúdo', items: [ADMIN_NEWS, ADMIN_GALLERY] },
   { title: 'Gestão', items: [ADMIN_REPORT] },
   { title: 'Conta', items: [{ label: 'Minha conta', to: '/minha-conta' }] },
 ]

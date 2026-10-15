@@ -346,6 +346,51 @@ export const openApiDocument = {
           authorized: { type: 'boolean', enum: [true], description: 'Declaração de que há autorização de uso de imagem (RN07). Guardada como data.' },
         },
       },
+      GalleryPhoto: {
+        type: 'object',
+        required: ['id', 'alt', 'caption', 'url'],
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          alt: { type: 'string', description: 'Descrição para quem não enxerga a foto.' },
+          caption: { type: ['string', 'null'] },
+          url: { type: 'string', description: 'Endereço da foto, com `?v=` para o cache. Só abre enquanto a foto está no ar.' },
+        },
+      },
+      GalleryAlbum: {
+        type: 'object',
+        required: ['name', 'photos'],
+        properties: {
+          name: { type: 'string' },
+          photos: { type: 'array', items: { $ref: '#/components/schemas/GalleryPhoto' } },
+        },
+      },
+      AdminGalleryPhoto: {
+        type: 'object',
+        required: ['id', 'album', 'alt', 'caption', 'state', 'published', 'authorized', 'publishedAt', 'uploadedAt', 'imageUrl'],
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          album: { type: 'string' },
+          alt: { type: 'string' },
+          caption: { type: ['string', 'null'] },
+          state: { type: 'string', enum: ['live', 'stored', 'unauthorized'], description: '`live` = no ar; `stored` = guardada; `unauthorized` = sem autorização de imagem (nunca pode ir ao ar).' },
+          published: { type: 'boolean' },
+          authorized: { type: 'boolean' },
+          publishedAt: { type: ['string', 'null'], format: 'date-time' },
+          uploadedAt: { type: 'string', format: 'date-time' },
+          imageUrl: { type: 'string', description: 'Imagem para a equipe (exige sessão), sem cache.' },
+        },
+      },
+      GalleryUploadRequest: {
+        type: 'object',
+        required: ['data', 'album', 'alt'],
+        properties: {
+          data: { type: 'string', description: 'A imagem em base64 (JPG, PNG, GIF ou WebP, até 4 MB). O tipo é lido dos bytes, não do nome.' },
+          album: { type: 'string', maxLength: 120, description: 'Fotos com o mesmo nome de álbum aparecem juntas.' },
+          alt: { type: 'string', maxLength: 300 },
+          caption: { type: ['string', 'null'], maxLength: 300 },
+          authorized: { type: 'boolean', default: false, description: 'Declaração de que existe autorização de uso de imagem (RN07). Guardada como data. Sem ela a foto fica guardada e não pode ir ao ar.' },
+        },
+      },
     },
   },
   paths: {
@@ -1252,6 +1297,147 @@ export const openApiDocument = {
           '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '404': { description: '`news_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/gallery': {
+      get: {
+        tags: ['Gallery'],
+        summary: 'Álbuns com fotos no ar (RF05)',
+        description: 'Só entram fotos publicadas **e** com autorização de imagem declarada (RN07). Álbuns do mais recente ao mais antigo; fotos na ordem em que foram ao ar.',
+        responses: {
+          '200': { description: 'Os álbuns', content: { 'application/json': { schema: { type: 'object', properties: { data: { type: 'array', items: { $ref: '#/components/schemas/GalleryAlbum' } } } } } } },
+        },
+      },
+    },
+    '/gallery/{id}/image': {
+      get: {
+        tags: ['Gallery'],
+        summary: 'A imagem de uma foto no ar',
+        description: 'Responde 404 igual para foto inexistente, guardada, tirada do ar ou sem autorização: o arquivo não é servido a quem não é equipe. `nosniff` e cache de 5 minutos.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          '200': { description: 'Os bytes da imagem', content: { 'image/*': { schema: { type: 'string', format: 'binary' } } } },
+          '400': { description: 'Identificador inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`photo_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/gallery': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Todas as fotos, da mais recente à mais antiga (equipe)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'As fotos, em qualquer situação', content: { 'application/json': { schema: { type: 'object', properties: { data: { type: 'array', items: { $ref: '#/components/schemas/AdminGalleryPhoto' } } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      post: {
+        tags: ['Admin'],
+        summary: 'Sobe uma foto (equipe)',
+        description: 'Subir **nunca publica**: a foto nasce guardada. Com `authorized: true` a declaração de autorização é guardada como data; sem ela a foto fica guardada mas não pode ir ao ar. O corpo aceita até 6 MB de JSON (4 MB de imagem em base64).',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/GalleryUploadRequest' } } } },
+        responses: {
+          '201': { description: 'A foto guardada', content: { 'application/json': { schema: { type: 'object', properties: { photo: { $ref: '#/components/schemas/AdminGalleryPhoto' } } } } } },
+          '400': { description: 'Dados inválidos (`invalid_data`) ou arquivo que não é imagem (`invalid_image`)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '413': { description: '`image_too_large`: mais de 4 MB', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/gallery/{id}': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Uma foto (equipe)',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'A foto', content: { 'application/json': { schema: { type: 'object', properties: { photo: { $ref: '#/components/schemas/AdminGalleryPhoto' } } } } } },
+          '400': { description: 'Identificador inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`photo_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      put: {
+        tags: ['Admin'],
+        summary: 'Corrige o texto da foto (equipe)',
+        description: 'Reescreve só álbum, descrição e legenda. O arquivo, a declaração de autorização e a publicação não mudam por aqui, seja qual for o corpo.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['album', 'alt'],
+                properties: {
+                  album: { type: 'string', maxLength: 120 },
+                  alt: { type: 'string', maxLength: 300 },
+                  caption: { type: 'string', maxLength: 300, nullable: true },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'A foto com o texto novo', content: { 'application/json': { schema: { type: 'object', properties: { photo: { $ref: '#/components/schemas/AdminGalleryPhoto' } } } } } },
+          '400': { description: 'Texto inválido ou identificador inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`photo_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      delete: {
+        tags: ['Admin'],
+        summary: 'Apaga a foto e o arquivo (equipe)',
+        description: 'Sem desfazer: a linha e o arquivo no disco somem, e todo link que já circulou deixa de abrir.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '204': { description: 'Apagada' },
+          '400': { description: 'Identificador inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`photo_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/gallery/{id}/publication': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Põe no ar ou tira do ar (equipe)',
+        description: 'Único jeito de mudar `published`. A data da primeira publicação é guardada e não muda ao tirar do ar. Sem autorização de imagem declarada na subida, publicar responde 409 `authorization_missing`.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['published'], properties: { published: { type: 'boolean' } } } } } },
+        responses: {
+          '200': { description: 'A foto atualizada', content: { 'application/json': { schema: { type: 'object', properties: { photo: { $ref: '#/components/schemas/AdminGalleryPhoto' } } } } } },
+          '400': { description: 'Corpo inválido', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`photo_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: '`authorization_missing`: a autorização de imagem não foi declarada na subida', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/gallery/{id}/image': {
+      get: {
+        tags: ['Admin'],
+        summary: 'A imagem de qualquer foto, para a equipe',
+        description: 'Serve a imagem mesmo de foto guardada, sem autorização ou tirada do ar. `private, no-store`.',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Os bytes da imagem', content: { 'image/*': { schema: { type: 'string', format: 'binary' } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`photo_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },
