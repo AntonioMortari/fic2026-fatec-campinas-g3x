@@ -222,6 +222,8 @@ describe('home page: in the press', () => {
     expect(within(section).getByText('Rede Globo · 2021')).toBeInTheDocument()
     expect(within(section).getByText('Caldeirão do Huck · quadro The Wall')).toBeInTheDocument()
     expect(within(section).getByText('Participação em rede nacional')).toBeInTheDocument()
+    expect(within(section).getByText('Gshow · 2021')).toBeInTheDocument()
+    expect(within(section).getByText('Participante do The Wall faz discurso emocionante contra o racismo')).toBeInTheDocument()
   })
 
   it('links each piece to its original, the ones the team gave, in a new tab', () => {
@@ -231,6 +233,7 @@ describe('home page: in the press', () => {
     expect(links.map((link) => [link.textContent?.replace(/\s+/g, ' ').trim(), link.getAttribute('href')])).toEqual([
       ['Ler a matéria na Folha ↗ (abre em outra aba)', 'https://pitacocultural.blogfolha.uol.com.br/2021/03/30/como-o-menino-que-era-caixa-de-supermercado-criou-um-atelie-para-valorizar-a-cultura-negra/'],
       ['Assistir no Globoplay ↗ (abre em outra aba)', 'https://globoplay.globo.com/v/9362917/'],
+      ['Ler a matéria no Gshow ↗ (abre em outra aba)', 'https://gshow.globo.com/programas/caldeirao-do-huck/the-wall/noticia/participante-do-the-wall-faz-discurso-emocionante-contra-o-racismo-estamos-perdendo-as-nossas-criancas.ghtml'],
     ])
     for (const link of links) expect(link).toHaveAttribute('target', '_blank')
   })
