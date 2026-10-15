@@ -9,6 +9,8 @@ import { AccountEdit } from './pages/AccountEdit'
 import { AdminAttendance } from './pages/admin/AdminAttendance'
 import { AdminEventForm } from './pages/admin/AdminEventForm'
 import { AdminEvents } from './pages/admin/AdminEvents'
+import { AdminGallery } from './pages/admin/AdminGallery'
+import { AdminGalleryDelete } from './pages/admin/AdminGalleryDelete'
 import { AdminHome } from './pages/admin/AdminHome'
 import { AdminReport } from './pages/admin/AdminReport'
 import { AdminRegistrants } from './pages/admin/AdminRegistrants'
@@ -67,6 +69,9 @@ export const routes: RouteObject[] = [
       { path: '/admin/eventos/:id/presenca', element: <AdminAttendance />, handle: { hideHeaderOnMobile: true } },
       { path: '/admin/contatos', element: <AdminContacts /> },
       { path: '/admin/contatos/:id', element: <AdminContacts />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/galeria', element: <AdminGallery />, handle: { hideHeaderOnMobile: true } },
+      { path: '/admin/galeria/nova', element: <AdminGallery />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/galeria/:id/apagar', element: <AdminGalleryDelete />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/voluntarios', element: <AdminVolunteers /> },
       { path: '/admin/voluntarios/:id', element: <AdminVolunteers />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
     ],
