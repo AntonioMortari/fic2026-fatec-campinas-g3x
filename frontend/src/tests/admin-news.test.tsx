@@ -231,6 +231,24 @@ describe('writing a piece (design 11o)', () => {
     expect(calls('POST /admin/news')).toHaveLength(0)
   })
 
+  it('takes each image error away as soon as that field is fixed, not only on the next save', async () => {
+    const user = userEvent.setup()
+    open()
+    renderRoute('/admin/noticias/nova')
+    await user.type(await screen.findByLabelText('Título'), 'Com imagem')
+    await user.type(screen.getByLabelText('Texto da notícia'), 'Texto.')
+    await user.upload(document.querySelector('input[type=file]')!, new File(['x'], 'foto.png', { type: 'image/png' }))
+    await user.click(screen.getAllByRole('button', { name: 'Guardar rascunho' })[0]!)
+    await screen.findByText('Descreva a imagem para quem não a enxerga.')
+
+    await user.type(screen.getByLabelText('Descrição da imagem'), 'Crianças em roda.')
+    expect(screen.queryByText('Descreva a imagem para quem não a enxerga.')).not.toBeInTheDocument()
+    expect(screen.getByText('Para subir a imagem, confirme que existe autorização de uso de imagem.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('checkbox', { name: /autorização de uso de imagem/ }))
+    expect(screen.queryByText('Para subir a imagem, confirme que existe autorização de uso de imagem.')).not.toBeInTheDocument()
+  })
+
   it('refuses a file that is not an image', async () => {
     open()
     renderRoute('/admin/noticias/nova')

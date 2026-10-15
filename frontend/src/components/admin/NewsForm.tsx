@@ -42,8 +42,17 @@ export function NewsForm({ news, saving, notice, onSubmit }: NewsFormProps) {
   const [draft, setDraft] = useState<PhotoDraft>(EMPTY_PHOTO)
   const [localError, setLocalError] = useState<{ alt?: string; authorized?: string }>({})
   const { formRef, alertRef, ...feedback } = useFormFeedback()
-  const hasFieldErrors = Object.keys(feedback.fields).length > 0 || Object.keys(localError).length > 0
+  const hasFieldErrors = Object.keys(feedback.fields).length > 0 || Object.values(localError).some(Boolean)
   const saveLabel = news ? 'Guardar alterações' : 'Guardar rascunho'
+
+  function changeDraft(next: PhotoDraft) {
+    const replaced = next.blob !== draft.blob || next.removed !== draft.removed
+    setDraft(next)
+    setLocalError((current) => ({
+      alt: replaced || next.alt !== draft.alt ? undefined : current.alt,
+      authorized: replaced || next.authorized !== draft.authorized ? undefined : current.authorized,
+    }))
+  }
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -106,7 +115,7 @@ export function NewsForm({ news, saving, notice, onSubmit }: NewsFormProps) {
           onChange={(e) => setBody(e.target.value)}
           error={feedback.fields.body}
         />
-        <NewsImageField news={news} draft={draft} onChange={setDraft} errors={errors} />
+        <NewsImageField news={news} draft={draft} onChange={changeDraft} errors={errors} />
       </div>
 
       <div className="hidden items-center justify-between gap-2.5 border-t border-line bg-cream px-8 py-4 desktop:flex">
