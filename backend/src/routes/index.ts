@@ -14,6 +14,8 @@ import { galleryRoutes } from './gallery.routes';
 import { adminGalleryRoutes } from './admin-gallery.routes';
 import { newsRoutes } from './news.routes';
 import { adminNewsRoutes } from './admin-news.routes';
+import { faqRoutes } from './faq.routes';
+import { adminFaqRoutes } from './admin-faq.routes';
 
 export const routes = Router();
 
@@ -33,3 +35,5 @@ routes.use('/gallery', galleryRoutes);
 routes.use('/admin/gallery', adminGalleryRoutes);
 routes.use('/news', newsRoutes);
 routes.use('/admin/news', adminNewsRoutes);
+routes.use('/faq', faqRoutes);
+routes.use('/admin/faq', adminFaqRoutes);

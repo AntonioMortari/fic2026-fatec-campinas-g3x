@@ -11,3 +11,5 @@ export { VolunteerArea } from './volunteer-area.model';
 export { Contact, CONTACT_STATUSES, type ContactStatus } from './contact.model';
 export { GalleryPhoto } from './gallery-photo.model';
 export { News, NEWS_KINDS, type NewsKind } from './news.model';
+export { FaqTheme } from './faq-theme.model';
+export { FaqItem } from './faq-item.model';

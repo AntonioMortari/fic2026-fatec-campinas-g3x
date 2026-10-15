@@ -12,11 +12,12 @@ export interface SelectOption {
 interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string
   options: SelectOption[]
+  placeholder?: string
   hint?: ReactNode
   error?: string
 }
 
-export function SelectField({ label, options, hint, error, id, className, ...select }: SelectFieldProps) {
+export function SelectField({ label, options, placeholder = 'Escolha uma opção', hint, error, id, className, ...select }: SelectFieldProps) {
   const { fieldId, hintId, errorId, describedBy } = useFieldIds(id, Boolean(hint), Boolean(error))
 
   return (
@@ -32,7 +33,7 @@ export function SelectField({ label, options, hint, error, id, className, ...sel
           className="min-h-12.5 w-full min-w-0 flex-1 cursor-pointer bg-transparent px-3 text-body text-brown outline-none"
           {...select}
         >
-          <option value="">Escolha uma opção</option>
+          <option value="">{placeholder}</option>
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

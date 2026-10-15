@@ -1,29 +1,32 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Button, Container, PageHeader, StripedBand } from '../components/ui'
+import { Button, Container, EmptyState, LoadingState, PageHeader, StripedBand } from '../components/ui'
 import { CONTACTS } from '../lib/contacts'
-import { FAQ_ITEMS, FAQ_THEMES, filterFaq, searchWords, type FaqItem } from '../lib/faq'
+import { filterFaq, searchWords } from '../lib/faq'
 import { revealElement } from '../lib/motion'
+import { usePublicFaq } from '../services/faq'
+import type { PublicFaqQuestion } from '../types/faq'
 
 const THEME_OVERLINE = 'm-0 text-[0.8125rem] leading-[normal] font-bold uppercase tracking-[0.12em] text-ochre-deep desktop:text-[1.625rem] desktop:tracking-normal desktop:normal-case desktop:text-brown'
 
-function Answer({ item }: { item: FaqItem }) {
+function Answer({ item }: { item: PublicFaqQuestion }) {
   return (
-    <p className="m-0 pb-4 text-[0.96875rem] leading-[1.6] desktop:pr-11 desktop:pb-5 desktop:text-[1.0625rem] desktop:leading-[1.65]">
-      {item.answer.map((part, index) =>
-        typeof part === 'string' ? (
-          part
-        ) : (
-          <Link key={index} to={part.to}>
-            {part.text}
-          </Link>
-        ),
+    <div className="flex flex-col gap-2 pb-4 text-[0.96875rem] leading-[1.6] desktop:pr-11 desktop:pb-5 desktop:text-[1.0625rem] desktop:leading-[1.65]">
+      {item.answer.split('\n\n').map((paragraph) => (
+        <p key={paragraph} className="m-0">
+          {paragraph}
+        </p>
+      ))}
+      {item.link && (
+        <Link to={item.link.to} className="inline-flex min-h-11 items-center self-start font-semibold">
+          {item.link.label} <span aria-hidden="true">&nbsp;→</span>
+        </Link>
       )}
-    </p>
+    </div>
   )
 }
 
-function Question({ item, open, onToggle }: { item: FaqItem; open: boolean; onToggle: () => void }) {
+function Question({ item, open, onToggle }: { item: PublicFaqQuestion; open: boolean; onToggle: () => void }) {
   return (
     <div id={item.id} className="scroll-mt-24 border-t-[1.5px] border-brown">
       <h3 className="m-0">
@@ -57,18 +60,21 @@ export function Faq() {
   const linkedId = decodeURIComponent(hash.slice(1))
   const isOpen = (id: string) => searching || (opened[id] ?? id === linkedId)
 
+  const faq = usePublicFaq()
+  const themes = faq.data
   const searching = searchWords(term).length > 0
-  const found = useMemo(() => filterFaq(FAQ_ITEMS, term), [term])
-  const groups = FAQ_THEMES.map((theme) => ({ theme, items: found.filter((item) => item.theme === theme.id) })).filter((group) => group.items.length > 0)
+  const groups = useMemo(() => filterFaq(themes ?? [], term), [themes, term])
+  const foundCount = groups.reduce((total, theme) => total + theme.items.length, 0)
+  const total = (themes ?? []).reduce((sum, theme) => sum + theme.items.length, 0)
 
   useEffect(() => {
-    if (!FAQ_ITEMS.some((item) => item.id === linkedId)) return
+    if (!linkedId || !themes?.some((theme) => theme.items.some((item) => item.id === linkedId))) return
     const timer = window.setTimeout(() => {
       const target = document.getElementById(linkedId)
       if (target) revealElement(target, 'start')
     }, 50)
     return () => window.clearTimeout(timer)
-  }, [linkedId])
+  }, [linkedId, themes])
 
   const search = (
     <form role="search" aria-label="Buscar nas perguntas" onSubmit={(event) => event.preventDefault()} className="flex flex-col gap-1.5 desktop:w-[28.75rem]">
@@ -119,8 +125,8 @@ export function Faq() {
         <nav aria-label="Temas" className="hidden desktop:sticky desktop:top-6 desktop:flex desktop:flex-col">
           <span className="pb-2 text-[0.75rem] font-bold uppercase tracking-[0.12em] text-ochre-deep">Temas</span>
           <ul className="m-0 list-none p-0">
-            {FAQ_THEMES.map((theme) => {
-              const count = found.filter((item) => item.theme === theme.id).length
+            {(themes ?? []).map((theme) => {
+              const count = groups.find((group) => group.id === theme.id)?.items.length ?? 0
               return (
                 <li key={theme.id} className="border-t border-line">
                   {count > 0 ? (
@@ -143,14 +149,14 @@ export function Faq() {
         <div className="flex max-w-[48.75rem] flex-col gap-7 desktop:gap-10">
           {searching && (
             <p role="status" className="m-0 font-semibold">
-              {found.length === 0 ? 'Nenhuma pergunta encontrada' : found.length === 1 ? '1 pergunta encontrada' : `${found.length} perguntas encontradas`} ·{' '}
+              {foundCount === 0 ? 'Nenhuma pergunta encontrada' : foundCount === 1 ? '1 pergunta encontrada' : `${foundCount} perguntas encontradas`} ·{' '}
               <button type="button" onClick={() => setTerm('')} className="inline-flex min-h-11 cursor-pointer items-center border-0 bg-transparent p-0 font-semibold text-blue-deep underline">
                 ver todas
               </button>
             </p>
           )}
 
-          {searching && found.length === 0 && (
+          {searching && foundCount === 0 && (
             <div className="flex flex-col gap-3 border-[1.5px] border-dashed border-brown p-4.5 desktop:gap-3.5 desktop:p-6">
               <p className="m-0 text-[1.0625rem] leading-[1.3] font-bold desktop:text-[1.1875rem]">Nenhuma pergunta com essas palavras.</p>
               <p className="m-0 text-[0.9375rem] leading-[1.5] desktop:text-[1.03125rem] desktop:leading-[1.55]">Tente outra palavra ou fale com a gente.</p>
@@ -165,10 +171,27 @@ export function Faq() {
             </div>
           )}
 
-          {groups.map(({ theme, items }) => (
-            <section key={theme.id} id={`tema-${theme.id}`} aria-labelledby={`titulo-${theme.id}`} className="flex scroll-mt-6 flex-col">
-              <h2 id={`titulo-${theme.id}`} className={`${THEME_OVERLINE} mb-2 desktop:mb-2.5`}>
-                {theme.name}
+          {faq.isPending && (
+            <LoadingState label="Carregando as perguntas…" shape="rows" count={4} />
+          )}
+          {faq.isError && (
+            <EmptyState
+              tone="error"
+              title="Não conseguimos carregar as perguntas"
+              text="Tente de novo em alguns minutos. Se preferir, fale com a gente."
+              actions={
+                <Button variant="secondary" size="compact" onClick={() => void faq.refetch()}>
+                  Tentar de novo
+                </Button>
+              }
+            />
+          )}
+          {faq.isSuccess && total === 0 && <EmptyState title="Ainda não há perguntas por aqui" text="Fale com a gente pelo WhatsApp ou pelo formulário de contato." />}
+
+          {groups.map(({ id, name, items }) => (
+            <section key={id} id={`tema-${id}`} aria-labelledby={`titulo-${id}`} className="flex scroll-mt-6 flex-col">
+              <h2 id={`titulo-${id}`} className={`${THEME_OVERLINE} mb-2 desktop:mb-2.5`}>
+                {name}
               </h2>
               {items.map((item) => (
                 <Question key={item.id} item={item} open={isOpen(item.id)} onToggle={() => setOpened((current) => ({ ...current, [item.id]: !isOpen(item.id) }))} />
