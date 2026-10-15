@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { AdminBackBar } from '../../components/admin/AdminBackBar'
 import { AdminPage } from '../../components/admin/AdminPage'
 import { AdminTitle } from '../../components/admin/AdminTitle'
@@ -7,13 +7,15 @@ import { ConfirmDialog } from '../../components/admin/ConfirmDialog'
 import { GalleryFilters } from '../../components/admin/GalleryFilters'
 import { PanelNotice } from '../../components/admin/PanelNotice'
 import { PhotoCard } from '../../components/admin/PhotoCard'
+import { PhotoEditForm } from '../../components/admin/PhotoEditForm'
 import { PhotoUploadForm } from '../../components/admin/PhotoUploadForm'
 import { Button, EmptyState, LoadingState } from '../../components/ui'
 import { cn } from '../../lib/cn'
 import { parseApiError } from '../../lib/api-error'
 import { ADMIN_GALLERY_NEW_PATH, ADMIN_GALLERY_PATH, FILTER_SLUGS, filterFromSlug, NOTICES, PUBLICATION_DIALOG, type NoticeKey } from '../../lib/gallery'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/use-media-query'
-import { useAdminPhotos, useSetPhotoPublication } from '../../services/gallery'
+import { useAdminPhoto, useAdminPhotos, useSetPhotoPublication } from '../../services/gallery'
+import { PhotoNotFound } from './AdminGalleryEdit'
 import type { AdminPhoto, PhotoState } from '../../types/gallery'
 
 interface Notice {
@@ -28,7 +30,9 @@ export function AdminGallery() {
   const { pathname, state, key } = useLocation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { id: editingId } = useParams()
   const list = useAdminPhotos()
+  const editing = useAdminPhoto(editingId)
   const publication = useSetPhotoPublication()
   const [asking, setAsking] = useState<AdminPhoto | null>(null)
   const [notice, setNotice] = useState<Notice | null>(null)
@@ -119,6 +123,7 @@ export function AdminGallery() {
                       key={photo.id}
                       photo={photo}
                       desktop={desktop}
+                      selected={photo.id === editingId}
                       busy={publication.isPending && publication.variables?.id === photo.id}
                       onPublication={() => setAsking(photo)}
                     />
@@ -146,27 +151,37 @@ export function AdminGallery() {
             </details>
 
             <p className="m-0 text-[0.84375rem] leading-normal text-brown-400 max-desktop:order-last">
-              Não dá para trocar a foto nem o texto de uma que já subiu: escolher a foto de novo é o mesmo trabalho que subir outra. Para corrigir, suba de novo e apague esta.
+              O texto de uma foto se corrige em “Editar”. Para trocar a foto em si, suba outra e apague esta.
             </p>
           </AdminPage>
         </div>
       )}
 
       {showForm && (
-        <aside aria-label="Subir uma foto" className={cn('min-w-0 desktop:sticky desktop:top-18 desktop:h-[calc(100dvh-4.5rem)] desktop:overflow-y-auto')}>
+        <aside aria-label={editingId ? 'Corrigir o texto da foto' : 'Subir uma foto'} className={cn('min-w-0 desktop:sticky desktop:top-18 desktop:h-[calc(100dvh-4.5rem)] desktop:overflow-y-auto')}>
           <AdminBackBar to={ADMIN_GALLERY_PATH} label="Galeria" />
           <AdminPage className="flex flex-col gap-4 pt-5 desktop:px-8 desktop:pt-7 desktop:pb-8">
-            {desktop ? (
-              <h2 className="m-0 text-[1.5rem] leading-[1.2] font-bold">Subir uma foto</h2>
+            {editingId ? (
+              <>
+                {editing.isPending && <LoadingState label="Carregando a foto…" shape="block" count={2} />}
+                {editing.isError && <PhotoNotFound error={editing.error} />}
+                {editing.data && <PhotoEditForm key={editing.data.id} photo={editing.data} desktop onSaved={() => setNotice(noticeOf('edited'))} />}
+              </>
             ) : (
               <>
-                <h1 className="m-0 text-[1.75rem] leading-[1.15] font-bold">Subir uma foto</h1>
-                <p className="m-0 border border-line bg-card px-3.5 py-3 text-[0.90625rem] leading-normal">
-                  <strong>Nenhuma foto vai ao ar sem autorização de uso de imagem registrada</strong> de quem aparece nela. Subir não publica.
-                </p>
+                {desktop ? (
+                  <h2 className="m-0 text-[1.5rem] leading-[1.2] font-bold">Subir uma foto</h2>
+                ) : (
+                  <>
+                    <h1 className="m-0 text-[1.75rem] leading-[1.15] font-bold">Subir uma foto</h1>
+                    <p className="m-0 border border-line bg-card px-3.5 py-3 text-[0.90625rem] leading-normal">
+                      <strong>Nenhuma foto vai ao ar sem autorização de uso de imagem registrada</strong> de quem aparece nela. Subir não publica.
+                    </p>
+                  </>
+                )}
+                <PhotoUploadForm onStart={clearNotice} onUploaded={uploaded} />
               </>
             )}
-            <PhotoUploadForm onStart={clearNotice} onUploaded={uploaded} />
           </AdminPage>
         </aside>
       )}

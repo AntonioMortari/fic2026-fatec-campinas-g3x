@@ -60,7 +60,7 @@ const cards = async () => {
 }
 
 describe('the gallery of the panel is for staff only', () => {
-  it.each(['/admin/galeria', '/admin/galeria/nova', '/admin/galeria/k1/apagar'])('answers the 404 of the public site on %s and asks the API for nothing', async (path) => {
+  it.each(['/admin/galeria', '/admin/galeria/nova', '/admin/galeria/k1/apagar', '/admin/galeria/k1/editar'])('answers the 404 of the public site on %s and asks the API for nothing', async (path) => {
     open(listing(), { account: fakeUser })
     renderRoute(path)
 
@@ -105,15 +105,17 @@ describe('the list of photos (designs 11j and 11k)', () => {
     expect(within(sem!).getByText('Não pode ir ao ar: sem autorização declarada.')).toBeInTheDocument()
   })
 
-  it('has "Apagar" on every photo, as a link to the confirmation screen, and no way to edit', async () => {
+  it('has "Editar" and "Apagar" on every photo, as links to their own screens, even on the one without declaration', async () => {
     open()
     renderRoute('/admin/galeria')
 
     const items = await cards()
     expect(within(items[0]!).getByRole('link', { name: /^Apagar/ })).toHaveAttribute('href', '/admin/galeria/k1/apagar')
     expect(within(items[1]!).getByRole('link', { name: /^Apagar/ })).toHaveAttribute('href', '/admin/galeria/s1/apagar')
-    expect(screen.queryByRole('link', { name: /Editar/ })).not.toBeInTheDocument()
-    expect(screen.getByText(/Não dá para trocar a foto nem o texto de uma que já subiu/)).toBeInTheDocument()
+    expect(within(items[0]!).getByRole('link', { name: /^Editar/ })).toHaveAttribute('href', '/admin/galeria/k1/editar')
+    expect(within(items[1]!).getByRole('link', { name: /^Editar/ })).toHaveAttribute('href', '/admin/galeria/s1/editar')
+    expect(within(items[2]!).getByRole('link', { name: /^Editar/ })).toHaveAttribute('href', '/admin/galeria/l1/editar')
+    expect(screen.getByText(/O texto de uma foto se corrige em “Editar”. Para trocar a foto em si, suba outra e apague esta/)).toBeInTheDocument()
   })
 
   it('draws the chips with the count of each situation and none on "Todas"', async () => {
@@ -489,5 +491,165 @@ describe('deleting a photo (design 11m)', () => {
     expect(await screen.findByText('Não encontramos essa foto')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Apagar de vez' })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Voltar para a galeria' })).toHaveAttribute('href', '/admin/galeria')
+  })
+})
+
+describe('editing the text of a photo', () => {
+  const LIVE_WITH_CAPTION = entry({ id: 'c1', state: 'live', published: true, publishedAt: '2026-10-06T12:00:00.000Z', album: 'Cafú e o Café', alt: 'Homem sorridente.', caption: 'Lançamento do livro.' })
+  const field = (name: RegExp) => screen.getByRole('textbox', { name })
+
+  it('opens on its own screen with the photo and the three texts already filled in, and says what does not change', async () => {
+    open(listing([LIVE_WITH_CAPTION]))
+    renderRoute('/admin/galeria/c1/editar')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Corrigir o texto da foto' })).toBeInTheDocument()
+    expect(field(/^Álbum/)).toHaveValue('Cafú e o Café')
+    expect(field(/^Descrição da foto/)).toHaveValue('Homem sorridente.')
+    expect(field(/^Legenda/)).toHaveValue('Lançamento do livro.')
+    expect(screen.getByText(/A foto e a autorização de imagem não mudam por aqui — só o texto/)).toBeInTheDocument()
+    expect(screen.getByText(/Esta foto está no ar: o texto novo aparece no site na hora/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Voltar sem salvar' })).toHaveAttribute('href', '/admin/galeria')
+  })
+
+  it('sends only the three texts, goes back to the list and says it was updated', async () => {
+    const user = userEvent.setup()
+    open({ ...listing([LIVE_WITH_CAPTION]), 'PUT /admin/gallery/c1': () => ({ status: 200, data: { photo: { ...LIVE_WITH_CAPTION, album: 'Cafú e o Café (2026)' } } }) })
+    renderRoute('/admin/galeria/c1/editar')
+    await screen.findByRole('heading', { name: 'Corrigir o texto da foto' })
+
+    await user.clear(field(/^Álbum/))
+    await user.type(field(/^Álbum/), 'Cafú e o Café (2026)')
+    await user.clear(field(/^Legenda/))
+    await user.click(screen.getByRole('button', { name: 'Salvar texto' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Galeria' })).toBeInTheDocument()
+    expect(screen.getByText('Texto da foto atualizado.')).toBeInTheDocument()
+    const [put] = calls('PUT /admin/gallery/c1')
+    expect(put?.body).toEqual({ album: 'Cafú e o Café (2026)', alt: 'Homem sorridente.', caption: null })
+  })
+
+  it('refuses an empty album or description on the screen, marks the field and sends nothing', async () => {
+    const user = userEvent.setup()
+    open({ ...listing([LIVE_WITH_CAPTION]), 'PUT /admin/gallery/c1': () => ({ status: 200, data: { photo: LIVE_WITH_CAPTION } }) })
+    renderRoute('/admin/galeria/c1/editar')
+    await screen.findByRole('heading', { name: 'Corrigir o texto da foto' })
+
+    await user.clear(field(/^Álbum/))
+    await user.clear(field(/^Descrição da foto/))
+    await user.click(screen.getByRole('button', { name: 'Salvar texto' }))
+
+    expect(await screen.findByText('Escreva o nome do álbum.')).toBeInTheDocument()
+    expect(screen.getByText('Descreva a foto para quem não a enxerga.')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Confira os campos marcados abaixo.')
+    expect(field(/^Álbum/)).toBeInvalid()
+    expect(calls('PUT /admin/gallery/c1')).toHaveLength(0)
+  })
+
+  it('shows what the server said and keeps what was typed', async () => {
+    const user = userEvent.setup()
+    open({
+      ...listing([LIVE_WITH_CAPTION]),
+      'PUT /admin/gallery/c1': () => apiError(400, 'invalid_data', 'Dados inválidos.', [{ field: 'alt', message: 'A descrição da foto passou de 300 caracteres.' }]),
+    })
+    renderRoute('/admin/galeria/c1/editar')
+    await screen.findByRole('heading', { name: 'Corrigir o texto da foto' })
+
+    await user.type(field(/^Descrição da foto/), ' mais um pouco')
+    await user.click(screen.getByRole('button', { name: 'Salvar texto' }))
+
+    expect(await screen.findByText('A descrição da foto passou de 300 caracteres.')).toBeInTheDocument()
+    expect(field(/^Descrição da foto/)).toHaveValue('Homem sorridente. mais um pouco')
+    expect(screen.getByRole('heading', { name: 'Corrigir o texto da foto' })).toBeInTheDocument()
+  })
+
+  it('says it could not reach the server, and stays', async () => {
+    const user = userEvent.setup()
+    open({ ...listing([LIVE_WITH_CAPTION]), 'PUT /admin/gallery/c1': () => 'network-error' })
+    renderRoute('/admin/galeria/c1/editar')
+    await screen.findByRole('heading', { name: 'Corrigir o texto da foto' })
+
+    await user.click(screen.getByRole('button', { name: 'Salvar texto' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Não conseguimos falar com o servidor')
+    expect(screen.getByRole('heading', { name: 'Corrigir o texto da foto' })).toBeInTheDocument()
+  })
+
+  it('says the photo is not there when it was already deleted', async () => {
+    open({ ...listing([]), 'GET /admin/gallery/zz': () => apiError(404, 'photo_not_found', 'Não encontramos essa foto.') })
+    renderRoute('/admin/galeria/zz/editar')
+
+    expect(await screen.findByText('Não encontramos essa foto')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Salvar texto' })).not.toBeInTheDocument()
+  })
+
+  describe('on the desktop the right column is the editor, with the list still in view', () => {
+    const OTHER = entry({ id: 'o1', album: 'Outro álbum', alt: 'Outra descrição.' })
+
+    it('opens the photo in the column when "Editar" is touched, marks the card and keeps the list', async () => {
+      const user = userEvent.setup()
+      open(listing([LIVE_WITH_CAPTION, OTHER]), { desktop: true })
+      renderRoute('/admin/galeria')
+      const items = await cards()
+      expect(screen.getByRole('heading', { level: 2, name: 'Subir uma foto' })).toBeInTheDocument()
+
+      await user.click(within(items[0]!).getByRole('link', { name: /^Editar/ }))
+
+      expect(await screen.findByRole('heading', { level: 2, name: 'Corrigir o texto da foto' })).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: 'Subir uma foto' })).not.toBeInTheDocument()
+      expect(field(/^Álbum/)).toHaveValue('Cafú e o Café')
+      expect(screen.getByRole('heading', { level: 1, name: 'Galeria' })).toBeInTheDocument()
+      const list = await cards()
+      expect(list).toHaveLength(2)
+      expect(list[0]).toHaveAttribute('aria-current', 'true')
+      expect(list[1]).not.toHaveAttribute('aria-current')
+    })
+
+    it('opens straight on the address, switches photo without leaving the screen and starts from that photo', async () => {
+      const user = userEvent.setup()
+      open(listing([LIVE_WITH_CAPTION, OTHER]), { desktop: true })
+      renderRoute('/admin/galeria/c1/editar')
+      await screen.findByRole('heading', { level: 2, name: 'Corrigir o texto da foto' })
+      await user.type(field(/^Álbum/), ' rascunho')
+
+      await user.click(within((await cards())[1]!).getByRole('link', { name: /^Editar/ }))
+
+      await waitFor(() => expect(field(/^Álbum/)).toHaveValue('Outro álbum'))
+      expect(field(/^Descrição da foto/)).toHaveValue('Outra descrição.')
+    })
+
+    it('saves in place: says it was updated, keeps the photo open and does not leave the screen', async () => {
+      const user = userEvent.setup()
+      open({ ...listing([LIVE_WITH_CAPTION]), 'PUT /admin/gallery/c1': () => ({ status: 200, data: { photo: { ...LIVE_WITH_CAPTION, caption: 'Nova.' } } }) }, { desktop: true })
+      renderRoute('/admin/galeria/c1/editar')
+      await screen.findByRole('heading', { level: 2, name: 'Corrigir o texto da foto' })
+
+      await user.clear(field(/^Legenda/))
+      await user.type(field(/^Legenda/), 'Nova.')
+      await user.click(screen.getByRole('button', { name: 'Salvar texto' }))
+
+      expect(await screen.findByText('Texto da foto atualizado.')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: 'Corrigir o texto da foto' })).toBeInTheDocument()
+      expect(calls('PUT /admin/gallery/c1')[0]?.body).toEqual({ album: 'Cafú e o Café', alt: 'Homem sorridente.', caption: 'Nova.' })
+    })
+
+    it('"Cancelar" closes the editor and the column goes back to sending a photo', async () => {
+      const user = userEvent.setup()
+      open(listing([LIVE_WITH_CAPTION]), { desktop: true })
+      renderRoute('/admin/galeria/c1/editar')
+      await screen.findByRole('heading', { level: 2, name: 'Corrigir o texto da foto' })
+
+      await user.click(screen.getByRole('link', { name: 'Cancelar' }))
+
+      expect(await screen.findByRole('heading', { level: 2, name: 'Subir uma foto' })).toBeInTheDocument()
+      expect(calls('PUT /admin/gallery/c1')).toHaveLength(0)
+    })
+
+    it('says in the column that the photo is not there, keeping the list', async () => {
+      open({ ...listing([LIVE_WITH_CAPTION]), 'GET /admin/gallery/zz': () => apiError(404, 'photo_not_found', 'Não encontramos essa foto.') }, { desktop: true })
+      renderRoute('/admin/galeria/zz/editar')
+
+      expect(await screen.findByText('Não encontramos essa foto')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 1, name: 'Galeria' })).toBeInTheDocument()
+    })
   })
 })

@@ -32,3 +32,9 @@ export interface PhotoUpload {
   caption: string
   authorized: boolean
 }
+
+export interface PhotoText {
+  album: string
+  alt: string
+  caption: string
+}

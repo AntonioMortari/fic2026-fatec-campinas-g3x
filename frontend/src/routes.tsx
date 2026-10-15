@@ -10,6 +10,7 @@ import { AdminAttendance } from './pages/admin/AdminAttendance'
 import { AdminEventForm } from './pages/admin/AdminEventForm'
 import { AdminEvents } from './pages/admin/AdminEvents'
 import { AdminGallery } from './pages/admin/AdminGallery'
+import { AdminGalleryEditRoute } from './pages/admin/AdminGalleryEditRoute'
 import { AdminGalleryDelete } from './pages/admin/AdminGalleryDelete'
 import { AdminHome } from './pages/admin/AdminHome'
 import { AdminReport } from './pages/admin/AdminReport'
@@ -78,6 +79,7 @@ export const routes: RouteObject[] = [
       { path: '/admin/contatos/:id', element: <AdminContacts />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/galeria', element: <AdminGallery />, handle: { hideHeaderOnMobile: true } },
       { path: '/admin/galeria/nova', element: <AdminGallery />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/galeria/:id/editar', element: <AdminGalleryEditRoute />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/galeria/:id/apagar', element: <AdminGalleryDelete />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/noticias', element: <AdminNews /> },
       { path: '/admin/noticias/nova', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },

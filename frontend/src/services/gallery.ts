@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { AdminPhoto, GalleryAlbum, PhotoUpload } from '../types/gallery'
+import type { AdminPhoto, GalleryAlbum, PhotoText, PhotoUpload } from '../types/gallery'
 import { api } from './api'
 
 const KEY = ['gallery']
@@ -34,6 +34,15 @@ export function useUploadPhoto() {
   return useMutation({
     mutationFn: async (upload: PhotoUpload) =>
       (await api.post<{ photo: AdminPhoto }>('/admin/gallery', { ...upload, caption: upload.caption.trim() || null })).data.photo,
+    onSuccess: refresh,
+  })
+}
+
+export function useUpdatePhotoText() {
+  const refresh = useRefreshAfterChange()
+  return useMutation({
+    mutationFn: async ({ id, ...text }: PhotoText & { id: string }) =>
+      (await api.put<{ photo: AdminPhoto }>(`/admin/gallery/${id}`, { ...text, caption: text.caption.trim() || null })).data.photo,
     onSuccess: refresh,
   })
 }

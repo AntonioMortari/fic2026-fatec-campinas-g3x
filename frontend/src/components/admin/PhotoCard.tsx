@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { cn } from '../../lib/cn'
-import { ADMIN_GALLERY_PATH, numericDate } from '../../lib/gallery'
+import { ADMIN_GALLERY_PATH, adminGalleryEditPath, numericDate } from '../../lib/gallery'
 import { useAdminPhotoImage } from '../../services/gallery'
 import type { AdminPhoto } from '../../types/gallery'
 import { Skeleton } from '../ui'
@@ -11,12 +11,13 @@ interface PhotoCardProps {
   photo: AdminPhoto
   desktop: boolean
   busy: boolean
+  selected?: boolean
   onPublication: () => void
 }
 
 const ACTION = 'inline-flex min-h-11 cursor-pointer items-center justify-center text-[0.875rem] font-semibold no-underline'
 
-export function PhotoCard({ photo, desktop, busy, onPublication }: PhotoCardProps) {
+export function PhotoCard({ photo, desktop, busy, selected = false, onPublication }: PhotoCardProps) {
   const image = useAdminPhotoImage(photo.imageUrl)
   const unauthorized = photo.state === 'unauthorized'
   const missing = image.isError
@@ -24,10 +25,11 @@ export function PhotoCard({ photo, desktop, busy, onPublication }: PhotoCardProp
 
   return (
     <li
+      aria-current={selected ? 'true' : undefined}
       className={cn(
         'grid grid-cols-[6rem_minmax(0,1fr)] gap-x-3 gap-y-3 border-t border-line py-3.5',
         'desktop:flex desktop:flex-col desktop:gap-0 desktop:border desktop:bg-card desktop:p-0',
-        unauthorized ? 'desktop:border-error' : 'desktop:border-brown/25',
+        unauthorized ? 'desktop:border-error' : selected ? 'desktop:border-brown desktop:ring-2 desktop:ring-brown' : 'desktop:border-brown/25',
       )}
     >
       {image.data ? (
@@ -61,7 +63,7 @@ export function PhotoCard({ photo, desktop, busy, onPublication }: PhotoCardProp
         )}
       </div>
 
-      <div className={cn('col-span-2 grid gap-2 desktop:col-span-1 desktop:gap-0 desktop:border-t desktop:border-brown/20', unauthorized ? 'grid-cols-1' : 'grid-cols-2')}>
+      <div className="col-span-2 flex flex-wrap gap-2 desktop:col-span-1 desktop:grid desktop:auto-cols-fr desktop:grid-flow-col desktop:gap-0 desktop:border-t desktop:border-brown/20">
         {!unauthorized && (
           <button
             type="button"
@@ -69,14 +71,20 @@ export function PhotoCard({ photo, desktop, busy, onPublication }: PhotoCardProp
             onClick={onPublication}
             className={cn(
               ACTION,
-              'border-[1.5px] border-brown desktop:border-0 desktop:border-r desktop:border-brown/20',
+              'basis-26 flex-1 border-[1.5px] border-brown desktop:border-0 desktop:border-r desktop:border-brown/20',
               photo.state === 'stored' ? 'bg-brown text-cream hover:text-cream' : 'bg-transparent text-brown',
             )}
           >
             {photo.state === 'live' ? 'Tirar do ar' : 'Publicar'} <span className="sr-only">{name}</span>
           </button>
         )}
-        <Link to={`${ADMIN_GALLERY_PATH}/${photo.id}/apagar`} className={cn(ACTION, 'border-[1.5px] border-error text-error hover:text-error desktop:border-0')}>
+        <Link
+          to={adminGalleryEditPath(photo.id)}
+          className={cn(ACTION, 'basis-26 flex-1 border-[1.5px] border-brown text-brown desktop:border-0 desktop:border-r desktop:border-brown/20')}
+        >
+          Editar <span className="sr-only">{name}</span>
+        </Link>
+        <Link to={`${ADMIN_GALLERY_PATH}/${photo.id}/apagar`} className={cn(ACTION, 'basis-26 flex-1 border-[1.5px] border-error text-error hover:text-error desktop:border-0')}>
           Apagar <span className="sr-only">{name}</span>
         </Link>
       </div>

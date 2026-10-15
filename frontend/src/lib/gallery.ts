@@ -5,6 +5,8 @@ export const GALLERY_PATH = '/galeria'
 export const ADMIN_GALLERY_PATH = '/admin/galeria'
 export const ADMIN_GALLERY_NEW_PATH = '/admin/galeria/nova'
 
+export const adminGalleryEditPath = (id: string): string => `${ADMIN_GALLERY_PATH}/${id}/editar`
+
 export const EMPTY_GALLERY =
   'Ainda não publicamos nenhum álbum por aqui. As fotos e vídeos das nossas oficinas e apresentações só entram no ar depois da autorização de uso de imagem de quem aparece neles — assim que os primeiros álbuns estiverem prontos, você encontra os registros aqui.'
 
@@ -62,6 +64,7 @@ export const NO_PHOTO_CHOSEN = 'Escolha uma foto para enviar.'
 export const NOTICES = {
   published: 'Publicada. A foto já aparece na galeria do site.',
   taken_down: 'Tirada do ar. A foto sumiu da galeria do site e continua guardada aqui.',
+  edited: 'Texto da foto atualizado.',
   deleted: 'Apagada. A foto saiu do site e o arquivo foi removido — não dá para recuperar.',
   kept: 'Foto enviada e guardada. Ela só vai para o site quando você apertar “Publicar”.',
   kept_unauthorized:
