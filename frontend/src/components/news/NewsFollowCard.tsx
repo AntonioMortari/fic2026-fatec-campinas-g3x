@@ -4,7 +4,7 @@ const LINK = 'flex min-h-11 items-center border-t border-line-strong/50 text-[0.
 
 export function NewsFollowCard() {
   return (
-    <aside aria-labelledby="follow-title" className="hidden flex-col gap-3.5 self-start border border-line bg-card p-6 desktop:flex">
+    <aside aria-labelledby="follow-title" className="hidden flex-col gap-3.5 self-start border border-line bg-card p-6 desktop:col-start-2 desktop:row-span-2 desktop:row-start-1 desktop:mt-13 desktop:flex">
       <h2 id="follow-title" className="m-0 text-[1.125rem] leading-[1.25] font-bold">
         Acompanhe também
       </h2>

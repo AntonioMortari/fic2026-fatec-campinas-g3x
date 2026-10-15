@@ -112,6 +112,29 @@ describe('the news list (design 11e and 11g)', () => {
     expect(within(card).getByRole('link', { name: '@atelie_afrocultural', hidden: true })).toBeInTheDocument()
     expect(within(card).getByRole('link', { name: 'WhatsApp (11) 95396-8344', hidden: true })).toBeInTheDocument()
   })
+
+  it('does not reserve the image column for a piece without an image', async () => {
+    open({
+      'GET /news': () => ({
+        status: 200,
+        data: { data: [item({ id: 'a1a1a1a1-0000-4000-8000-000000000001', title: 'Sem foto' }), item({ image: { url: '/news/x/image', alt: 'Foto de teste' } })] },
+      }),
+    })
+    renderRoute('/noticias')
+
+    const articles = await screen.findAllByRole('article')
+    expect(articles[0]?.className).not.toContain('desktop:grid-cols')
+    expect(articles[1]?.className).toContain('desktop:grid-cols')
+  })
+
+  it('starts the follow-us card at the top of the page, beside the heading', async () => {
+    open({ 'GET /news': () => ({ status: 200, data: { data: [item()] } }) })
+    renderRoute('/noticias')
+
+    const card = await screen.findByRole('complementary', { name: 'Acompanhe também', hidden: true })
+    expect(card.className).toContain('desktop:row-start-1')
+    expect(card.className).toContain('desktop:col-start-2')
+  })
 })
 
 describe('a piece of news (design 11f)', () => {

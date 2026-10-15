@@ -82,7 +82,7 @@ export function NewsForm({ news, saving, notice, onSubmit }: NewsFormProps) {
           </Alert>
         )}
 
-        <SegmentedField legend="Tipo" name="kind" options={[...KINDS]} value={kind} onChange={setKind} error={feedback.fields.kind} />
+        <SegmentedField legend="Tipo" hideLegend name="kind" options={[...KINDS]} value={kind} onChange={setKind} error={feedback.fields.kind} />
         <TextField label="Título" name="title" required hint="Aparece na lista e no topo da notícia." value={title} onChange={(e) => setTitle(e.target.value)} error={feedback.fields.title} />
         <TextAreaField
           label={

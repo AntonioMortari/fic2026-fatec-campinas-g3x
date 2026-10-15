@@ -9,9 +9,9 @@ export function News() {
 
   return (
     <Container className="pb-10 desktop:grid desktop:grid-cols-[minmax(0,1fr)_18.75rem] desktop:gap-x-18 desktop:pb-18">
-      <PageHeader overline="Notícias" title="Notícias" lead="O que anda acontecendo no ateliê." className="desktop:col-span-2 desktop:flex-col desktop:items-start desktop:gap-3" />
+      <PageHeader overline="Notícias" title="Notícias" lead="O que anda acontecendo no ateliê." className="desktop:col-start-1 desktop:flex-col desktop:items-start desktop:gap-3" />
 
-      <div className="flex flex-col gap-5 desktop:gap-6">
+      <div className="flex flex-col gap-5 desktop:col-start-1 desktop:gap-6">
         {isPending && (
           <p role="status" className="m-0 text-brown-400">
             Carregando as notícias…

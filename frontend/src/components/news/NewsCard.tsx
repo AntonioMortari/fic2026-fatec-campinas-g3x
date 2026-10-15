@@ -8,16 +8,19 @@ import { NewsKindTag } from './NewsKindTag'
 export function NewsCard({ item }: { item: NewsItem }) {
   const href = `${NEWS_PATH}/${item.id}`
   return (
-    <article className="flex flex-col gap-2.5 border-b border-line pb-5 desktop:grid desktop:grid-cols-[20rem_minmax(0,1fr)] desktop:gap-x-7 desktop:gap-y-0 desktop:border-b-0 desktop:border-t desktop:pt-6 desktop:pb-0">
-      {item.image ? (
+    <article
+      className={cn(
+        'flex flex-col gap-2.5 border-b border-line pb-5 desktop:border-b-0 desktop:border-t desktop:pt-6 desktop:pb-0',
+        item.image && 'desktop:grid desktop:grid-cols-[20rem_minmax(0,1fr)] desktop:gap-x-7 desktop:gap-y-0',
+      )}
+    >
+      {item.image && (
         <img
           src={newsImageSrc(item.image.url)}
           alt={item.image.alt}
           loading="lazy"
           className="block aspect-video w-full bg-cream-dark object-cover desktop:aspect-[4/3]"
         />
-      ) : (
-        <span aria-hidden="true" className="hidden desktop:block" />
       )}
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-wrap items-center gap-2.5">
