@@ -348,12 +348,13 @@ export const openApiDocument = {
       },
       GalleryPhoto: {
         type: 'object',
-        required: ['id', 'alt', 'caption', 'url'],
+        required: ['id', 'alt', 'caption', 'url', 'publishedAt'],
         properties: {
           id: { type: 'string', format: 'uuid' },
           alt: { type: 'string', description: 'Descrição para quem não enxerga a foto.' },
           caption: { type: ['string', 'null'] },
           url: { type: 'string', description: 'Endereço da foto, com `?v=` para o cache. Só abre enquanto a foto está no ar.' },
+          publishedAt: { type: 'string', format: 'date-time', description: 'Quando a foto foi ao ar (na primeira vez, e fica ao tirar do ar).' },
         },
       },
       GalleryAlbum: {

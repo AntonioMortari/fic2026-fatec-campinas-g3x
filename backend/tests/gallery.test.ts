@@ -93,9 +93,25 @@ describe('GET /api/gallery (public)', () => {
       alt: 'Homem de camiseta amarela toca atabaque.',
       caption: 'Lançamento.',
       url: `/api/gallery/a1/image?v=${new Date('2026-10-12T12:00:00.123Z').getTime()}`,
+      publishedAt: '2026-09-12T12:00:00.000Z',
     });
     const text = JSON.stringify(response.body);
-    for (const leaked of ['authorizedAt', 'published', 'imageFile', 'imageMime', 'uploadedAt']) expect(text).not.toContain(leaked);
+    for (const leaked of ['authorizedAt', '"published"', 'imageFile', 'imageMime', 'uploadedAt']) expect(text).not.toContain(leaked);
+  });
+});
+
+describe('GET /api/gallery (public): when each photo went on air', () => {
+  it('tells when each photo went on air, so the home can show the most recent ones', async () => {
+    jest.spyOn(GalleryPhoto, 'findAll').mockResolvedValue([
+      row({ id: 'p1', album: 'A', publishedAt: new Date('2026-10-01T12:00:00Z') }),
+      row({ id: 'p2', album: 'A', publishedAt: new Date('2026-10-03T12:00:00Z') }),
+      row({ id: 'p3', album: 'B', publishedAt: null, createdAt: new Date('2026-10-02T12:00:00Z') }),
+    ]);
+
+    const response = await request(app).get('/api/gallery');
+
+    const dates = Object.fromEntries(response.body.data.flatMap((album: { photos: { id: string; publishedAt: string }[] }) => album.photos).map((photo: { id: string; publishedAt: string }) => [photo.id, photo.publishedAt]));
+    expect(dates).toEqual({ p1: '2026-10-01T12:00:00.000Z', p2: '2026-10-03T12:00:00.000Z', p3: '2026-10-02T12:00:00.000Z' });
   });
 });
 
