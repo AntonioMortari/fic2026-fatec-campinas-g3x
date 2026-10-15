@@ -31,6 +31,7 @@ import { MyVolunteerApplications } from './pages/MyVolunteerApplications'
 import { VolunteerApplicationPage } from './pages/VolunteerApplication'
 import { Volunteering } from './pages/Volunteering'
 import { Contact } from './pages/Contact'
+import { Faq } from './pages/Faq'
 import { Gallery } from './pages/Gallery'
 import { News } from './pages/News'
 import { NewsDetail } from './pages/NewsDetail'
@@ -57,6 +58,7 @@ export const routes: RouteObject[] = [
       },
       { path: '/contato', element: <Contact /> },
       { path: '/para-escolas', element: <Schools /> },
+      { path: '/perguntas-frequentes', element: <Faq /> },
       { path: '/galeria', element: <Gallery /> },
       { path: '/noticias', element: <News /> },
       { path: '/noticias/:id', element: <NewsDetail />, handle: { hideHeaderOnMobile: true } },

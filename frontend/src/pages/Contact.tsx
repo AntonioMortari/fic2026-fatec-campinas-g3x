@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { FaqHint } from '../components/faq/FaqHint'
 import { ContactChannels } from '../components/contact/ContactChannels'
 import { ContactForm } from '../components/contact/ContactForm'
 import { ContactLocation } from '../components/contact/ContactLocation'
@@ -57,6 +58,7 @@ export function Contact() {
         <h2 id="contact-form-title" className="m-0 text-h2 font-bold desktop:text-[1.625rem] desktop:leading-[1.2]">
           Ou mande uma mensagem por aqui
         </h2>
+        <FaqHint links={[{ text: 'Talvez já esteja respondido: perguntas frequentes' }]} />
         <ContactForm key={sentCount} onSent={() => setSentCount((count) => count + 1)} />
       </section>
 

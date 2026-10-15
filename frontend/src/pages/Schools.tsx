@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { FaqHint } from '../components/faq/FaqHint'
 import { PastVenues } from '../components/schools/PastVenues'
 import { RequirementList } from '../components/schools/RequirementList'
 import { SchoolsActions } from '../components/schools/SchoolsActions'
@@ -75,6 +76,12 @@ export function Schools() {
             <p className="m-0 text-[0.96875rem] leading-[1.55] desktop:text-[0.96875rem]">
               Conte para a gente qual atividade interessou, quantas crianças participariam e qual período você tem em mente. Respondemos pelo mesmo canal que você escolher.
             </p>
+            <FaqHint
+              links={[
+                { id: 'escola-providenciar', text: 'O que a escola precisa providenciar?' },
+                { id: 'escola-duracao', text: 'Quanto dura e qual é a classificação?' },
+              ]}
+            />
             <SchoolsActions placement="card" className="hidden desktop:flex desktop:flex-col desktop:gap-3" />
             <Link to={CONTACT_PATH} className="inline-flex min-h-11 items-center text-[0.90625rem] font-semibold">
               Prefere escrever por aqui? Use o formulário

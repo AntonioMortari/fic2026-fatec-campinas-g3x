@@ -559,3 +559,17 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Decidido aqui, a confirmar:** o tipo Notícia/Campanha (`kind`) foi implementado porque o desenho o traz, mas ele próprio o marca como proposta ("só se a coluna existir"); o menu do painel diz "Notícias" (o desenho diz "Publicações" no menu e "Notícias" no título, e sugere "Notícias" nos dois); a coluna "Acompanhe também" do desktop segue o desenho, que pede para confirmar se fica.
 - **Por quê:** RF04 e o pedido do grupo de que a equipe escreva e publique o que aparece no site.
 - **PR:** branch `feat/news`
+
+## 2026-10-16 — Perguntas frequentes, parte pública (desenhos 18a–18c)
+- **Artefato:** Protótipos (rodada 18) · Requisitos (RF01)
+- **Antes:** não havia página de perguntas frequentes, nem link para ela.
+- **Depois:** `/perguntas-frequentes` com busca (filtra enquanto se digita, sem acento e sem caixa, com as respostas encontradas já abertas e a contagem), perguntas agrupadas em 4 temas com a lista de temas e a contagem de cada um no desktop, cada pergunta com endereço próprio (`#imagem`, que chega aberta) e o cartão "Ficou alguma dúvida?". Sem resultado, oferece WhatsApp e o formulário. Os pontos de entrada do 18c: link no rodapé e em "Ajuda" nos dois menus, e uma linha com a pergunta certa ao lado da autorização de imagem na inscrição, em "Para escolas", no topo da candidatura de voluntariado e acima do formulário de contato. Os dados estão em `lib/faq.ts`.
+- **Diferenças em relação ao desenho, e por quê:**
+  - **9 das 11 perguntas.** "Como posso apoiar o Ateliê?" e "Como peço para ver, corrigir ou apagar os meus dados?" ficaram de fora: a regra do desenho é que a resposta repita o que **já está escrito numa página do site**, e as páginas de origem (`/doar` e `/privacidade`) ainda não existem. Entram junto com elas;
+  - da resposta sobre a ficha técnica saiu "em Projetos" (a página não existe, e um link para o 404 é pior que a ausência);
+  - os temas da coluna lateral são links para a seção (o desenho os mostra como texto) e somem o link quando o tema fica sem resultado;
+  - a faixa listrada sob o cabeçalho segue o desenho, o que contraria a regra de uma faixa por página (o rodapé já tem a sua);
+  - a barra inferior do celular segue a do projeto (o desenho tem "Biblioteca").
+- **Fica para depois (precisa de banco):** o painel das perguntas (18d–18f: criar, editar, ordenar, temas e tirar do ar). O desenho o pede como proposta, com duas tabelas novas; enquanto não existir, a lista mora no código.
+- **Por quê:** o desenho da rodada 18 leva a dúvida certa para onde ela aparece; a parte pública não depende de banco.
+- **PR:** branch `feat/faq-page`
