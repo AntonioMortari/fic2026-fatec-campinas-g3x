@@ -61,7 +61,7 @@ export function TabList({ tabs, activeId, onChange, label, prefix, className }: 
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(tab.id)}
             className={cn(
-              'min-h-11.5 cursor-pointer px-3 text-[0.9375rem] font-semibold transition-colors duration-[90ms]',
+              'min-h-11.5 cursor-pointer px-3 text-[0.9375rem] font-semibold transition-colors duration-(--motion-touch)',
               selected ? 'bg-brown text-cream' : 'bg-transparent text-brown hover:bg-hover',
             )}
           >

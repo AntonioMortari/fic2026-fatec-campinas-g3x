@@ -69,25 +69,22 @@
   --shadow-applique-hero-desktop: 8px 8px 0 var(--color-brown);
   --shadow-focus: 0 0 0 3px var(--color-blue);
 
-  --ease-out-soft: cubic-bezier(0.2, 0, 0, 1);
-  --motion-press: 90ms;
-  --motion-micro: 150ms;
-  --motion-page: 200ms;
-  --motion-enter: 200ms;
-  --motion-menu: 180ms;
-  --motion-sheet: 280ms;
-  --motion-sheet-out: 200ms;
+  --ease-motion: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --motion-touch: 100ms;
+  --motion-change: 200ms;
+  --motion-arrive: 320ms;
+  --motion-exit: 200ms;
   --motion-stagger: 20ms;
   --motion-skeleton-delay: 120ms;
 
-  --animate-rise: rise var(--motion-enter) var(--ease-out-soft) both;
-  --animate-sheet: sheet var(--motion-sheet) var(--ease-out-soft) both;
-  --animate-page: page var(--motion-page) var(--ease-out-soft) backwards;
-  --animate-drop: drop var(--motion-menu) var(--ease-out-soft) both;
-  --animate-drop-out: drop-out var(--motion-micro) var(--ease-out-soft) forwards;
-  --animate-page-out: page-out var(--motion-micro) ease-in forwards;
-  --animate-sink: sink var(--motion-micro) var(--ease-out-soft) forwards;
-  --animate-skeleton-in: skeleton-in var(--motion-enter) ease-out var(--motion-skeleton-delay) both;
+  --animate-rise: rise var(--motion-change) var(--ease-motion) both;
+  --animate-sheet: sheet var(--motion-arrive) var(--ease-motion) both;
+  --animate-page: page var(--motion-change) var(--ease-motion) backwards;
+  --animate-drop: drop var(--motion-change) var(--ease-motion) both;
+  --animate-drop-out: drop-out var(--motion-change) var(--ease-motion) forwards;
+  --animate-page-out: page-out var(--motion-change) ease-in forwards;
+  --animate-sink: sink var(--motion-change) var(--ease-motion) forwards;
+  --animate-skeleton-in: skeleton-in var(--motion-change) ease-out var(--motion-skeleton-delay) both;
   --animate-skeleton-pulse: skeleton-pulse 1.6s ease-in-out infinite;
   --animate-spin: spin 800ms linear infinite;
 
@@ -194,15 +191,15 @@
   summary,
   [role="tab"] {
     transition-property: color, background-color, border-color, box-shadow, transform, filter, opacity, text-decoration-color;
-    transition-duration: var(--motion-micro);
-    transition-timing-function: var(--ease-out-soft);
+    transition-duration: var(--motion-change);
+    transition-timing-function: var(--ease-motion);
   }
 
   a:active,
   button:active,
   summary:active,
   [role="tab"]:active {
-    transition-duration: var(--motion-press);
+    transition-duration: var(--motion-touch);
   }
 
   button:not(:disabled),
@@ -227,8 +224,8 @@
       block-size: 0;
       overflow: clip;
       transition:
-        block-size var(--motion-micro) var(--ease-out-soft),
-        content-visibility var(--motion-micro) allow-discrete;
+        block-size var(--motion-change) var(--ease-motion),
+        content-visibility var(--motion-change) allow-discrete;
     }
 
     details[open]::details-content {
@@ -237,9 +234,9 @@
 
     dialog[data-sheet] {
       transition:
-        transform var(--motion-sheet-out) var(--ease-out-soft),
-        display var(--motion-sheet-out) allow-discrete,
-        overlay var(--motion-sheet-out) allow-discrete;
+        transform var(--motion-exit) var(--ease-motion),
+        display var(--motion-exit) allow-discrete,
+        overlay var(--motion-exit) allow-discrete;
     }
 
     dialog[data-sheet]:not([open]) {
@@ -248,9 +245,9 @@
 
     dialog[data-sheet][open] {
       transition:
-        transform var(--motion-sheet) var(--ease-out-soft),
-        display var(--motion-sheet) allow-discrete,
-        overlay var(--motion-sheet) allow-discrete;
+        transform var(--motion-arrive) var(--ease-motion),
+        display var(--motion-arrive) allow-discrete,
+        overlay var(--motion-arrive) allow-discrete;
 
       @starting-style {
         transform: translateY(100%);
@@ -259,9 +256,9 @@
 
     dialog[data-sheet]::backdrop {
       transition:
-        opacity var(--motion-micro) ease-out,
-        display var(--motion-micro) allow-discrete,
-        overlay var(--motion-micro) allow-discrete;
+        opacity var(--motion-change) ease-out,
+        display var(--motion-change) allow-discrete,
+        overlay var(--motion-change) allow-discrete;
     }
 
     dialog[data-sheet]:not([open])::backdrop {
