@@ -116,3 +116,9 @@ describe('motion (design "Movimento e Feedback", round 22)', () => {
     expect(highContrast).toMatch(/--color-skeleton:/)
   })
 })
+
+describe('toast animations (round 22g)', () => {
+  it('rises in the arrive time and fades in the change time', () => {
+    expect(css).toMatch(/--animate-toast-in: toast-rise var\(--motion-arrive\)[^;]*, toast-fade var\(--motion-change\)/)
+  })
+})

@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFormFeedback } from '../components/auth/use-form-feedback'
 import { Button, Checkbox, LoadingState, Skeleton, Tabs, TextField } from '../components/ui'
 import { ToastProvider } from '../components/ui/ToastProvider'
-import { TOAST_DURATION_MS } from '../components/ui/toast-context'
+import { TOAST_DURATION_MS, TOAST_EXIT_MS, TOAST_UNDO_DURATION_MS } from '../components/ui/toast-context'
 import { useToast } from '../components/ui/useToast'
 import { focusAndReveal, prefersReducedMotion, revealElement, scrollBehavior, scrollToStart, scrollToTop } from '../lib/motion'
 import { mockApi } from './auth-support'
@@ -279,6 +279,20 @@ describe('toast dismissal', () => {
 
     expect(screen.getByRole('status')).toBeEmptyDOMElement()
     vi.useRealTimers()
+  })
+
+  it('rises in 320ms and fades in 200ms, and the exit is the quicker 200ms', () => {
+    reduceMotion(false)
+    render(
+      <ToastProvider>
+        <Trigger />
+      </ToastProvider>,
+    )
+    act(() => screen.getByRole('button', { name: 'Mostrar' }).click())
+
+    expect(screen.getByText('Salvo').parentElement).toHaveClass('animate-toast-in')
+    expect(TOAST_EXIT_MS).toBe(200)
+    expect(TOAST_UNDO_DURATION_MS).toBe(6000)
   })
 
   it('plays the exit before it leaves for everyone else', () => {

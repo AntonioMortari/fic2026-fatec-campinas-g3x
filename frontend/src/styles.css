@@ -86,6 +86,7 @@
   --animate-sink: sink var(--motion-change) var(--ease-motion) forwards;
   --animate-skeleton-in: skeleton-in var(--motion-change) ease-out var(--motion-skeleton-delay) both;
   --animate-skeleton-pulse: skeleton-pulse 1.6s ease-in-out infinite;
+  --animate-toast-in: toast-rise var(--motion-arrive) var(--ease-motion) both, toast-fade var(--motion-change) linear both;
   --animate-unfold: unfold var(--motion-change) var(--ease-motion) both;
   --animate-weave: weave 800ms linear infinite;
 
@@ -133,6 +134,18 @@
     to {
       opacity: 0;
       transform: translateY(8px);
+    }
+  }
+
+  @keyframes toast-rise {
+    from {
+      transform: translateY(1.5rem);
+    }
+  }
+
+  @keyframes toast-fade {
+    from {
+      opacity: 0;
     }
   }
 
