@@ -21,6 +21,32 @@ describe('bottom bar', () => {
     expect(within(bar).getByRole('link', { name: 'Início' })).toHaveAttribute('aria-current', 'page')
     expect(within(bar).getByRole('link', { name: 'Agenda' })).not.toHaveAttribute('aria-current')
   })
+
+  it('draws one ochre marker that slides to the current column, and hides it where no item is current', () => {
+    renderRoute('/agenda')
+    const bar = screen.getByRole('navigation', { name: 'Atalhos' })
+    const marker = bar.querySelector<HTMLElement>('[data-marker-index]')!
+
+    expect(bar.querySelectorAll('[data-marker-index]')).toHaveLength(1)
+    expect(marker).toHaveAttribute('data-marker-index', '1')
+    expect(marker.style.transform).toBe('translateX(100%)')
+    expect(marker.style.width).toBe('20%')
+    expect(marker.className).toContain('transition-[transform,opacity]')
+  })
+
+  it('hides the marker on a page that is in no section of the bar', () => {
+    renderRoute('/uma-pagina-que-nao-existe')
+    const marker = screen.getByRole('navigation', { name: 'Atalhos' }).querySelector<HTMLElement>('[data-marker-index]')!
+
+    expect(marker.style.opacity).toBe('0')
+  })
+
+  it('shrinks the word a little while it is pressed', () => {
+    renderRoute('/')
+    const bar = screen.getByRole('navigation', { name: 'Atalhos' })
+
+    expect(within(bar).getByRole('link', { name: 'Agenda' }).className).toContain('active:scale-[.94]')
+  })
 })
 
 describe('bottom sheet menu', () => {

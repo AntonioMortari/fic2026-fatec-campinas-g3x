@@ -42,9 +42,15 @@ export function TabList({ tabs, activeId, onChange, label, prefix, className }: 
       role="tablist"
       aria-label={label}
       onKeyDown={handleKeyDown}
-      className={cn('grid overflow-hidden rounded-control border border-brown bg-cream', className)}
+      className={cn('relative grid overflow-hidden rounded-control border border-brown bg-cream', className)}
       style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
     >
+      <span
+        aria-hidden="true"
+        data-tab-indicator
+        className="absolute inset-y-0 left-0 bg-brown transition-transform duration-(--motion-change) ease-(--ease-motion)"
+        style={{ width: `${100 / tabs.length}%`, transform: `translateX(${Math.max(0, tabs.findIndex((tab) => tab.id === activeId)) * 100}%)` }}
+      />
       {tabs.map((tab, index) => {
         const selected = tab.id === activeId
         return (
@@ -61,8 +67,8 @@ export function TabList({ tabs, activeId, onChange, label, prefix, className }: 
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(tab.id)}
             className={cn(
-              'min-h-11.5 cursor-pointer px-3 text-[0.9375rem] font-semibold transition-colors duration-(--motion-touch)',
-              selected ? 'bg-brown text-cream' : 'bg-transparent text-brown hover:bg-hover',
+              'relative min-h-11.5 cursor-pointer px-3 text-[0.9375rem] transition-colors duration-(--motion-change)',
+              selected ? 'bg-transparent font-bold text-cream' : 'bg-transparent font-semibold text-brown hover:bg-hover',
             )}
           >
             {tab.label}

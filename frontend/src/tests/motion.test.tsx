@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFormFeedback } from '../components/auth/use-form-feedback'
-import { Button, LoadingState, Skeleton } from '../components/ui'
+import { Button, LoadingState, Skeleton, Tabs } from '../components/ui'
 import { ToastProvider } from '../components/ui/ToastProvider'
 import { TOAST_DURATION_MS } from '../components/ui/toast-context'
 import { useToast } from '../components/ui/useToast'
@@ -194,6 +195,33 @@ describe('button while sending', () => {
     render(<Button>Confirmar inscrição</Button>)
 
     expect(screen.getByRole('button', { name: 'Confirmar inscrição' }).querySelector('.invisible')).toBeNull()
+  })
+})
+
+describe('tabs', () => {
+  const TABS = [
+    { id: 'a', label: 'Entrar', content: 'um' },
+    { id: 'b', label: 'Criar conta', content: 'dois' },
+  ]
+
+  it('slides one indicator from where it was to the tab that was touched, with transform only', async () => {
+    const user = userEvent.setup()
+    function Harness() {
+      const [id, setId] = useState('a')
+      return <Tabs tabs={TABS} activeId={id} onChange={setId} label="Acesso" />
+    }
+    render(<Harness />)
+    const indicator = () => document.querySelector<HTMLElement>('[data-tab-indicator]')!
+
+    expect(document.querySelectorAll('[data-tab-indicator]')).toHaveLength(1)
+    expect(indicator().style.transform).toBe('translateX(0%)')
+    expect(indicator().className).toMatch(/transition-transform/)
+
+    await user.click(screen.getByRole('tab', { name: 'Criar conta' }))
+
+    expect(indicator().style.transform).toBe('translateX(100%)')
+    expect(indicator().style.width).toBe('50%')
+    expect(screen.getByRole('tab', { name: 'Criar conta' }).className).toContain('font-bold')
   })
 })
 
