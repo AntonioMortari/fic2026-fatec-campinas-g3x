@@ -176,6 +176,22 @@ describe('a piece of news (design 11f)', () => {
     vi.unstubAllGlobals()
   })
 
+  it('confirms the copy on the button itself, in words, and goes back to "Compartilhar" after 2.5s', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', { ...navigator, share: undefined, clipboard: { writeText } })
+    open({ [`GET /news/${ID}`]: () => ({ status: 200, data: { news: detail() } }) })
+    renderRoute(`/noticias/${ID}`)
+
+    await user.click(await screen.findByRole('button', { name: /^Compartilhar/ }))
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining(`/noticias/${ID}`))
+    expect(await screen.findByRole('button', { name: 'Link copiado' })).toHaveAttribute('data-done', 'true')
+    expect(screen.getByText('Link copiado. É só colar onde quiser compartilhar.')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /^Compartilhar/ }, { timeout: 4000 })).not.toHaveAttribute('data-done')
+    vi.unstubAllGlobals()
+  })
+
   it('answers the 404 page for a draft or a piece that does not exist', async () => {
     open({ [`GET /news/${ID}`]: () => apiError(404, 'news_not_found', 'Não encontramos essa notícia.') })
     renderRoute(`/noticias/${ID}`)

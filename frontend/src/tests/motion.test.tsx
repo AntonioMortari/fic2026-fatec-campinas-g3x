@@ -150,7 +150,7 @@ describe('skeleton', () => {
 })
 
 describe('button while sending', () => {
-  it('says "Enviando…", keeps the width of the label and hides the label and the spinner from the reader', () => {
+  it('says "Enviando…", keeps the width of the label and hides the label and the thread from the reader', () => {
     render(
       <Button type="submit" loading>
         Confirmar inscrição
@@ -162,6 +162,32 @@ describe('button while sending', () => {
     expect(button).toHaveAttribute('aria-busy', 'true')
     expect(button.querySelectorAll('[aria-hidden="true"]')).toHaveLength(2)
     expect(button.querySelector('.invisible')).toHaveTextContent('Confirmar inscrição')
+  })
+
+  it('weaves a blue thread across the base, and never draws a spinning circle', () => {
+    render(
+      <Button type="submit" loading>
+        Confirmar inscrição
+      </Button>,
+    )
+
+    const button = screen.getByRole('button', { name: 'Enviando…' })
+    expect(button.querySelector('.weave-thread.animate-weave')).not.toBeNull()
+    expect(button.querySelector('.animate-spin, .rounded-full')).toBeNull()
+  })
+
+  it('says it is done in words, with a tick, in the ochre of the design, and stays clickable', () => {
+    render(
+      <Button done doneLabel="Link copiado">
+        Compartilhar
+      </Button>,
+    )
+
+    const button = screen.getByRole('button', { name: 'Link copiado' })
+    expect(button).toBeEnabled()
+    expect(button).toHaveAttribute('data-done', 'true')
+    expect(button.className).toContain('bg-ochre')
+    expect(screen.queryByText('Compartilhar')).toBeNull()
   })
 
   it('shows only the label when idle', () => {

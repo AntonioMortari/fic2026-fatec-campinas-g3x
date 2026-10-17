@@ -86,7 +86,7 @@
   --animate-sink: sink var(--motion-change) var(--ease-motion) forwards;
   --animate-skeleton-in: skeleton-in var(--motion-change) ease-out var(--motion-skeleton-delay) both;
   --animate-skeleton-pulse: skeleton-pulse 1.6s ease-in-out infinite;
-  --animate-spin: spin 800ms linear infinite;
+  --animate-weave: weave 800ms linear infinite;
 
   @keyframes rise {
     from {
@@ -132,6 +132,12 @@
     to {
       opacity: 0;
       transform: translateY(8px);
+    }
+  }
+
+  @keyframes weave {
+    to {
+      background-position: 16px 0;
     }
   }
 
@@ -335,6 +341,11 @@ html[data-contrast="high"] {
   & > :nth-child(n + 4) {
     animation-delay: calc(3 * var(--motion-stagger));
   }
+}
+
+@utility weave-thread {
+  background: repeating-linear-gradient(90deg, var(--color-blue) 0 4px, transparent 4px 8px);
+  background-size: 16px 100%;
 }
 
 @utility striped-band {
