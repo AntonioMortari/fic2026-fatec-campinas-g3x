@@ -40,14 +40,21 @@ function Question({ item, open, onToggle }: { item: PublicFaqQuestion; open: boo
           {item.question}
           <span
             aria-hidden="true"
-            className={`grid size-6.5 place-items-center border-[1.5px] border-brown text-base leading-none desktop:size-7 desktop:text-lg ${open ? 'bg-ochre' : 'bg-transparent'}`}
+            className={`grid size-6.5 place-items-center border-[1.5px] border-brown text-base leading-none transition-[transform,background-color] duration-(--motion-change) ease-(--ease-motion) desktop:size-7 desktop:text-lg ${open ? 'rotate-45 bg-ochre' : 'bg-transparent'}`}
           >
-            {open ? '−' : '+'}
+            +
           </span>
         </button>
       </h3>
-      <div id={`resposta-${item.id}`} hidden={!open}>
-        <Answer item={item} />
+      <div
+        id={`resposta-${item.id}`}
+        inert={!open}
+        data-open={open}
+        className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-(--motion-change) ease-(--ease-motion) data-[open=true]:grid-rows-[1fr]"
+      >
+        <div className={`overflow-hidden transition-opacity duration-(--motion-change) ${open ? 'opacity-100' : 'opacity-0'}`}>
+          <Answer item={item} />
+        </div>
       </div>
     </div>
   )

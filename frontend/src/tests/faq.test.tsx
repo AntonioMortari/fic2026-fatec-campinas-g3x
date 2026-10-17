@@ -63,6 +63,29 @@ describe('the page (design 18)', () => {
     expect(button).toHaveAttribute('aria-expanded', 'false')
   })
 
+  it('grows the answer in height and turns the + into an ×, and keeps the closed answer out of reach', async () => {
+    const user = userEvent.setup()
+    open()
+    renderRoute('/perguntas-frequentes')
+    const button = await questionButton(/Preciso criar conta/)
+    const panel = document.getElementById(button.getAttribute('aria-controls')!)!
+    const sign = button.querySelector('[aria-hidden="true"]')!
+
+    expect(panel).toHaveAttribute('inert')
+    expect(panel).toHaveAttribute('data-open', 'false')
+    expect(panel.className).toContain('grid-rows-[0fr]')
+    expect(panel.className).toContain('transition-[grid-template-rows]')
+    expect(sign.className).not.toContain('rotate-45')
+
+    await user.click(button)
+
+    expect(panel).not.toHaveAttribute('inert')
+    expect(panel).toHaveAttribute('data-open', 'true')
+    expect(panel.className).toContain('data-[open=true]:grid-rows-[1fr]')
+    expect(sign.className).toContain('rotate-45')
+    expect(sign).toHaveTextContent('+')
+  })
+
   it('arrives with the question of the address already open, and it can still be closed', async () => {
     const user = userEvent.setup()
     open()
