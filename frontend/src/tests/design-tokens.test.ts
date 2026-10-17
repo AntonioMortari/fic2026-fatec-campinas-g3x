@@ -122,3 +122,18 @@ describe('toast animations (round 22g)', () => {
     expect(css).toMatch(/--animate-toast-in: toast-rise var\(--motion-arrive\)[^;]*, toast-fade var\(--motion-change\)/)
   })
 })
+
+describe('arrival (round 22j)', () => {
+  const arrive = css.slice(css.indexOf('@utility arrive'), css.indexOf('@utility enter-list'))
+
+  it('rises the overline, the title and the lead 60ms apart, in the arrive time, on any page', () => {
+    expect(arrive).toMatch(/& p:has\(\+ h1\) \{\s*animation: rise var\(--motion-arrive\) var\(--ease-motion\) both/)
+    expect(arrive).toMatch(/& h1 \{\s*animation: rise var\(--motion-arrive\) var\(--ease-motion\) 60ms both/)
+    expect(arrive).toMatch(/& h1 \+ p \{\s*animation: rise var\(--motion-arrive\) var\(--ease-motion\) 120ms both/)
+  })
+
+  it('stretches the band from the left in half a second', () => {
+    expect(arrive).toMatch(/transform-origin: left/)
+    expect(arrive).toMatch(/animation: extend 500ms/)
+  })
+})

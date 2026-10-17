@@ -12,6 +12,7 @@ afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
   localStorage.clear()
+  sessionStorage.clear()
   setToken(null)
   document.documentElement.removeAttribute('data-font-scale')
   document.documentElement.removeAttribute('data-contrast')
