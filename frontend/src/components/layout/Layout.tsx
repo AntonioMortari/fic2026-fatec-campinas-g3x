@@ -6,6 +6,7 @@ import { Header } from './Header'
 import { Menu, type MenuSection } from './Menu'
 import { SkipLink } from './SkipLink'
 import { ToastProvider } from '../ui/ToastProvider'
+import { useArrival } from '../../lib/arrival'
 import { useRouteFocus } from './useRouteFocus'
 
 export interface RouteHandle {
@@ -25,6 +26,7 @@ export function Layout({ children, hideHeaderOnMobile: forceHideHeader = false, 
   const matches = useMatches()
   const hideBottomBar = forceHideBottomBar || matches.some((match) => (match.handle as RouteHandle | undefined)?.hideBottomBar)
   const hideHeaderOnMobile = forceHideHeader || matches.some((match) => (match.handle as RouteHandle | undefined)?.hideHeaderOnMobile)
+  const arriving = useArrival(pathname)
   useRouteFocus()
 
   return (
@@ -33,7 +35,7 @@ export function Layout({ children, hideHeaderOnMobile: forceHideHeader = false, 
         <SkipLink />
         <Header openMenu={openMenu} menuOpen={menu.open} hideOnMobile={hideHeaderOnMobile} />
         <main id="content" tabIndex={-1} className="flex-1 outline-none">
-          <div key={pathname} className="animate-page">
+          <div key={pathname} className={arriving ? 'arrive' : 'animate-page'}>
             {children ?? <Outlet />}
           </div>
         </main>

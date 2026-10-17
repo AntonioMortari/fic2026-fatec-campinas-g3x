@@ -12,10 +12,12 @@ export function FieldMessages({ error, errorId, hint, hintId }: FieldMessagesPro
   return (
     <>
       {error && (
-        <p id={errorId} className="m-0 flex items-start gap-1.5 text-small font-bold text-error">
-          <ErrorIcon className="mt-[0.2em] shrink-0" />
-          <span>{error}</span>
-        </p>
+        <div className="grid animate-unfold">
+          <p id={errorId} className="m-0 flex items-start gap-1.5 overflow-hidden text-small font-bold text-error">
+            <ErrorIcon className="mt-[0.2em] shrink-0" />
+            <span>{error}</span>
+          </p>
+        </div>
       )}
       {hint && !error && (
         <p id={hintId} className="m-0 text-[0.84375rem] leading-[1.45] text-brown-400">

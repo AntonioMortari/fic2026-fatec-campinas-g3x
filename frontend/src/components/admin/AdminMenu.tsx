@@ -1,8 +1,9 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ADMIN_MORE_GROUPS } from '../../lib/admin-navigation'
 import { useSignOut } from '../auth/useSignOut'
 import { ReadingControls } from '../layout/ReadingControls'
+import { useSheetDrag } from '../layout/use-sheet-drag'
 import { DestinationBadge } from './DestinationBadge'
 
 const OVERLINE = 'm-0 mt-6 mb-0.5 text-overline font-semibold uppercase tracking-[0.12em] text-ochre-deep'
@@ -16,7 +17,7 @@ interface AdminMenuProps {
 
 // "Mais" of the phone panel (design 10e): the same sheet as the public menu, with the panel's own screens.
 export function AdminMenu({ open, onClose, bottomBar }: AdminMenuProps) {
-  const dialog = useRef<HTMLDialogElement>(null)
+  const { dialog, handle } = useSheetDrag()
   const signOut = useSignOut()
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export function AdminMenu({ open, onClose, bottomBar }: AdminMenuProps) {
     if (!element) return
     if (open && !element.open) element.showModal()
     else if (!open && element.open) element.close()
-  }, [open])
+  }, [dialog, open])
 
   return (
     <dialog
@@ -38,21 +39,23 @@ export function AdminMenu({ open, onClose, bottomBar }: AdminMenuProps) {
       className="m-0 mt-auto h-[calc(100dvh-4rem)] max-h-none w-full max-w-none border-0 border-t border-brown bg-card p-0 text-brown backdrop:bg-scrim desktop:hidden"
     >
       <div className="flex h-full flex-col">
-        <div aria-hidden="true" className="flex justify-center pt-2.5 pb-1">
-          <span className="h-1 w-11 rounded-sm bg-cream-dim" />
-        </div>
-        <div className="flex items-center justify-between px-4 pt-1 pb-2">
-          <h2 id="admin-menu-title" className="m-0 text-[1.375rem] leading-[1.2] font-bold">
-            Painel
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar o menu"
-            className="grid size-11 cursor-pointer place-items-center rounded-control border border-brown bg-transparent text-xl"
-          >
-            ×
-          </button>
+        <div data-sheet-handle className="touch-none" {...handle}>
+          <div aria-hidden="true" className="flex justify-center pt-2.5 pb-1">
+            <span className="h-1 w-11 rounded-sm bg-cream-dim" />
+          </div>
+          <div className="flex items-center justify-between px-4 pt-1 pb-2">
+            <h2 id="admin-menu-title" className="m-0 text-[1.375rem] leading-[1.2] font-bold">
+              Painel
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fechar o menu"
+              className="grid size-11 cursor-pointer place-items-center rounded-control border border-brown bg-transparent text-xl"
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-24">

@@ -5,6 +5,9 @@ import { longDate, numericDate } from '../lib/news'
 import type { NewsDetail, NewsItem } from '../types/news'
 import { apiError, mockApi } from './auth-support'
 import { renderRoute } from './render'
+import { freezeNow } from './clock'
+
+freezeNow()
 
 let mock: ReturnType<typeof mockApi>
 afterEach(() => mock?.restore())
@@ -173,6 +176,22 @@ describe('a piece of news (design 11f)', () => {
     await user.click(await screen.findByRole('button', { name: /^Compartilhar/ }))
 
     expect(share).toHaveBeenCalledWith({ title: 'Novembro é Mês da Consciência Negra no Ateliê', url: expect.stringContaining(`/noticias/${ID}`) })
+    vi.unstubAllGlobals()
+  })
+
+  it('confirms the copy on the button itself, in words, and goes back to "Compartilhar" after 2.5s', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', { ...navigator, share: undefined, clipboard: { writeText } })
+    open({ [`GET /news/${ID}`]: () => ({ status: 200, data: { news: detail() } }) })
+    renderRoute(`/noticias/${ID}`)
+
+    await user.click(await screen.findByRole('button', { name: /^Compartilhar/ }))
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining(`/noticias/${ID}`))
+    expect(await screen.findByRole('button', { name: 'Link copiado' })).toHaveAttribute('data-done', 'true')
+    expect(screen.getByText('Link copiado. É só colar onde quiser compartilhar.')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /^Compartilhar/ }, { timeout: 4000 })).not.toHaveAttribute('data-done')
     vi.unstubAllGlobals()
   })
 

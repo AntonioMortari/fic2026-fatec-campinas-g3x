@@ -20,7 +20,11 @@ export function Checkbox({ label, hint, error, id, className, ...input }: Checkb
           type="checkbox"
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className="mt-0.5 size-6 shrink-0 cursor-pointer accent-brown aria-[invalid=true]:outline-2 aria-[invalid=true]:outline-offset-2 aria-[invalid=true]:outline-error"
+          className={
+            'relative mt-0.5 size-6 shrink-0 cursor-pointer appearance-none border-[1.5px] border-brown bg-transparent transition-colors duration-(--motion-touch) checked:bg-brown ' +
+            "after:absolute after:top-0.5 after:left-[0.4375rem] after:h-[0.8125rem] after:w-[0.4375rem] after:rotate-45 after:scale-0 after:border-r-[2.5px] after:border-b-[2.5px] after:border-cream after:transition-[scale] after:duration-(--motion-change) after:ease-(--ease-motion) after:content-[''] checked:after:scale-100 " +
+            'aria-[invalid=true]:outline-2 aria-[invalid=true]:outline-offset-2 aria-[invalid=true]:outline-error'
+          }
           {...input}
         />
         <span>{label}</span>

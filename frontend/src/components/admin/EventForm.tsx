@@ -185,7 +185,7 @@ export function EventForm({ event, saving, onSubmit, header, photoNotice, initia
         </div>
         <div aria-hidden="true" className="grid gap-1.5 px-4 pb-0" style={{ gridTemplateColumns: `repeat(${SECTIONS.length}, minmax(0, 1fr))` }}>
           {SECTIONS.map((section, index) => (
-            <span key={section.title} className={cn('h-1 transition-colors duration-(--motion-enter)', index <= step ? 'bg-ochre' : 'bg-cream-dark')} />
+            <span key={section.title} className={cn('h-1 transition-colors duration-(--motion-change)', index <= step ? 'bg-ochre' : 'bg-cream-dark')} />
           ))}
         </div>
       </div>

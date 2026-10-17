@@ -7,6 +7,7 @@ import { Chevron } from '../ui/Chevron'
 import type { RouteHandle } from './Layout'
 import { Logo } from './Logo'
 import { SkipLink } from './SkipLink'
+import { useArrival } from '../../lib/arrival'
 import { useRouteFocus } from './useRouteFocus'
 
 export function FocusedLayout() {
@@ -19,6 +20,7 @@ export function FocusedLayout() {
   const genericBack = handles.some((handle) => handle?.genericBack)
   const back = safeRedirect(searchParams.get('voltar'), defaultBack ?? '/')
   const backLabel = back === '/' ? null : labelForRoute(back)
+  const arriving = useArrival(pathname)
   useRouteFocus()
 
   return (
@@ -59,7 +61,7 @@ export function FocusedLayout() {
           wide ? 'max-w-xl desktop:flex desktop:max-w-page desktop:items-center desktop:px-8 desktop:py-10' : 'max-w-xl',
         )}
       >
-        <div key={pathname} className="w-full animate-page">
+        <div key={pathname} className={cn('w-full', arriving ? 'arrive' : 'animate-page')}>
           <Outlet />
         </div>
       </main>

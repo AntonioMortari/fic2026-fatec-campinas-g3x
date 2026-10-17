@@ -79,7 +79,7 @@ export function AdminAttendance() {
                 aria-valuenow={checked}
                 className="h-1.5 bg-cream-dark"
               >
-                <div className="h-full bg-ochre transition-[width] duration-(--motion-enter) ease-out" style={{ width: `${(checked / entries.length) * 100}%` }} />
+                <div className="h-full bg-ochre transition-[width] duration-(--motion-change) ease-out" style={{ width: `${(checked / entries.length) * 100}%` }} />
               </div>
             </div>
           )}

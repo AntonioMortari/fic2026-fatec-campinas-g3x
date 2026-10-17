@@ -1,10 +1,11 @@
+import { useState } from 'react'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFormFeedback } from '../components/auth/use-form-feedback'
-import { Button, LoadingState, Skeleton } from '../components/ui'
+import { Button, Checkbox, LoadingState, Skeleton, Tabs, TextField } from '../components/ui'
 import { ToastProvider } from '../components/ui/ToastProvider'
-import { TOAST_DURATION_MS } from '../components/ui/toast-context'
+import { TOAST_DURATION_MS, TOAST_EXIT_MS, TOAST_UNDO_DURATION_MS } from '../components/ui/toast-context'
 import { useToast } from '../components/ui/useToast'
 import { focusAndReveal, prefersReducedMotion, revealElement, scrollBehavior, scrollToStart, scrollToTop } from '../lib/motion'
 import { mockApi } from './auth-support'
@@ -118,7 +119,7 @@ describe('skeleton', () => {
     expect(status).toHaveAttribute('aria-busy', 'true')
     expect(status).toHaveTextContent('Carregando a agenda…')
     expect(screen.getByText('Carregando a agenda…')).toHaveClass('sr-only')
-    expect(status.querySelectorAll(':scope > [aria-hidden="true"]')).toHaveLength(3)
+    expect(status.querySelectorAll(':scope > [aria-hidden="true"]:not([data-loading-thread])')).toHaveLength(3)
   })
 
   it.each([
@@ -129,7 +130,7 @@ describe('skeleton', () => {
   ] as const)('draws %s as many times as asked', (shape, count) => {
     render(<LoadingState label="Carregando…" shape={shape} count={count} />)
 
-    expect(screen.getByRole('status').querySelectorAll(':scope > [aria-hidden="true"]')).toHaveLength(count)
+    expect(screen.getByRole('status').querySelectorAll(':scope > [aria-hidden="true"]:not([data-loading-thread])')).toHaveLength(count)
   })
 
   it('appears after a delay and stops pulsing for reduced motion through the same animation tokens', () => {
@@ -145,12 +146,23 @@ describe('skeleton', () => {
       </LoadingState>,
     )
 
-    expect(screen.getByRole('status').querySelectorAll('[aria-hidden="true"]')).toHaveLength(1)
+    expect(screen.getByRole('status').querySelectorAll('[aria-hidden="true"]:not([data-loading-thread])')).toHaveLength(1)
+  })
+})
+
+describe('loading thread (round 22i)', () => {
+  it('weaves the blue thread along the top of the loading shape, hidden from the reader', () => {
+    render(<LoadingState label="Carregando a agenda…" shape="rows" />)
+
+    const thread = screen.getByRole('status').querySelector('[data-loading-thread]')!
+    expect(thread).toHaveAttribute('aria-hidden', 'true')
+    expect(thread.className).toContain('animate-weave')
+    expect(screen.getByRole('status')).toHaveTextContent('Carregando a agenda…')
   })
 })
 
 describe('button while sending', () => {
-  it('says "Enviando…", keeps the width of the label and hides the label and the spinner from the reader', () => {
+  it('says "Enviando…", keeps the width of the label and hides the label and the thread from the reader', () => {
     render(
       <Button type="submit" loading>
         Confirmar inscrição
@@ -164,10 +176,98 @@ describe('button while sending', () => {
     expect(button.querySelector('.invisible')).toHaveTextContent('Confirmar inscrição')
   })
 
+  it('weaves a blue thread across the base, and never draws a spinning circle', () => {
+    render(
+      <Button type="submit" loading>
+        Confirmar inscrição
+      </Button>,
+    )
+
+    const button = screen.getByRole('button', { name: 'Enviando…' })
+    expect(button.querySelector('.weave-thread.animate-weave')).not.toBeNull()
+    expect(button.querySelector('.animate-spin, .rounded-full')).toBeNull()
+  })
+
+  it('says it is done in words, with a tick, in the ochre of the design, and stays clickable', () => {
+    render(
+      <Button done doneLabel="Link copiado">
+        Compartilhar
+      </Button>,
+    )
+
+    const button = screen.getByRole('button', { name: 'Link copiado' })
+    expect(button).toBeEnabled()
+    expect(button).toHaveAttribute('data-done', 'true')
+    expect(button.className).toContain('bg-ochre')
+    expect(screen.queryByText('Compartilhar')).toBeNull()
+  })
+
   it('shows only the label when idle', () => {
     render(<Button>Confirmar inscrição</Button>)
 
     expect(screen.getByRole('button', { name: 'Confirmar inscrição' }).querySelector('.invisible')).toBeNull()
+  })
+})
+
+describe('field and checkbox (round 22f)', () => {
+  it('unfolds the error message instead of popping it in, with the icon and the words, and the field does not move', () => {
+    render(<TextField label="Telefone" error="Faltam números. Escreva com DDD, como (11) 95396-8344." />)
+
+    const message = screen.getByText(/Faltam números/)
+    expect(message.closest('.animate-unfold')).not.toBeNull()
+    expect(message.closest('p')?.className).toContain('overflow-hidden')
+  })
+
+  it('answers the focus ring in 100ms and the border colour in 200ms', () => {
+    render(<TextField label="Telefone" />)
+
+    const box = screen.getByLabelText('Telefone').parentElement!
+    expect(box.className).toContain('transition-[box-shadow,border-color]')
+    expect(box.className).toContain('focus-within:duration-(--motion-touch)')
+    expect(box.className).toContain('duration-(--motion-change)')
+  })
+
+  it('draws its own tick that grows from nothing when checked, and still works as a native checkbox', async () => {
+    const user = userEvent.setup()
+    render(<Checkbox label="Autorizo o uso de imagem" />)
+
+    const box = screen.getByRole('checkbox', { name: 'Autorizo o uso de imagem' })
+    expect(box.className).toContain('appearance-none')
+    expect(box.className).toContain('after:scale-0')
+    expect(box.className).toContain('checked:after:scale-100')
+    expect(box).not.toBeChecked()
+
+    await user.click(box)
+    expect(box).toBeChecked()
+    await user.keyboard(' ')
+    expect(box).not.toBeChecked()
+  })
+})
+
+describe('tabs', () => {
+  const TABS = [
+    { id: 'a', label: 'Entrar', content: 'um' },
+    { id: 'b', label: 'Criar conta', content: 'dois' },
+  ]
+
+  it('slides one indicator from where it was to the tab that was touched, with transform only', async () => {
+    const user = userEvent.setup()
+    function Harness() {
+      const [id, setId] = useState('a')
+      return <Tabs tabs={TABS} activeId={id} onChange={setId} label="Acesso" />
+    }
+    render(<Harness />)
+    const indicator = () => document.querySelector<HTMLElement>('[data-tab-indicator]')!
+
+    expect(document.querySelectorAll('[data-tab-indicator]')).toHaveLength(1)
+    expect(indicator().style.transform).toBe('translateX(0%)')
+    expect(indicator().className).toMatch(/transition-transform/)
+
+    await user.click(screen.getByRole('tab', { name: 'Criar conta' }))
+
+    expect(indicator().style.transform).toBe('translateX(100%)')
+    expect(indicator().style.width).toBe('50%')
+    expect(screen.getByRole('tab', { name: 'Criar conta' }).className).toContain('font-bold')
   })
 })
 
@@ -190,6 +290,20 @@ describe('toast dismissal', () => {
 
     expect(screen.getByRole('status')).toBeEmptyDOMElement()
     vi.useRealTimers()
+  })
+
+  it('rises in 320ms and fades in 200ms, and the exit is the quicker 200ms', () => {
+    reduceMotion(false)
+    render(
+      <ToastProvider>
+        <Trigger />
+      </ToastProvider>,
+    )
+    act(() => screen.getByRole('button', { name: 'Mostrar' }).click())
+
+    expect(screen.getByText('Salvo').parentElement).toHaveClass('animate-toast-in')
+    expect(TOAST_EXIT_MS).toBe(200)
+    expect(TOAST_UNDO_DURATION_MS).toBe(6000)
   })
 
   it('plays the exit before it leaves for everyone else', () => {

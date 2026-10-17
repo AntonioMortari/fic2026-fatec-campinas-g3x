@@ -68,25 +68,28 @@ function motionToken(name: string): number {
   return Number(match[1])
 }
 
-describe('motion (design "Movimento")', () => {
-  it('closes the touch feedback in the press token, and the press token is the 90ms of the design', () => {
-    expect(css).toMatch(/a:active,[\s\S]*?button:active,[\s\S]*?\{\s*transition-duration: var\(--motion-press\);/)
-    expect(motionToken('press')).toBe(90)
+describe('motion (design "Movimento e Feedback", round 22)', () => {
+  it('closes the touch feedback in the touch token, and the touch token is the 100ms of the design', () => {
+    expect(css).toMatch(/a:active,[\s\S]*?button:active,[\s\S]*?\{\s*transition-duration: var\(--motion-touch\);/)
+    expect(motionToken('touch')).toBe(100)
   })
 
-  it('keeps the entrance at 200ms, the sheet at 280ms and the page fade at 150ms', () => {
-    expect(motionToken('enter')).toBe(200)
-    expect(motionToken('sheet')).toBe(280)
-    expect(motionToken('page')).toBe(200)
-    expect(css).toMatch(/--animate-rise: rise var\(--motion-enter\)/)
-    expect(css).toMatch(/--animate-sheet: sheet var\(--motion-sheet\)/)
-    expect(css).toMatch(/--animate-page: page var\(--motion-page\)/)
+  it('has the four durations and the curve of the design: touch 100, change 200, arrive 320, exit 200', () => {
+    expect(motionToken('touch')).toBe(100)
+    expect(motionToken('change')).toBe(200)
+    expect(motionToken('arrive')).toBe(320)
+    expect(motionToken('exit')).toBe(200)
+    expect(css).toMatch(/--ease-motion: cubic-bezier\(0\.2, 0\.7, 0\.2, 1\);/)
   })
 
-  it('keeps micro feedback at 150ms or less, and the whole stagger of a list under a page transition', () => {
-    expect(motionToken('micro')).toBeLessThanOrEqual(150)
-    expect(motionToken('sheet-out')).toBeLessThan(motionToken('sheet'))
-    expect(motionToken('stagger') * 3 + motionToken('enter')).toBeLessThanOrEqual(280)
+  it('arrives in 320ms and leaves faster, in 200ms: leaving is always quicker than entering', () => {
+    expect(css).toMatch(/--animate-sheet: sheet var\(--motion-arrive\)/)
+    expect(css).toMatch(/--animate-rise: rise var\(--motion-change\)/)
+    expect(motionToken('exit')).toBeLessThan(motionToken('arrive'))
+  })
+
+  it('keeps the whole stagger of a list under a page transition', () => {
+    expect(motionToken('stagger') * 3 + motionToken('change')).toBeLessThanOrEqual(280)
   })
 
   it('shows a skeleton only after a short delay, so a fast answer never flashes it', () => {
@@ -111,5 +114,58 @@ describe('motion (design "Movimento")', () => {
 
   it('gives the skeleton a visible color in high contrast too', () => {
     expect(highContrast).toMatch(/--color-skeleton:/)
+  })
+})
+
+describe('toast animations (round 22g)', () => {
+  it('rises in the arrive time and fades in the change time', () => {
+    expect(css).toMatch(/--animate-toast-in: toast-rise var\(--motion-arrive\)[^;]*, toast-fade var\(--motion-change\)/)
+  })
+})
+
+describe('arrival (round 22j)', () => {
+  const arrive = css.slice(css.indexOf('@utility arrive'), css.indexOf('@utility enter-list'))
+
+  it('rises the overline, the title and the lead 60ms apart, in the arrive time, on any page', () => {
+    expect(arrive).toMatch(/& p:has\(\+ h1\) \{\s*animation: rise var\(--motion-arrive\) var\(--ease-motion\) both/)
+    expect(arrive).toMatch(/& h1 \{\s*animation: rise var\(--motion-arrive\) var\(--ease-motion\) 60ms both/)
+    expect(arrive).toMatch(/& h1 \+ p \{\s*animation: rise var\(--motion-arrive\) var\(--ease-motion\) 120ms both/)
+  })
+
+  it('stretches the band from the left in half a second', () => {
+    expect(arrive).toMatch(/transform-origin: left/)
+    expect(arrive).toMatch(/animation: extend 500ms/)
+  })
+})
+
+describe('reveal on scroll (round 22k)', () => {
+  const reveal = css.slice(css.indexOf('@layer components'), css.indexOf('@utility arrive'))
+
+  it('lifts 12px and fades in the arrive time, and only hides when the page has the js class', () => {
+    expect(reveal).toMatch(/html\.js \[data-reveal\]:not\(\[data-revealed\]\) \{\s*opacity: 0;\s*transform: translateY\(12px\)/)
+    expect(reveal).toMatch(/opacity var\(--motion-arrive\) var\(--ease-motion\)/)
+  })
+
+  it('shows everything for someone who asked for less motion and on paper', () => {
+    expect(reveal).toMatch(/@media \(prefers-reduced-motion: reduce\), print \{\s*html\.js \[data-reveal\]:not\(\[data-revealed\]\) \{\s*opacity: 1;\s*transform: none/)
+  })
+
+  it('has the js class set by the page before the first paint', () => {
+    expect(readFileSync(join(process.cwd(), 'index.html'), 'utf8')).toMatch(/document\.documentElement\.classList\.add\('js'\)/)
+  })
+})
+
+describe('reduced motion chosen in the Aa menu (round 22)', () => {
+  const chosen = css.slice(css.indexOf('html[data-motion="reduced"] {'), css.indexOf('@utility enter-list'))
+
+  it('does the same as the device setting: no animation, no transition, no smooth scroll, no hidden blocks', () => {
+    expect(chosen).toMatch(/animation-duration: 0\.01ms !important/)
+    expect(chosen).toMatch(/transition-duration: 0\.01ms !important/)
+    expect(chosen).toMatch(/scroll-behavior: auto !important/)
+    expect(chosen).toMatch(/html\[data-motion="reduced"\]\.js \[data-reveal\]:not\(\[data-revealed\]\) \{\s*opacity: 1;\s*transform: none/)
+  })
+
+  it('is applied before the first paint from the saved choice', () => {
+    expect(readFileSync(join(process.cwd(), 'index.html'), 'utf8')).toMatch(/af-motion'\) === 'reduced'\) document\.documentElement\.setAttribute\('data-motion', 'reduced'\)/)
   })
 })
