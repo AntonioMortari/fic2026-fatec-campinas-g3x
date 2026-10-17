@@ -39,6 +39,11 @@ export function Footer() {
             </a>
           </li>
           <li>
+            <Link className={LINK} to="/perguntas-frequentes">
+              Perguntas frequentes
+            </Link>
+          </li>
+          <li>
             <Link className={LINK} to="/privacidade">
               Privacidade
             </Link>

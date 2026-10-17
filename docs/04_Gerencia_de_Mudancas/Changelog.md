@@ -559,3 +559,19 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Decidido aqui, a confirmar:** o tipo Notícia/Campanha (`kind`) foi implementado porque o desenho o traz, mas ele próprio o marca como proposta ("só se a coluna existir"); o menu do painel diz "Notícias" (o desenho diz "Publicações" no menu e "Notícias" no título, e sugere "Notícias" nos dois); a coluna "Acompanhe também" do desktop segue o desenho, que pede para confirmar se fica.
 - **Por quê:** RF04 e o pedido do grupo de que a equipe escreva e publique o que aparece no site.
 - **PR:** branch `feat/news`
+
+## 2026-10-16 — Perguntas frequentes: página pública e painel (desenhos 18a–18f)
+- **Artefato:** Protótipos (rodada 18) · Requisitos (RF01) · Arquitetura (duas tabelas e rotas)
+- **Antes:** não havia página de perguntas frequentes, nem link para ela.
+- **Depois:** `/perguntas-frequentes` (busca que filtra enquanto se digita, sem acento e sem caixa; respostas achadas abertas; sem resultado, WhatsApp e formulário; temas com contagem; endereço por pergunta, `#imagem`, que chega aberta) e os pontos de entrada do 18c (rodapé, "Ajuda" nos dois menus, e uma linha com a pergunta certa na inscrição, em "Para escolas", na candidatura de voluntariado e no contato). No painel, `/admin/perguntas`: lista por tema, editor (pergunta, resposta, tema, link no fim, página de origem), "Temas" (criar, renomear, ordenar, tirar do ar) e "Pôr no ar"/"Tirar do ar" de um toque. Back-end: tabelas `faq_themes` e `faq_items` (a migration traz as 9 respostas de antes), `GET /api/faq` e `/api/admin/faq/*` (só equipe).
+- **Diferenças em relação ao desenho, e por quê:**
+  - **9 das 11 respostas.** "Como posso apoiar o Ateliê?" e "Como peço para ver, corrigir ou apagar os meus dados?" repetem páginas que ainda não existem (`/doar` e `/privacidade`), e a regra do desenho é repetir o que já está escrito numa página. Entram junto com elas; pelo mesmo motivo a lista de páginas do formulário só tem as que existem;
+  - da resposta sobre a ficha técnica saiu "em Projetos" (a página não existe);
+  - **guardar nunca publica**, nem a pergunta nova: o desenho tem "Guardar e pôr no ar" e, no cabeçalho do mesmo editor, "fica fora do ar até você publicar"; ficou a regra do projeto (a pergunta nasce fora do ar e o "Pôr no ar" é um toque);
+  - no celular só se **cria** tema (opção "+ Novo tema…", como diz o 18f); renomear, ordenar e tirar um tema do ar é no desktop, porque os desenhos do celular não têm a tela de temas;
+  - a lista de temas da página pública tem links para as seções (o desenho a mostra como texto);
+  - a faixa listrada sob o cabeçalho segue o desenho, o que contraria a regra de uma faixa por página (o rodapé já tem a sua);
+  - a barra inferior do celular segue a do projeto (o desenho tem "Biblioteca").
+- **Decidido aqui, a confirmar:** o endereço de cada pergunta nasce do texto e não muda ao corrigi-lo (para o link antigo não quebrar); "tirar do ar" não pede confirmação, porque volta com um toque; sem registro do que as pessoas buscam, como o desenho pede.
+- **Por quê:** o desenho da rodada 18 leva a dúvida certa para onde ela aparece e passa a lista para a equipe, que não depende mais de quem programa.
+- **PR:** branch `feat/faq-page`

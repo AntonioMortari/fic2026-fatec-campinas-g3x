@@ -15,6 +15,7 @@ export const SUPPORT: Destination = { label: 'Apoiar', to: '/doar' }
 export const PROJECTS: Destination = { label: 'Projetos', to: '/projetos' }
 export const VOLUNTEER: Destination = { label: 'Voluntariado', to: '/voluntariado' }
 export const SCHOOLS: Destination = { label: 'Para escolas', to: '/para-escolas' }
+export const FAQ: Destination = { label: 'Perguntas frequentes', to: '/perguntas-frequentes' }
 
 export const BOTTOM_BAR: Destination[] = [HOME, { label: 'Agenda', to: '/agenda' }, PROJECTS]
 
@@ -44,6 +45,7 @@ export const MENU_GROUPS: MenuGroup[] = [
       { label: 'Acervo', to: '/acervo' },
     ],
   },
+  { title: 'Ajuda', tone: 'blue', items: [FAQ] },
 ]
 
 export const DESKTOP_MENU_GROUPS: MenuGroup[] = [
@@ -68,6 +70,7 @@ export const DESKTOP_MENU_GROUPS: MenuGroup[] = [
     title: 'Ajuda',
     tone: 'brown',
     items: [
+      { ...FAQ, description: 'Respostas rápidas às dúvidas comuns' },
       { label: 'Contato', to: '/contato', description: 'Escreva para a equipe' },
       { label: 'Privacidade', to: '/privacidade', description: 'Como cuidamos dos seus dados' },
     ],

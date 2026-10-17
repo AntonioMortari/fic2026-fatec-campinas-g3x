@@ -7,6 +7,7 @@ import { useApplyToVolunteer } from '../../services/volunteering'
 import type { AuthUser } from '../../services/auth'
 import type { VolunteerArea } from '../../types/volunteering'
 import { ActionBar, Alert, BackLink, Button, Card, TextAreaField } from '../ui'
+import { FaqHint } from '../faq/FaqHint'
 import { AreaPicker } from './AreaPicker'
 import { OrderedSteps } from './OrderedSteps'
 
@@ -62,6 +63,8 @@ export function VolunteerForm({ areas, user, onSent }: VolunteerFormProps) {
             Escolha as áreas em que você quer ajudar e conte um pouco de você — a gente lê e entra em contato para conversar.
           </p>
         </header>
+
+        <FaqHint links={[{ id: 'voluntario', text: 'Como faço para ser voluntário?' }]} />
 
         {feedback.error && (
           <Alert ref={alertRef} tone="error">

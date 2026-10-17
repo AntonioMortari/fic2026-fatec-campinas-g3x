@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { FaqHint } from '../faq/FaqHint'
 import { formatPhone, maskCpf, maskPhone } from '../../lib/format-phone'
 import { revealElement } from '../../lib/motion'
 import { useEventRegistration } from '../../services/events'
@@ -177,6 +178,7 @@ export function RegistrationForm({ event, account, onDone }: RegistrationFormPro
         checked={values.imageAuthorized}
         onChange={(e) => set('imageAuthorized', e.target.checked)}
       />
+      <FaqHint links={[{ id: 'imagem', text: 'Preciso autorizar para participar?' }]} />
       <Checkbox
         label="Concordo que o Ateliê use estes dados para organizar esta atividade."
         name="consent"

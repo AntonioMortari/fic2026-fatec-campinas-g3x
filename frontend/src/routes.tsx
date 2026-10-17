@@ -16,6 +16,7 @@ import { AdminHome } from './pages/admin/AdminHome'
 import { AdminReport } from './pages/admin/AdminReport'
 import { AdminRegistrants } from './pages/admin/AdminRegistrants'
 import { AdminContacts } from './pages/admin/AdminContacts'
+import { AdminFaq } from './pages/admin/AdminFaq'
 import { AdminNews } from './pages/admin/AdminNews'
 import { AdminVolunteers } from './pages/admin/AdminVolunteers'
 import { Auth } from './pages/Auth'
@@ -31,6 +32,7 @@ import { MyVolunteerApplications } from './pages/MyVolunteerApplications'
 import { VolunteerApplicationPage } from './pages/VolunteerApplication'
 import { Volunteering } from './pages/Volunteering'
 import { Contact } from './pages/Contact'
+import { Faq } from './pages/Faq'
 import { Gallery } from './pages/Gallery'
 import { News } from './pages/News'
 import { NewsDetail } from './pages/NewsDetail'
@@ -57,6 +59,7 @@ export const routes: RouteObject[] = [
       },
       { path: '/contato', element: <Contact /> },
       { path: '/para-escolas', element: <Schools /> },
+      { path: '/perguntas-frequentes', element: <Faq /> },
       { path: '/galeria', element: <Gallery /> },
       { path: '/noticias', element: <News /> },
       { path: '/noticias/:id', element: <NewsDetail />, handle: { hideHeaderOnMobile: true } },
@@ -81,6 +84,10 @@ export const routes: RouteObject[] = [
       { path: '/admin/galeria/nova', element: <AdminGallery />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/galeria/:id/editar', element: <AdminGalleryEditRoute />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/galeria/:id/apagar', element: <AdminGalleryDelete />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/perguntas', element: <AdminFaq /> },
+      { path: '/admin/perguntas/nova', element: <AdminFaq />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/perguntas/temas', element: <AdminFaq />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
+      { path: '/admin/perguntas/:id/editar', element: <AdminFaq />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/noticias', element: <AdminNews /> },
       { path: '/admin/noticias/nova', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },
       { path: '/admin/noticias/:id/editar', element: <AdminNews />, handle: { hideBottomBar: true, hideHeaderOnMobile: true } },

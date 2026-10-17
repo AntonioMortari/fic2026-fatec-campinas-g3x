@@ -284,6 +284,53 @@ export const openApiDocument = {
           consent: { type: 'boolean', enum: [true], description: 'Obrigatório: concordância com o uso dos dados para responder a mensagem. Guardada como data.' },
         },
       },
+      FaqPublicTheme: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' },
+          items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string', description: 'Endereço da pergunta: `/perguntas-frequentes#<id>`.' },
+                question: { type: 'string' },
+                answer: { type: 'string', description: 'Texto puro.' },
+                link: { type: 'object', nullable: true, properties: { to: { type: 'string' }, label: { type: 'string' } } },
+              },
+            },
+          },
+        },
+      },
+      AdminFaqItem: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          themeId: { type: 'string' },
+          question: { type: 'string' },
+          answer: { type: 'string' },
+          linkTo: { type: 'string', nullable: true, description: 'Uma das páginas de `options.links`.' },
+          source: { type: 'string', description: 'Uma das páginas de `options.sources`: onde a resposta já está escrita no site.' },
+          published: { type: 'boolean', description: 'Só muda por PATCH /admin/faq/items/{id}/publication.' },
+          sortOrder: { type: 'integer' },
+        },
+      },
+      AdminFaqTheme: {
+        type: 'object',
+        properties: { id: { type: 'string' }, name: { type: 'string' }, published: { type: 'boolean' }, sortOrder: { type: 'integer' } },
+      },
+      FaqItemInput: {
+        type: 'object',
+        required: ['question', 'answer', 'themeId', 'source'],
+        properties: {
+          question: { type: 'string', maxLength: 200 },
+          answer: { type: 'string', maxLength: 2000 },
+          themeId: { type: 'string' },
+          linkTo: { type: 'string', nullable: true },
+          source: { type: 'string' },
+        },
+      },
       NewsImage: {
         type: ['object', 'null'],
         properties: { url: { type: 'string', description: 'Caminho da imagem, com `?v=` para o cache.' }, alt: { type: 'string' } },
@@ -1153,6 +1200,152 @@ export const openApiDocument = {
           '201': { description: 'Mensagem registrada', content: { 'application/json': { schema: { type: 'object', properties: { received: { type: 'boolean', enum: [true] } } } } } },
           '400': { description: 'Dados inválidos. `error.details` lista cada campo.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '429': { description: '`too_many_requests`: mais de 30 mensagens na última hora vindas da mesma conexão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/faq': {
+      get: {
+        tags: ['FAQ'],
+        summary: 'As perguntas frequentes no ar, agrupadas por tema (desenho 18)',
+        description: 'Aberta. Só tema e pergunta no ar, na ordem do painel; tema sem pergunta no ar não aparece.',
+        responses: {
+          '200': { description: 'Os temas com suas perguntas', content: { 'application/json': { schema: { type: 'object', properties: { data: { type: 'array', items: { $ref: '#/components/schemas/FaqPublicTheme' } } } } } } },
+        },
+      },
+    },
+    '/admin/faq': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Todos os temas e perguntas, no ar ou não, mais as páginas que o formulário oferece (só equipe)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Temas, perguntas e opções', content: { 'application/json': { schema: { type: 'object', properties: { themes: { type: 'array', items: { $ref: '#/components/schemas/AdminFaqTheme' } }, items: { type: 'array', items: { $ref: '#/components/schemas/AdminFaqItem' } }, options: { type: 'object' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/faq/items': {
+      post: {
+        tags: ['Admin'],
+        summary: 'Cria uma pergunta (nasce fora do ar; só equipe)',
+        description: 'Salvar nunca publica. O endereço é gerado do texto da pergunta. Não há DELETE em nenhuma rota de perguntas frequentes.',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/FaqItemInput' } } } },
+        responses: {
+          '201': { description: 'A pergunta criada', content: { 'application/json': { schema: { type: 'object', properties: { item: { $ref: '#/components/schemas/AdminFaqItem' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '400': { description: 'Corpo inválido (`validation_error`) ou tema que não existe (`invalid_theme`)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/faq/items/{id}': {
+      put: {
+        tags: ['Admin'],
+        summary: 'Corrige uma pergunta (só equipe)',
+        description: 'Grava pergunta, resposta, tema, link e página de origem, e mais nada: `published` do corpo é descartado. Mudar de tema leva a pergunta para o fim do novo.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/FaqItemInput' } } } },
+        responses: {
+          '200': { description: 'A pergunta', content: { 'application/json': { schema: { type: 'object', properties: { item: { $ref: '#/components/schemas/AdminFaqItem' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '400': { description: 'Corpo inválido (`validation_error`) ou tema que não existe (`invalid_theme`)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`faq_item_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/faq/items/{id}/publication': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Põe a pergunta no ar ou a tira do ar (só equipe)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['published'], properties: { published: { type: 'boolean' } } } } } },
+        responses: {
+          '200': { description: 'A pergunta', content: { 'application/json': { schema: { type: 'object', properties: { item: { $ref: '#/components/schemas/AdminFaqItem' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`faq_item_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/faq/items/{id}/position': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Sobe ou desce a pergunta dentro do tema (só equipe)',
+        description: 'Nas pontas não faz nada.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['direction'], properties: { direction: { type: 'string', enum: ['up', 'down'] } } } } } },
+        responses: {
+          '200': { description: 'A pergunta', content: { 'application/json': { schema: { type: 'object', properties: { item: { $ref: '#/components/schemas/AdminFaqItem' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`faq_item_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/faq/themes': {
+      post: {
+        tags: ['Admin'],
+        summary: 'Cria um tema, no ar e por último (só equipe)',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['name'], properties: { name: { type: 'string', maxLength: 40 } } } } } },
+        responses: {
+          '201': { description: 'O tema criado', content: { 'application/json': { schema: { type: 'object', properties: { theme: { $ref: '#/components/schemas/AdminFaqTheme' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: '`theme_name_taken`: já existe um tema com esse nome, sem distinguir caixa nem acento', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/faq/themes/{id}': {
+      put: {
+        tags: ['Admin'],
+        summary: 'Renomeia um tema (só equipe)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['name'], properties: { name: { type: 'string', maxLength: 40 } } } } } },
+        responses: {
+          '200': { description: 'O tema', content: { 'application/json': { schema: { type: 'object', properties: { theme: { $ref: '#/components/schemas/AdminFaqTheme' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`faq_theme_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '409': { description: '`theme_name_taken`: já existe um tema com esse nome, sem distinguir caixa nem acento', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/faq/themes/{id}/publication': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Põe o tema no ar ou o tira do ar (só equipe)',
+        description: 'Tirar um tema do ar esconde todas as perguntas dele; elas continuam guardadas.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['published'], properties: { published: { type: 'boolean' } } } } } },
+        responses: {
+          '200': { description: 'O tema', content: { 'application/json': { schema: { type: 'object', properties: { theme: { $ref: '#/components/schemas/AdminFaqTheme' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`faq_theme_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/admin/faq/themes/{id}/position': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Sobe ou desce o tema (só equipe)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['direction'], properties: { direction: { type: 'string', enum: ['up', 'down'] } } } } } },
+        responses: {
+          '200': { description: 'O tema', content: { 'application/json': { schema: { type: 'object', properties: { theme: { $ref: '#/components/schemas/AdminFaqTheme' } } } } } },
+          '401': { description: 'Sem sessão', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Não é da equipe', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: '`faq_theme_not_found`', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },
