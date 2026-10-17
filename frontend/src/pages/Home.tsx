@@ -9,7 +9,7 @@ import { SchoolsBanner } from '../components/home/SchoolsBanner'
 import { StartingPoints } from '../components/home/StartingPoints'
 import { WhatWeDo } from '../components/home/WhatWeDo'
 import { WhereWeAre } from '../components/home/WhereWeAre'
-import { Container } from '../components/ui'
+import { Container, Reveal } from '../components/ui'
 import type { HomePhoto } from '../lib/gallery'
 import type { EventSummary } from '../types/event'
 import type { NewsItem } from '../types/news'
@@ -33,15 +33,15 @@ export function Home({ nextEvent = null, photos = [], news = [] }: HomeProps) {
           <NextActivity event={nextEvent} />
         </Container>
       )}
-      <StartingPoints />
-      <WhatWeDo />
-      <OurStory />
-      <HomeGallery photos={photos} />
-      <SchoolsBanner />
-      <HomeNews news={news} />
-      <PressSection />
-      <PlacesWeWent />
-      <WhereWeAre />
+      <Reveal><StartingPoints /></Reveal>
+      <Reveal><WhatWeDo /></Reveal>
+      <Reveal><OurStory /></Reveal>
+      <Reveal><HomeGallery photos={photos} /></Reveal>
+      <Reveal><SchoolsBanner /></Reveal>
+      <Reveal><HomeNews news={news} /></Reveal>
+      <Reveal><PressSection /></Reveal>
+      <Reveal><PlacesWeWent /></Reveal>
+      <Reveal><WhereWeAre /></Reveal>
     </>
   )
 }

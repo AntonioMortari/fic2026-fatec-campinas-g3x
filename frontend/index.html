@@ -12,6 +12,8 @@
     <link rel="preload" href="/fonts/bitter-latin.woff2" as="font" type="font/woff2" crossorigin />
     <script>
       // Applies the saved reading preferences before first paint to avoid a flash at the default size.
+      // `js` is what allows the scroll reveal to hide a block: without script, everything is simply there.
+      document.documentElement.classList.add('js')
       try {
         var step = localStorage.getItem('af-font')
         if (step && /^(-1|[1-3])$/.test(step)) document.documentElement.setAttribute('data-font-scale', step)

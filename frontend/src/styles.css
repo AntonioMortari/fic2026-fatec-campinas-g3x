@@ -355,6 +355,30 @@ html[data-contrast="high"] {
   }
 }
 
+@layer components {
+  [data-reveal] {
+    transition:
+      opacity var(--motion-arrive) var(--ease-motion),
+      transform var(--motion-arrive) var(--ease-motion);
+  }
+
+  [data-reveal][data-reveal-instant] {
+    transition: none;
+  }
+
+  html.js [data-reveal]:not([data-revealed]) {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  @media (prefers-reduced-motion: reduce), print {
+    html.js [data-reveal]:not([data-revealed]) {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
 @utility arrive {
   & p:has(+ h1) {
     animation: rise var(--motion-arrive) var(--ease-motion) both;

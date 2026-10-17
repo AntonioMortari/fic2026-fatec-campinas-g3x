@@ -137,3 +137,20 @@ describe('arrival (round 22j)', () => {
     expect(arrive).toMatch(/animation: extend 500ms/)
   })
 })
+
+describe('reveal on scroll (round 22k)', () => {
+  const reveal = css.slice(css.indexOf('@layer components'), css.indexOf('@utility arrive'))
+
+  it('lifts 12px and fades in the arrive time, and only hides when the page has the js class', () => {
+    expect(reveal).toMatch(/html\.js \[data-reveal\]:not\(\[data-revealed\]\) \{\s*opacity: 0;\s*transform: translateY\(12px\)/)
+    expect(reveal).toMatch(/opacity var\(--motion-arrive\) var\(--ease-motion\)/)
+  })
+
+  it('shows everything for someone who asked for less motion and on paper', () => {
+    expect(reveal).toMatch(/@media \(prefers-reduced-motion: reduce\), print \{\s*html\.js \[data-reveal\]:not\(\[data-revealed\]\) \{\s*opacity: 1;\s*transform: none/)
+  })
+
+  it('has the js class set by the page before the first paint', () => {
+    expect(readFileSync(join(process.cwd(), 'index.html'), 'utf8')).toMatch(/document\.documentElement\.classList\.add\('js'\)/)
+  })
+})
