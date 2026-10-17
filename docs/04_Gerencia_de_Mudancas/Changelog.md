@@ -575,3 +575,19 @@ aprovada** (o problema, a proposta de valor e o escopo acordados com a ONG).
 - **Decidido aqui, a confirmar:** o endereço de cada pergunta nasce do texto e não muda ao corrigi-lo (para o link antigo não quebrar); "tirar do ar" não pede confirmação, porque volta com um toque; sem registro do que as pessoas buscam, como o desenho pede.
 - **Por quê:** o desenho da rodada 18 leva a dúvida certa para onde ela aparece e passa a lista para a equipe, que não depende mais de quem programa.
 - **PR:** branch `feat/faq-page`
+
+## 2026-10-17 — Movimento e Feedback em todas as páginas (desenho da rodada 22)
+- **Artefato:** Protótipos (rodada 22, "Movimento e Feedback")
+- **Antes:** o movimento seguia a seção "Movimento" das rodadas anteriores: toque em 90ms, troca em 150ms, entrada e folha em 200–280ms, curva `cubic-bezier(.2,0,0,1)`, botão enviando com um círculo girando, abas e marcador da barra que trocavam de uma vez, acordeão que abria de uma vez, mensagem de erro que aparecia de uma vez, aviso de 5s, folha do menu que só abria e fechava, nenhuma animação de chegada e nenhum revelar ao rolar.
+- **Depois:** os tokens passam a ser os do desenho (toque 100ms, troca 200ms, chegada 320ms, saída 200ms, curva `cubic-bezier(.2,.7,.2,1)`); botão enviando com fio azul tecendo e estado "pronto" (usado no "Compartilhar"); marcador deslizante nas abas e nas duas barras de baixo, com o toque encolhendo o rótulo; acordeão do FAQ em altura com o + virando ×; erro de campo que desdobra e caixa de marcar com tique que cresce; aviso que sobe em 320ms e fica 6s quando tem "Desfazer"; folhas do menu que seguem o dedo; fio no topo do esqueleto de carregamento; chegada da página (título, texto e faixa) na primeira visita da sessão; revelar ao rolar em Início e Quem somos; e "Reduzir movimento" no menu Aa, além do `prefers-reduced-motion`.
+- **Diferenças em relação ao desenho, e por quê:**
+  - **o anel de foco continua azul** (o desenho usa ocre): ocre sobre creme não chega a 3:1 de contraste, e a acessibilidade é critério do projeto; só o tempo (100ms) vem do desenho;
+  - **o erro de campo continua aparecendo no envio, não ao sair do campo** (o desenho pede só ao sair): é mudança de comportamento dos formulários, não de movimento, e fica para uma decisão à parte;
+  - **as abas continuam em blocos preenchidos** (o desenho as sublinha): o fundo escuro é que desliza de uma aba para a outra;
+  - **o botão de copiar** existe só como o "Compartilhar" da notícia (não há chave Pix nem outro texto para copiar neste site);
+  - **a folha é arrastada só pela alça e pelo título**, não pelo conteúdo (que rola);
+  - **sem a tela "não carregou" depois de 8s** do esqueleto (22i): a tela da rodada 16 ainda não existe aqui;
+  - **a folha de filtros e a de acessibilidade** não são folhas neste projeto (os filtros são chips e a acessibilidade mora no menu), então o arrastar vale para o menu público e o do painel;
+  - a chegada da página não vale no painel, que não usa o cabeçalho de página.
+- **Por quê:** o desenho da rodada 22 diz que "toda ação responde e nada se mexe sozinho", e o site quase não reagia.
+- **PR:** branch `feat/motion-feedback`
