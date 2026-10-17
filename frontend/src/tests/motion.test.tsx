@@ -119,7 +119,7 @@ describe('skeleton', () => {
     expect(status).toHaveAttribute('aria-busy', 'true')
     expect(status).toHaveTextContent('Carregando a agenda…')
     expect(screen.getByText('Carregando a agenda…')).toHaveClass('sr-only')
-    expect(status.querySelectorAll(':scope > [aria-hidden="true"]')).toHaveLength(3)
+    expect(status.querySelectorAll(':scope > [aria-hidden="true"]:not([data-loading-thread])')).toHaveLength(3)
   })
 
   it.each([
@@ -130,7 +130,7 @@ describe('skeleton', () => {
   ] as const)('draws %s as many times as asked', (shape, count) => {
     render(<LoadingState label="Carregando…" shape={shape} count={count} />)
 
-    expect(screen.getByRole('status').querySelectorAll(':scope > [aria-hidden="true"]')).toHaveLength(count)
+    expect(screen.getByRole('status').querySelectorAll(':scope > [aria-hidden="true"]:not([data-loading-thread])')).toHaveLength(count)
   })
 
   it('appears after a delay and stops pulsing for reduced motion through the same animation tokens', () => {
@@ -146,7 +146,18 @@ describe('skeleton', () => {
       </LoadingState>,
     )
 
-    expect(screen.getByRole('status').querySelectorAll('[aria-hidden="true"]')).toHaveLength(1)
+    expect(screen.getByRole('status').querySelectorAll('[aria-hidden="true"]:not([data-loading-thread])')).toHaveLength(1)
+  })
+})
+
+describe('loading thread (round 22i)', () => {
+  it('weaves the blue thread along the top of the loading shape, hidden from the reader', () => {
+    render(<LoadingState label="Carregando a agenda…" shape="rows" />)
+
+    const thread = screen.getByRole('status').querySelector('[data-loading-thread]')!
+    expect(thread).toHaveAttribute('aria-hidden', 'true')
+    expect(thread.className).toContain('animate-weave')
+    expect(screen.getByRole('status')).toHaveTextContent('Carregando a agenda…')
   })
 })
 

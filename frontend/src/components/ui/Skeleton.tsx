@@ -41,8 +41,9 @@ interface LoadingStateProps {
 
 export function LoadingState({ label, children, shape = 'lines', count = 3, className }: LoadingStateProps) {
   return (
-    <div role="status" aria-busy="true" className={cn('flex animate-skeleton-in flex-col', shape === 'cards' ? 'gap-3.5' : shape === 'rows' ? 'gap-0' : 'gap-3', className)}>
+    <div role="status" aria-busy="true" className={cn('relative flex animate-skeleton-in flex-col', shape === 'cards' ? 'gap-3.5' : shape === 'rows' ? 'gap-0' : 'gap-3', className)}>
       <span className="sr-only">{label}</span>
+      <span aria-hidden="true" data-loading-thread className="weave-thread absolute inset-x-0 top-0 h-[3px] animate-weave" />
       {children ?? Array.from({ length: count }, (_, index) => SHAPES[shape](index))}
     </div>
   )
