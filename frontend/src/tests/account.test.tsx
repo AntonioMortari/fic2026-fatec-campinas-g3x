@@ -4,6 +4,9 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { AuthUser } from '../services/auth'
 import { apiError, fakeUser, mockApi } from './auth-support'
 import { renderRoute } from './render'
+import { freezeNow } from './clock'
+
+freezeNow()
 
 type Handlers = Parameters<typeof mockApi>[0]
 

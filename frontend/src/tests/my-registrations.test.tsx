@@ -4,6 +4,9 @@ import { afterEach, describe, expect, it } from 'vitest'
 import type { MyRegistration } from '../types/my-registration'
 import { apiError, fakeUser, mockApi } from './auth-support'
 import { renderRoute } from './render'
+import { freezeNow } from './clock'
+
+freezeNow()
 
 let mock: ReturnType<typeof mockApi>
 afterEach(() => mock?.restore())

@@ -3,6 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { api } from '../services/api'
 import type { EventPeriod, EventSummary } from '../types/event'
 import { renderRoute } from './render'
+import { freezeNow } from './clock'
+
+freezeNow()
 
 function event(overrides: Partial<EventSummary> = {}): EventSummary {
   return {

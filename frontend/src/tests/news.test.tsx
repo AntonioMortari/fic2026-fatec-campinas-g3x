@@ -5,6 +5,9 @@ import { longDate, numericDate } from '../lib/news'
 import type { NewsDetail, NewsItem } from '../types/news'
 import { apiError, mockApi } from './auth-support'
 import { renderRoute } from './render'
+import { freezeNow } from './clock'
+
+freezeNow()
 
 let mock: ReturnType<typeof mockApi>
 afterEach(() => mock?.restore())

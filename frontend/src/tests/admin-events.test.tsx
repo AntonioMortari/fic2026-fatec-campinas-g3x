@@ -5,6 +5,9 @@ import { toLocalInput } from '../lib/dates'
 import type { AdminEvent } from '../types/admin-event'
 import { apiError, fakeUser, mockApi } from './auth-support'
 import { renderRoute } from './render'
+import { freezeNow } from './clock'
+
+freezeNow()
 
 type Handlers = Parameters<typeof mockApi>[0]
 

@@ -371,7 +371,8 @@ describe('sending a photo (designs 11j and 11l)', () => {
 
     await user.click(screen.getByRole('button', { name: 'Subir e guardar sem publicar' }))
 
-    const body = (await waitFor(() => calls('POST /admin/gallery')[0]!)).body as Record<string, unknown>
+    await waitFor(() => expect(calls('POST /admin/gallery')).toHaveLength(1))
+    const body = calls('POST /admin/gallery')[0]!.body as Record<string, unknown>
     expect(body).toMatchObject({ album: 'II Festa Preta', alt: 'Homem toca atabaque.', caption: null, authorized: false })
     expect(typeof body.data).toBe('string')
     expect(body).not.toHaveProperty('published')
@@ -392,7 +393,8 @@ describe('sending a photo (designs 11j and 11l)', () => {
 
     await user.click(screen.getByRole('button', { name: 'Subir foto' }))
 
-    const body = (await waitFor(() => calls('POST /admin/gallery')[0]!)).body as Record<string, unknown>
+    await waitFor(() => expect(calls('POST /admin/gallery')).toHaveLength(1))
+    const body = calls('POST /admin/gallery')[0]!.body as Record<string, unknown>
     expect(body).toMatchObject({ caption: 'Roda de tambor.', authorized: true })
     expect(await screen.findByText('Foto enviada e guardada. Ela só vai para o site quando você apertar “Publicar”.')).toBeInTheDocument()
   })
