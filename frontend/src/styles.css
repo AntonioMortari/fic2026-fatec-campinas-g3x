@@ -86,6 +86,7 @@
   --animate-sink: sink var(--motion-change) var(--ease-motion) forwards;
   --animate-skeleton-in: skeleton-in var(--motion-change) ease-out var(--motion-skeleton-delay) both;
   --animate-skeleton-pulse: skeleton-pulse 1.6s ease-in-out infinite;
+  --animate-unfold: unfold var(--motion-change) var(--ease-motion) both;
   --animate-weave: weave 800ms linear infinite;
 
   @keyframes rise {
@@ -132,6 +133,16 @@
     to {
       opacity: 0;
       transform: translateY(8px);
+    }
+  }
+
+  @keyframes unfold {
+    from {
+      grid-template-rows: 0fr;
+      opacity: 0;
+    }
+    to {
+      grid-template-rows: 1fr;
     }
   }
 

@@ -3,7 +3,7 @@ import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFormFeedback } from '../components/auth/use-form-feedback'
-import { Button, LoadingState, Skeleton, Tabs } from '../components/ui'
+import { Button, Checkbox, LoadingState, Skeleton, Tabs, TextField } from '../components/ui'
 import { ToastProvider } from '../components/ui/ToastProvider'
 import { TOAST_DURATION_MS } from '../components/ui/toast-context'
 import { useToast } from '../components/ui/useToast'
@@ -195,6 +195,41 @@ describe('button while sending', () => {
     render(<Button>Confirmar inscrição</Button>)
 
     expect(screen.getByRole('button', { name: 'Confirmar inscrição' }).querySelector('.invisible')).toBeNull()
+  })
+})
+
+describe('field and checkbox (round 22f)', () => {
+  it('unfolds the error message instead of popping it in, with the icon and the words, and the field does not move', () => {
+    render(<TextField label="Telefone" error="Faltam números. Escreva com DDD, como (11) 95396-8344." />)
+
+    const message = screen.getByText(/Faltam números/)
+    expect(message.closest('.animate-unfold')).not.toBeNull()
+    expect(message.closest('p')?.className).toContain('overflow-hidden')
+  })
+
+  it('answers the focus ring in 100ms and the border colour in 200ms', () => {
+    render(<TextField label="Telefone" />)
+
+    const box = screen.getByLabelText('Telefone').parentElement!
+    expect(box.className).toContain('transition-[box-shadow,border-color]')
+    expect(box.className).toContain('focus-within:duration-(--motion-touch)')
+    expect(box.className).toContain('duration-(--motion-change)')
+  })
+
+  it('draws its own tick that grows from nothing when checked, and still works as a native checkbox', async () => {
+    const user = userEvent.setup()
+    render(<Checkbox label="Autorizo o uso de imagem" />)
+
+    const box = screen.getByRole('checkbox', { name: 'Autorizo o uso de imagem' })
+    expect(box.className).toContain('appearance-none')
+    expect(box.className).toContain('after:scale-0')
+    expect(box.className).toContain('checked:after:scale-100')
+    expect(box).not.toBeChecked()
+
+    await user.click(box)
+    expect(box).toBeChecked()
+    await user.keyboard(' ')
+    expect(box).not.toBeChecked()
   })
 })
 
