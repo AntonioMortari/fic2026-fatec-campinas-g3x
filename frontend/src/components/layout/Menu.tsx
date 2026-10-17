@@ -9,6 +9,7 @@ import { MENU_GROUPS } from '../../lib/navigation'
 import { useSignOut } from '../auth/useSignOut'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/use-media-query'
 import { DesktopMenu } from './DesktopMenu'
+import { useSheetDrag } from './use-sheet-drag'
 
 export type MenuSection = 'start' | 'reading'
 export type OpenMenu = (section: MenuSection) => void
@@ -34,7 +35,7 @@ export function Menu(props: MenuProps) {
 }
 
 function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: MenuProps) {
-  const dialog = useRef<HTMLDialogElement>(null)
+  const { dialog, handle } = useSheetDrag()
   const readingHeading = useRef<HTMLHeadingElement>(null)
   const reading = useReadingPreferences()
   const { user } = useAuth()
@@ -52,7 +53,7 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
     } else if (!open && element.open) {
       element.close()
     }
-  }, [open, section])
+  }, [dialog, open, section])
 
   const account = user && (
     <section aria-labelledby="menu-account">
@@ -111,21 +112,23 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
       )}
     >
       <div className="flex h-full flex-col">
-        <div aria-hidden="true" className="flex justify-center pt-2.5 pb-1">
-          <span className="h-1 w-11 rounded-sm bg-cream-dim" />
-        </div>
-        <div className="flex items-center justify-between px-4 pt-1 pb-2">
-          <h2 id="menu-title" className="m-0 text-h2 font-bold">
-            Menu
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar o menu"
-            className="grid size-11 cursor-pointer place-items-center rounded-control border-[1.5px] border-brown bg-transparent text-xl"
-          >
-            ×
-          </button>
+        <div data-sheet-handle className="touch-none" {...handle}>
+          <div aria-hidden="true" className="flex justify-center pt-2.5 pb-1">
+            <span className="h-1 w-11 rounded-sm bg-cream-dim" />
+          </div>
+          <div className="flex items-center justify-between px-4 pt-1 pb-2">
+            <h2 id="menu-title" className="m-0 text-h2 font-bold">
+              Menu
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fechar o menu"
+              className="grid size-11 cursor-pointer place-items-center rounded-control border-[1.5px] border-brown bg-transparent text-xl"
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-24 desktop:pb-8">

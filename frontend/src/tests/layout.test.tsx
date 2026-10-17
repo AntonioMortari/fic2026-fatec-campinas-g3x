@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { createEvent, fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BOTTOM_BAR, MENU_GROUPS } from '../lib/navigation'
 import { renderRoute } from './render'
@@ -46,6 +46,77 @@ describe('bottom bar', () => {
     const bar = screen.getByRole('navigation', { name: 'Atalhos' })
 
     expect(within(bar).getByRole('link', { name: 'Agenda' }).className).toContain('active:scale-[.94]')
+  })
+})
+
+function pointer(type: 'pointerDown' | 'pointerMove' | 'pointerUp', target: Element, clientY: number, timeStamp: number) {
+  const event = createEvent[type](target, { clientY, button: 0, pointerId: 1 })
+  Object.defineProperty(event, 'timeStamp', { value: timeStamp })
+  fireEvent(target, event)
+}
+
+describe('bottom sheet follows the finger (round 22h)', () => {
+  async function openMenu() {
+    const user = userEvent.setup()
+    Element.prototype.setPointerCapture = () => undefined
+    renderRoute('/')
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+    const menu = screen.getByRole('dialog', { name: 'Menu' })
+    return { menu, zone: menu.querySelector('[data-sheet-handle]')! }
+  }
+
+  it('moves with the finger, with no transition while it is held, and never above its resting place', async () => {
+    const { menu, zone } = await openMenu()
+
+    pointer('pointerDown', zone, 100, 1000)
+    expect(menu.style.transition).toBe('none')
+    pointer('pointerMove', zone, 140, 1400)
+    expect(menu.style.transform).toBe('translateY(40px)')
+    pointer('pointerMove', zone, 60, 1800)
+    expect(menu.style.transform).toBe('translateY(0px)')
+  })
+
+  it('closes when it passed 80px', async () => {
+    const { menu, zone } = await openMenu()
+
+    pointer('pointerDown', zone, 100, 1000)
+    pointer('pointerMove', zone, 200, 2000)
+    pointer('pointerUp', zone, 200, 2000)
+
+    expect(menu).not.toHaveAttribute('open')
+    expect(menu.style.transform).toBe('')
+    expect(menu.style.transition).toBe('')
+  })
+
+  it('closes when it was let go fast, even before 80px', async () => {
+    const { menu, zone } = await openMenu()
+
+    pointer('pointerDown', zone, 100, 1000)
+    pointer('pointerMove', zone, 140, 1040)
+    pointer('pointerUp', zone, 140, 1040)
+
+    expect(menu).not.toHaveAttribute('open')
+  })
+
+  it('goes back up when it was slow and short, and stays open', async () => {
+    const { menu, zone } = await openMenu()
+
+    pointer('pointerDown', zone, 100, 1000)
+    pointer('pointerMove', zone, 150, 2000)
+    pointer('pointerUp', zone, 150, 2000)
+
+    expect(menu).toHaveAttribute('open')
+    expect(menu.style.transform).toBe('')
+    expect(menu.style.transition).toBe('')
+  })
+
+  it('does not start a drag from the close button', async () => {
+    const { menu } = await openMenu()
+    const close = within(menu).getByRole('button', { name: 'Fechar o menu' })
+
+    pointer('pointerDown', close, 100, 1000)
+
+    expect(menu.style.transition).toBe('')
   })
 })
 
