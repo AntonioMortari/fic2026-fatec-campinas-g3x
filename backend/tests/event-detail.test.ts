@@ -35,6 +35,15 @@ function storedEvent(overrides: Record<string, unknown> = {}) {
   } as unknown as Event;
 }
 
+// The fixtures carry real dates: a fixed "now" keeps them in the future as the calendar moves.
+const NOW = new Date('2026-10-10T12:00:00Z');
+
+beforeEach(() => {
+  jest.useFakeTimers({ now: NOW, doNotFake: ['nextTick', 'setImmediate', 'setTimeout'] });
+});
+
+afterEach(() => jest.useRealTimers());
+
 afterEach(() => jest.restoreAllMocks());
 
 describe('registrationStatus: the rules of design 13c, in order', () => {

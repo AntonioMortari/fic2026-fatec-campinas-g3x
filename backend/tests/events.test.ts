@@ -24,6 +24,15 @@ function fakeEvent(overrides: Partial<Record<string, unknown>> = {}) {
   } as unknown as Event;
 }
 
+// The fixtures carry real dates: a fixed "now" keeps them in the future as the calendar moves.
+const NOW = new Date('2026-10-10T12:00:00Z');
+
+beforeEach(() => {
+  jest.useFakeTimers({ now: NOW, doNotFake: ['nextTick', 'setImmediate', 'setTimeout'] });
+});
+
+afterEach(() => jest.useRealTimers());
+
 beforeEach(() => {
   jest.spyOn(Registration, 'findAll').mockResolvedValue([]);
 });
