@@ -76,6 +76,7 @@ describe('the page (design 18)', () => {
     expect(panel.className).toContain('grid-rows-[0fr]')
     expect(panel.className).toContain('transition-[grid-template-rows]')
     expect(sign.className).not.toContain('rotate-45')
+    expect(sign.className).toContain('transition-[rotate,background-color]')
 
     await user.click(button)
 

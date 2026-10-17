@@ -5,7 +5,7 @@ import type { OpenMenu } from './Menu'
 import { SlidingMarker } from './SlidingMarker'
 
 // Labels stop growing at 15px: with five columns at 320px, larger text made "Projetos" touch "Apoiar".
-const ITEM = 'relative flex min-h-14 items-center justify-center text-[min(0.8125rem,15px)] no-underline transition-[color,transform] duration-(--motion-touch) active:scale-[.94]'
+const ITEM = 'relative flex min-h-14 items-center justify-center text-[min(0.8125rem,15px)] no-underline transition-[color,transform,scale] duration-(--motion-touch) active:scale-[.94]'
 
 interface BottomBarProps {
   openMenu: OpenMenu

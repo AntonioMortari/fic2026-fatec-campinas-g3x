@@ -40,7 +40,7 @@ function Question({ item, open, onToggle }: { item: PublicFaqQuestion; open: boo
           {item.question}
           <span
             aria-hidden="true"
-            className={`grid size-6.5 place-items-center border-[1.5px] border-brown text-base leading-none transition-[transform,background-color] duration-(--motion-change) ease-(--ease-motion) desktop:size-7 desktop:text-lg ${open ? 'rotate-45 bg-ochre' : 'bg-transparent'}`}
+            className={`grid size-6.5 place-items-center border-[1.5px] border-brown text-base leading-none transition-[rotate,background-color] duration-(--motion-change) ease-(--ease-motion) desktop:size-7 desktop:text-lg ${open ? 'rotate-45 bg-ochre' : 'bg-transparent'}`}
           >
             +
           </span>

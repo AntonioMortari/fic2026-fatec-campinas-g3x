@@ -46,7 +46,9 @@ describe('bottom bar', () => {
     renderRoute('/')
     const bar = screen.getByRole('navigation', { name: 'Atalhos' })
 
-    expect(within(bar).getByRole('link', { name: 'Agenda' }).className).toContain('active:scale-[.94]')
+    const link = within(bar).getByRole('link', { name: 'Agenda' })
+    expect(link.className).toContain('active:scale-[.94]')
+    expect(link.className).toContain('transition-[color,transform,scale]')
   })
 })
 

@@ -4,7 +4,7 @@ import { ADMIN_BOTTOM_BAR, isActiveAdminRoute, isMoreRoute } from '../../lib/adm
 import { SlidingMarker } from '../layout/SlidingMarker'
 
 const ITEM =
-  'relative flex min-h-16 items-center justify-center text-[min(0.8125rem,15px)] no-underline transition-[color,transform] duration-(--motion-touch) active:scale-[.94]'
+  'relative flex min-h-16 items-center justify-center text-[min(0.8125rem,15px)] no-underline transition-[color,transform,scale] duration-(--motion-touch) active:scale-[.94]'
 
 interface AdminBottomBarProps {
   openMenu: () => void
