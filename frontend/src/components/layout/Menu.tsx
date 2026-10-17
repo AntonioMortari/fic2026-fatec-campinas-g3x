@@ -9,6 +9,7 @@ import { MENU_GROUPS } from '../../lib/navigation'
 import { useSignOut } from '../auth/useSignOut'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/use-media-query'
 import { DesktopMenu } from './DesktopMenu'
+import { MotionToggle } from './MotionToggle'
 import { useSheetDrag } from './use-sheet-drag'
 
 export type MenuSection = 'start' | 'reading'
@@ -217,6 +218,7 @@ function MenuSheet({ open, section, onClose, bottomBar, accountFirst = false }: 
               {reading.highContrast && <span aria-hidden="true">✓ </span>}Alto contraste
             </button>
           </div>
+          <MotionToggle className="mt-2" />
         </div>
       </div>
       {bottomBar}

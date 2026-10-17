@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { CONTRAST_STORAGE_KEY, FONT_STORAGE_KEY, MAX_FONT_STEP, MIN_FONT_STEP, ReadingContext } from './reading-context'
+import { CONTRAST_STORAGE_KEY, FONT_STORAGE_KEY, MAX_FONT_STEP, MIN_FONT_STEP, MOTION_STORAGE_KEY, ReadingContext } from './reading-context'
 
 function read(key: string): string | null {
   try {
@@ -26,6 +26,7 @@ function initialFontStep(): number {
 export function ReadingPreferencesProvider({ children }: { children: ReactNode }) {
   const [fontStep, setFontStep] = useState(initialFontStep)
   const [highContrast, setHighContrast] = useState(() => read(CONTRAST_STORAGE_KEY) === 'high')
+  const [reducedMotion, setReducedMotion] = useState(() => read(MOTION_STORAGE_KEY) === 'reduced')
 
   useEffect(() => {
     const root = document.documentElement
@@ -41,14 +42,22 @@ export function ReadingPreferencesProvider({ children }: { children: ReactNode }
     write(CONTRAST_STORAGE_KEY, highContrast ? 'high' : null)
   }, [highContrast])
 
+  useEffect(() => {
+    const root = document.documentElement
+    if (reducedMotion) root.setAttribute('data-motion', 'reduced')
+    else root.removeAttribute('data-motion')
+    write(MOTION_STORAGE_KEY, reducedMotion ? 'reduced' : null)
+  }, [reducedMotion])
+
   const decreaseFont = useCallback(() => setFontStep((step) => Math.max(MIN_FONT_STEP, step - 1)), [])
   const resetFont = useCallback(() => setFontStep(0), [])
   const increaseFont = useCallback(() => setFontStep((step) => Math.min(MAX_FONT_STEP, step + 1)), [])
   const toggleContrast = useCallback(() => setHighContrast((value) => !value), [])
+  const toggleMotion = useCallback(() => setReducedMotion((value) => !value), [])
 
   const value = useMemo(
-    () => ({ fontStep, highContrast, decreaseFont, resetFont, increaseFont, toggleContrast }),
-    [fontStep, highContrast, decreaseFont, resetFont, increaseFont, toggleContrast],
+    () => ({ fontStep, highContrast, reducedMotion, decreaseFont, resetFont, increaseFont, toggleContrast, toggleMotion }),
+    [fontStep, highContrast, reducedMotion, decreaseFont, resetFont, increaseFont, toggleContrast, toggleMotion],
   )
 
   return <ReadingContext.Provider value={value}>{children}</ReadingContext.Provider>

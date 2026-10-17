@@ -154,3 +154,18 @@ describe('reveal on scroll (round 22k)', () => {
     expect(readFileSync(join(process.cwd(), 'index.html'), 'utf8')).toMatch(/document\.documentElement\.classList\.add\('js'\)/)
   })
 })
+
+describe('reduced motion chosen in the Aa menu (round 22)', () => {
+  const chosen = css.slice(css.indexOf('html[data-motion="reduced"] {'), css.indexOf('@utility enter-list'))
+
+  it('does the same as the device setting: no animation, no transition, no smooth scroll, no hidden blocks', () => {
+    expect(chosen).toMatch(/animation-duration: 0\.01ms !important/)
+    expect(chosen).toMatch(/transition-duration: 0\.01ms !important/)
+    expect(chosen).toMatch(/scroll-behavior: auto !important/)
+    expect(chosen).toMatch(/html\[data-motion="reduced"\]\.js \[data-reveal\]:not\(\[data-revealed\]\) \{\s*opacity: 1;\s*transform: none/)
+  })
+
+  it('is applied before the first paint from the saved choice', () => {
+    expect(readFileSync(join(process.cwd(), 'index.html'), 'utf8')).toMatch(/af-motion'\) === 'reduced'\) document\.documentElement\.setAttribute\('data-motion', 'reduced'\)/)
+  })
+})

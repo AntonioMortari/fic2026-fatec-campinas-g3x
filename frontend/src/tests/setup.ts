@@ -16,6 +16,7 @@ afterEach(() => {
   setToken(null)
   document.documentElement.removeAttribute('data-font-scale')
   document.documentElement.removeAttribute('data-contrast')
+  document.documentElement.removeAttribute('data-motion')
 })
 
 // jsdom implements neither <dialog>.showModal()/close() nor scrollIntoView().

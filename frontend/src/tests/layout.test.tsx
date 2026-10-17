@@ -1,5 +1,6 @@
 import { createEvent, fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { prefersReducedMotion } from '../lib/motion'
 import { BOTTOM_BAR, MENU_GROUPS } from '../lib/navigation'
 import { renderRoute } from './render'
 
@@ -213,14 +214,36 @@ describe('reading preferences', () => {
     expect(localStorage.getItem('af-contrast')).toBe('high')
   })
 
+  it('"Reduzir movimento" is the same choice as the device setting: it marks the page, is saved and says its state', async () => {
+    const user = userEvent.setup()
+    renderRoute('/')
+    await user.click(screen.getByRole('button', { name: 'Menu' }))
+    const motion = screen.getByRole('button', { name: /Reduzir movimento/ })
+    expect(motion).toHaveAttribute('aria-pressed', 'false')
+
+    await user.click(motion)
+
+    expect(document.documentElement).toHaveAttribute('data-motion', 'reduced')
+    expect(motion).toHaveAttribute('aria-pressed', 'true')
+    expect(localStorage.getItem('af-motion')).toBe('reduced')
+    expect(prefersReducedMotion()).toBe(true)
+
+    await user.click(motion)
+
+    expect(document.documentElement).not.toHaveAttribute('data-motion')
+    expect(localStorage.getItem('af-motion')).toBeNull()
+  })
+
   it('reapplies what was saved', () => {
     localStorage.setItem('af-font', '1')
     localStorage.setItem('af-contrast', 'high')
+    localStorage.setItem('af-motion', 'reduced')
 
     renderRoute('/')
 
     expect(document.documentElement).toHaveAttribute('data-font-scale', '1')
     expect(document.documentElement).toHaveAttribute('data-contrast', 'high')
+    expect(document.documentElement).toHaveAttribute('data-motion', 'reduced')
   })
 
   it('ignores a saved value out of range', () => {

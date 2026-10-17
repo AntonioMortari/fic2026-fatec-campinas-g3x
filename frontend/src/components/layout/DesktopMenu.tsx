@@ -7,6 +7,7 @@ import { cn } from '../../lib/cn'
 import { CONTACTS } from '../../lib/contacts'
 import { DESKTOP_MENU_GROUPS } from '../../lib/navigation'
 import type { MenuSection } from './Menu'
+import { MotionToggle } from './MotionToggle'
 
 const TONES = { ochre: 'text-ochre-deep', blue: 'text-blue-deep', brown: 'text-brown-400' }
 const OVERLINE = 'm-0 text-overline font-semibold uppercase tracking-[0.12em]'
@@ -183,6 +184,7 @@ export function DesktopMenu({ open, section, onClose, onOpen }: DesktopMenuProps
                     {reading.highContrast && <span aria-hidden="true">✓ </span>}Alto contraste
                   </button>
                 </div>
+                <MotionToggle className="mt-2 text-[0.8125rem]" />
               </section>
             </div>
           </div>

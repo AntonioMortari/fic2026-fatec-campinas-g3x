@@ -1,6 +1,7 @@
 import { MAX_FONT_STEP, MIN_FONT_STEP } from '../../contexts/reading-context'
 import { useReadingPreferences } from '../../contexts/useReadingPreferences'
 import { cn } from '../../lib/cn'
+import { MotionToggle } from './MotionToggle'
 
 const BUTTON = 'grid min-h-11 cursor-pointer place-items-center rounded-control border-[1.5px] border-brown px-2 text-small font-semibold'
 
@@ -8,6 +9,7 @@ export function ReadingControls() {
   const reading = useReadingPreferences()
 
   return (
+    <div className="flex flex-col gap-2">
     <div role="group" aria-label="Tamanho do texto e contraste" className="grid grid-cols-[repeat(3,1fr)_1.6fr] gap-2">
       <button
         type="button"
@@ -44,6 +46,8 @@ export function ReadingControls() {
       >
         {reading.highContrast && <span aria-hidden="true">✓ </span>}Alto contraste
       </button>
+    </div>
+    <MotionToggle />
     </div>
   )
 }

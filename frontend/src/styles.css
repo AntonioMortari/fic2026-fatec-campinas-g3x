@@ -398,6 +398,29 @@ html[data-contrast="high"] {
   }
 }
 
+html[data-motion="reduced"] {
+  scroll-behavior: auto !important;
+}
+
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-motion="reduced"] .enter-list > *,
+html[data-motion="reduced"] .arrive * {
+  animation-delay: 0ms !important;
+}
+
+html[data-motion="reduced"].js [data-reveal]:not([data-revealed]) {
+  opacity: 1;
+  transform: none;
+}
+
 @utility enter-list {
   & > * {
     animation: var(--animate-rise);
